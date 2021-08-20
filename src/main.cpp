@@ -1,11 +1,58 @@
+/* -------------------------------------------------------------------------- */
+/*                                  main.cpp                                  */
+/* -------------------------------------------------------------------------- */
+
 #include <iostream>
 #include <cstdlib>
 #include <cstdbool>
-#include <utils.hpp>
-#include <bmm.hpp>
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <vector>
+
+#include <headers.hpp>
+#include <bmm.cpp>
+#include <utils.cpp>
+#include <reader.cpp>
+
+int main()
+{
+    /* ------------------------------- read matrix ------------------------------ */
+
+    int n;
+    int nnz;
+
+    std::string graph = "s6.mtx";
+    std::string file = "graphs/" + graph;
+
+    read_mtx_values(file, n, nnz);
+
+    int *coo_row = new int[nnz]();
+    int *coo_col = new int[nnz]();
+
+    open_mtx_file(file, coo_col, coo_row, n, nnz);
+
+    int *csr_row_ptr = new int[n]();
+    int *csr_col_ind = new int[nnz]();
+
+    coo2csr(csr_row_ptr, csr_col_ind, coo_row, coo_col, nnz, n, 0);
+
+    delete[] coo_row;
+    delete[] coo_col;
+
+    std::cout << "\nCSR row_ptr:";
+    prt::arr(csr_row_ptr, n);
+    std::cout << "CSR col_ind:";
+    prt::arr(csr_col_ind, nnz);
+
+    /* -------------------------------------------------------------------------- */
 
 
-int main(){
+    /* ------------------------------- free memory ------------------------------ */
 
-// test1
+    delete[] csr_row_ptr;
+    // delete[] csr_col_ind; TODO 
+
+    return 0;
+
 }

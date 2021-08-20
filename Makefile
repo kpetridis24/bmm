@@ -10,6 +10,6 @@ $(info $(shell mkdir -p $(BUILD_DIR)))
 default:
 	$(CC) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS)
 	./build/main
-
+	@printf "\n"
 clean:
 	rm test
