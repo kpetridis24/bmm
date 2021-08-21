@@ -42,8 +42,18 @@ namespace prt{
 
 namespace util
 {
-    
+  void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
 };
+
+/* --------------------------- blocking functions --------------------------- */
+
+ret csr2blocks( int *rowPtr, 
+                int *colInd, 
+                int N, 
+                int nnz, 
+                int b, 
+                int *LL_bRowPtr, 
+                int *LL_bColInd );
 
 /* -------------------------------------------------------------------------- */
 
