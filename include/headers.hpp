@@ -11,11 +11,31 @@
 
 typedef struct
 {
-    int *ret1;
-    int *ret2;
-    int *ret3;
-    int *ret4;
+  int *ret1;
+  int *ret2;
+  int *ret3;
+  int *ret4;
 } ret;
+
+/* -------------------------------- CSR type -------------------------------- */
+
+typedef struct
+{
+  int *rowPtr;
+  int *colInd;
+  int n;
+  int nnz;
+} csr;
+
+/* -------------------------------- CSC type -------------------------------- */
+
+typedef struct
+{
+  int *colPtr;
+  int *rowInd;
+  int n;
+  int nnz;
+} csc;
 
 /* ----------------------------- read functions ----------------------------- */
 
@@ -43,6 +63,8 @@ namespace prt{
 namespace util
 {
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
+  void initCsr(csr *M, int n, int nnz);
+  void initCsc(csr *M, int n, int nnz);
 };
 
 /* --------------------------- blocking functions --------------------------- */
@@ -54,6 +76,12 @@ ret csr2blocks( int *rowPtr,
                 int b, 
                 int *LL_bRowPtr, 
                 int *LL_bColInd );
+
+
+
+/* ----------------------------------- bmm ---------------------------------- */
+
+void bmm(csr A, csr B, csr C);
 
 /* -------------------------------------------------------------------------- */
 
