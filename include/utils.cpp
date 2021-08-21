@@ -28,5 +28,20 @@ namespace prt
 
 namespace util
 {
+    void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset)
+    /* -------------------------------------------------------------------------- */
+    /*             find the offsets of a specific block in the LL-CSR             */
+    /* -------------------------------------------------------------------------- */
+    {
+        int newBlockInd =  nzBlockIndex[blockInd];
+        LL_row_ptr_offset = newBlockInd * (b + 1);
+        LL_col_ind_offset = blockNnzCounter[blockInd];
 
+    /* -------------------------------------------------------------------------- */
+    /*                                    TODO                                    */
+    /* -------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*          pop the nz blocks of blockNnzCounter and use newBlockInd          */
+    /* -------------------------------------------------------------------------- */
+    }
 }

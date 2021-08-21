@@ -13,6 +13,7 @@
 #include <headers.hpp>
 #include <bmm.cpp>
 #include <blocking.cpp>
+#include <triCounting.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
@@ -76,6 +77,19 @@ int main()
     HL_bColInd = _ret.ret2;
     nzBlockIndex = _ret.ret3;
     blockNnzCounter = _ret.ret4;
+
+    /* ---------------------------- triCounting test ---------------------------- */
+
+    int trNum = bCsrTriCount( LL_bRowPtr, 
+                            LL_bColInd, 
+                            HL_bRowPtr, 
+                            HL_bColInd,
+                            nzBlockIndex,
+                            blockNnzCounter, 
+                            n, 
+                            b );
+
+    std::cout << "Num of triangles: " << trNum << std::endl;
 
     /* -------------------------------------------------------------------------- */
 
