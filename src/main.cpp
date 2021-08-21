@@ -12,6 +12,7 @@
 
 #include <headers.hpp>
 #include <bmm.cpp>
+#include <blocking.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
@@ -25,38 +26,68 @@ int main()
     std::string graph = "s6.mtx";
     std::string file = "graphs/" + graph;
 
-    read_mtx_values(file, n, nnz);
+    readMtxValues(file, n, nnz);
 
-    int *coo_row = new int[nnz]();
-    int *coo_col = new int[nnz]();
+    int *cooRow = new int[nnz]();
+    int *cooCol = new int[nnz]();
 
-    open_mtx_file(file, coo_col, coo_row, n, nnz);
+    openMtxFile(file, cooCol, cooRow, n, nnz);
 
-    int *csr_row_ptr = new int[n + 1]();
-    int *csr_col_ind = new int[nnz]();
+    int *csrRowPtr = new int[n + 1]();
+    int *csrColInd = new int[nnz]();
 
     // std::cout << "\nCOO row:\t";
     // prt::arr(coo_row, nnz);
     // std::cout << "COO col:\t";
     // prt::arr(coo_col, nnz);
 
-    coo2csr(csr_row_ptr, csr_col_ind, coo_row, coo_col, nnz, n, 0);
+    coo2csr(csrRowPtr, csrColInd, cooRow, cooCol, nnz, n, 0);
 
-    delete[] coo_row;
-    delete[] coo_col;
+    delete[] cooRow;
+    delete[] cooCol;
 
     std::cout << "\nCSR row_ptr:";
-    prt::arr(csr_row_ptr, n + 1);
+    prt::arr(csrRowPtr, n + 1);
     std::cout << "CSR col_ind:";
-    prt::arr(csr_col_ind, nnz);
+    prt::arr(csrColInd, nnz);
+
+    /* ------------------------------ blocking test ----------------------------- */
+
+    int b = 2;
+    int numBlocks = (n / b) * (n / b);
+    int LL_bRowPtrSize = numBlocks * (b + 1);
+    int blocksPerRow = n / b;
+
+    int *nzBlockIndex;
+    int *blockNnzCounter;
+
+    // Low-Level CSR
+    int *LL_bRowPtr = new int[LL_bRowPtrSize]();
+    int *LL_bColInd = new int[nnz]();
+
+    // High-Level B-CSR
+    int *HL_bRowPtr;
+    int *HL_bColInd;
+
+    // blocking
+    ret _ret = csr2blocks(csrRowPtr, csrColInd, n, nnz, b, LL_bRowPtr, LL_bColInd);
+
+    HL_bRowPtr = _ret.ret1;
+    HL_bColInd = _ret.ret2;
+    nzBlockIndex = _ret.ret3;
+    blockNnzCounter = _ret.ret4;
 
     /* -------------------------------------------------------------------------- */
 
 
     /* ------------------------------- free memory ------------------------------ */
 
-    delete[] csr_row_ptr;
-    delete[] csr_col_ind;
+    delete[] csrRowPtr;
+    delete[] csrColInd;
+    delete[] LL_bRowPtr;
+    delete[] LL_bColInd;
+    delete[] HL_bRowPtr;
+    delete[] HL_bColInd;
 
     return 0;
 

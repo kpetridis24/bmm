@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-void read_mtx_values(std::string f, int &n, int &nnz)
+void readMtxValues(std::string f, int &n, int &nnz)
 {
     // Open the file:
     std::ifstream fin(f);
@@ -25,7 +25,7 @@ void read_mtx_values(std::string f, int &n, int &nnz)
 }
 
 // read coo in 0-based format
-void open_mtx_file(std::string f, int *row, int *col, int &n, int &nnz)
+void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz)
 {
     // Open the file:
     std::ifstream fin(f);
@@ -54,8 +54,8 @@ void open_mtx_file(std::string f, int *row, int *col, int &n, int &nnz)
 int coo2csr(
   int       * const row,       
   int       * const col,     
-  int const * const row_coo,
-  int const * const col_coo,  
+  int const * const cooRow,
+  int const * const cooCol,  
   int const         nnz,      
   int const         n,         
   int const         isOneBased 
@@ -66,7 +66,7 @@ int coo2csr(
 
   // ----- find the correct column sizes
     for(int l = 0; l < nnz; l++)
-        row[row_coo[l] - isOneBased]++;
+        row[cooRow[l] - isOneBased]++;
 
   // ----- cumulative sum
     for(int i = 0, cumsum = 0; i < n; i++) {
@@ -78,10 +78,10 @@ int coo2csr(
 
   // ----- copy the row indices to the correct place
     for(int l = 0; l < nnz; l++) {
-        int row_l = row_coo[l] - isOneBased;
+        int row_l = cooRow[l] - isOneBased;
 
         int dst = row[row_l];
-        col[dst] = col_coo[l] - isOneBased;
+        col[dst] = cooCol[l] - isOneBased;
 
         row[row_l]++;
     }
