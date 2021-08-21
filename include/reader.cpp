@@ -62,8 +62,7 @@ int coo2csr(
 )
 {
   // ----- cannot assume that input is already 0!
-    for(int l = 0; l < n+1; l++) row[l] = 0;
-
+    for(int l = 0; l < n + 1; l++) row[l] = 0;
 
   // ----- find the correct column sizes
     for(int l = 0; l < nnz; l++)
@@ -76,6 +75,7 @@ int coo2csr(
         cumsum += temp;
     }
     row[n] = nnz;
+
   // ----- copy the row indices to the correct place
     for(int l = 0; l < nnz; l++) {
         int row_l = row_coo[l] - isOneBased;
@@ -85,6 +85,7 @@ int coo2csr(
 
         row[row_l]++;
     }
+
   // ----- revert the column pointers
     for(int i = 0, last = 0; i < n; i++) {
         int temp = row[i];
