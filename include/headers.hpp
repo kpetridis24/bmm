@@ -63,9 +63,13 @@ int coo2csr(
 
 /* ----------------------------- print functions ---------------------------- */
 
-namespace prt{
+namespace prt
+{
     void arr(int *arr, int len);
     void mat(int **mat, int rows, int cols);
+    void csrMat(csr &M);
+    void cscMat(csr &M);
+    void cooMat(csr &M);
 };
 
 /* ---------------------------------- utils --------------------------------- */

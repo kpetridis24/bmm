@@ -39,25 +39,15 @@ int main()
     csc B;
     util::initCsc(B, n, nnz);
 
-    // std::cout << "\nCOO row:\t";
-    // prt::arr(M.row, nnz);
-    // std::cout << "COO col:\t";
-    // prt::arr(M.col, nnz);
+    // prt::cooMat(M);
 
     coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
     coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
 
     util::delCoo(M);
 
-    // std::cout << "\nCSR row_ptr:";
-    // prt::arr(A.rowPtr, n + 1);
-    // std::cout << "CSR col_ind:";
-    // prt::arr(A.colInd, nnz);
-
-    // std::cout << "\nCSC col_ptr:";
-    // prt::arr(B.colPtr, n + 1);
-    // std::cout << "CSC row_ind:";
-    // prt::arr(B.rowInd, nnz);
+    // prt::csrMat(A);
+    // prt::cscMat(B);
 
     /* -------------------------------- bmm test -------------------------------- */
 
@@ -66,8 +56,7 @@ int main()
     // bmm(A, B, C);
     maskedBmm(A, A, B, C);
 
-    prt::arr(C.row, C.nnz);
-    prt::arr(C.col, C.nnz);
+    prt::cooMat(C);
 
     /* ------------------------------- free memory ------------------------------ */
 

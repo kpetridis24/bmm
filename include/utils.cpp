@@ -25,6 +25,30 @@ namespace prt
             std::cout << std::endl;
         }
     }
+
+    void csrMat(csr &M)
+    {
+        std::cout << "\nrowPtr:";
+        prt::arr(M.rowPtr, M.n + 1);
+        std::cout << "colInd:";
+        prt::arr(M.colInd, M.nnz);
+    }
+
+    void cscMat(csc &M)
+    {
+        std::cout << "\nrowPtr:";
+        prt::arr(M.colPtr, M.n + 1);
+        std::cout << "colInd:";
+        prt::arr(M.rowInd, M.nnz);
+    }
+
+    void cooMat(coo &M)
+    {
+        std::cout << "\nrow:";
+        prt::arr(M.row, M.nnz);
+        std::cout << "col:";
+        prt::arr(M.col, M.nnz);
+    }
 }
 
 namespace util
