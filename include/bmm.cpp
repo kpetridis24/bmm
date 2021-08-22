@@ -6,6 +6,7 @@
 #include <headers.hpp>
 
 void bmm(csr A, csc B)
+// boolean matrix multiplication (A*B)
 {
     if (A.n != B.n) {
         std::cout << "Dimensions error\n";
@@ -16,6 +17,23 @@ void bmm(csr A, csc B)
         for (int colB = 0; colB < B.n; colB++) {
             if (rowColMult(rowA, colB, A, B))
                 std::cout << rowA << "\t" << colB << std::endl;
+        }
+    }
+}
+
+void maskedBmm(csr F, csr A, csc B)
+// masked boolean matrix multiplication F.*(A*B)
+{
+    if (F.n != A.n || A.n != B.n) {
+        std::cout << "Dimensions error\n";
+        return;
+    }
+
+    for (int rowF = 0; rowF < F.n; rowF++) {
+        for (int indF = F.rowPtr[rowF]; indF < F.rowPtr[rowF + 1]; indF++) {
+            int colF = F.colInd[indF];
+            if (rowColMult(rowF, colF, A, B))
+                std::cout << rowF << "\t" << colF << std::endl;
         }
     }
 }

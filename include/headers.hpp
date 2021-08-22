@@ -83,6 +83,7 @@ ret csr2blocks( int *rowPtr,
 
 bool rowColMult(int rowA, int colB, csr A, csc B);
 void bmm(csr A, csr B);
+void maskedBmm(csr F, csr A, csc B);
 
 /* -------------------------------------------------------------------------- */
 

@@ -50,15 +50,15 @@ int main()
     delete[] cooRow;
     delete[] cooCol;
 
-    std::cout << "\nCSR row_ptr:";
-    prt::arr(A.rowPtr, n + 1);
-    std::cout << "CSR col_ind:";
-    prt::arr(A.colInd, nnz);
+    // std::cout << "\nCSR row_ptr:";
+    // prt::arr(A.rowPtr, n + 1);
+    // std::cout << "CSR col_ind:";
+    // prt::arr(A.colInd, nnz);
 
-    std::cout << "\nCSC col_ptr:";
-    prt::arr(B.colPtr, n + 1);
-    std::cout << "CSC row_ind:";
-    prt::arr(B.rowInd, nnz);
+    // std::cout << "\nCSC col_ptr:";
+    // prt::arr(B.colPtr, n + 1);
+    // std::cout << "CSC row_ind:";
+    // prt::arr(B.rowInd, nnz);
 
     /* ------------------------------ blocking test ----------------------------- */
 
@@ -101,7 +101,8 @@ int main()
 
     /* -------------------------------- bmm test -------------------------------- */
 
-    bmm(A, B);
+    // bmm(A, B);
+    maskedBmm(A, A, B);
 
     /* ------------------------------- free memory ------------------------------ */
 
