@@ -5,7 +5,7 @@
 #include <iostream>
 #include <headers.hpp>
 
-void bmm(csr A, csc B)
+void bmm(csr &A, csc &B)
 // boolean matrix multiplication (A*B)
 {
     if (A.n != B.n) {
@@ -21,7 +21,7 @@ void bmm(csr A, csc B)
     }
 }
 
-void maskedBmm(csr F, csr A, csc B)
+void maskedBmm(csr &F, csr &A, csc &B)
 // masked boolean matrix multiplication F.*(A*B)
 {
     if (F.n != A.n || A.n != B.n) {

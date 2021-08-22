@@ -30,14 +30,14 @@ int main()
     readMtxValues(file, n, nnz);
 
     coo M;
-    util::initCoo(&M, n, nnz);
+    util::initCoo(M, n, nnz);
 
     openMtxFile(file, M.col, M.row, M.n, M.nnz);
 
     csr A;
-    util::initCsr(&A, n, nnz);
+    util::initCsr(A, n, nnz);
     csc B;
-    util::initCsc(&B, n, nnz);
+    util::initCsc(B, n, nnz);
 
     // std::cout << "\nCOO row:\t";
     // prt::arr(M.row, nnz);
@@ -47,7 +47,7 @@ int main()
     coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
     coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
 
-    util::delCoo(&M);
+    util::delCoo(M);
 
     // std::cout << "\nCSR row_ptr:";
     // prt::arr(A.rowPtr, n + 1);
@@ -61,13 +61,16 @@ int main()
 
     /* -------------------------------- bmm test -------------------------------- */
 
+    coo C;
+    util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
     // bmm(A, B);
     maskedBmm(A, A, B);
 
     /* ------------------------------- free memory ------------------------------ */
 
-    util::delCsr(&A);
-    util::delCsc(&B);
+    util::delCsr(A);
+    util::delCsc(B);
+    util::delCoo(C);
 
     return 0;
 

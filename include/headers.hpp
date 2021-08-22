@@ -73,12 +73,12 @@ namespace prt{
 namespace util
 {
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
-  void initCsr(csr *M, int n, int nnz);
-  void initCsc(csr *M, int n, int nnz);
-  void initCoo(coo *M, int nnz);
-  void delCsr(csr *M);
-  void delCsc(csr *M);
-  void delCoo(csr *M);
+  void initCsr(csr &M, int n, int nnz);
+  void initCsc(csr &M, int n, int nnz);
+  void initCoo(coo &M, int n, int nnz);
+  void delCsr(csr &M);
+  void delCsc(csr &M);
+  void delCoo(csr &M);
 };
 
 /* --------------------------- blocking functions --------------------------- */
@@ -96,8 +96,8 @@ ret csr2blocks( int *rowPtr,
 /* ----------------------------------- bmm ---------------------------------- */
 
 bool rowColMult(int rowA, int colB, csr A, csc B);
-void bmm(csr A, csr B);
-void maskedBmm(csr F, csr A, csc B);
+void bmm(csr &A, csr &B);
+void maskedBmm(csr &F, csr &A, csc &B);
 
 /* -------------------------------------------------------------------------- */
 
