@@ -29,10 +29,10 @@ int main()
 
     readMtxValues(file, n, nnz);
 
-    int *cooRow = new int[nnz]();
-    int *cooCol = new int[nnz]();
+    coo M;
+    util::initCoo(&M, n, nnz);
 
-    openMtxFile(file, cooCol, cooRow, n, nnz);
+    openMtxFile(file, M.col, M.row, M.n, M.nnz);
 
     csr A;
     util::initCsr(&A, n, nnz);
@@ -40,15 +40,14 @@ int main()
     util::initCsc(&B, n, nnz);
 
     // std::cout << "\nCOO row:\t";
-    // prt::arr(coo_row, nnz);
+    // prt::arr(M.row, nnz);
     // std::cout << "COO col:\t";
-    // prt::arr(coo_col, nnz);
+    // prt::arr(M.col, nnz);
 
-    coo2csr(A.rowPtr, A.colInd, cooRow, cooCol, A.nnz, A.n, 0);
-    coo2csr(B.colPtr, B.rowInd, cooCol, cooRow, B.nnz, B.n, 0);
+    coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
+    coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
 
-    delete[] cooRow;
-    delete[] cooCol;
+    util::delCoo(&M);
 
     // std::cout << "\nCSR row_ptr:";
     // prt::arr(A.rowPtr, n + 1);
@@ -106,8 +105,9 @@ int main()
 
     /* ------------------------------- free memory ------------------------------ */
 
-    delete[] A.rowPtr;
-    delete[] A.colInd;
+    util::delCsr(&A);
+    util::delCsc(&B);
+
     // delete[] LL_bRowPtr;
     // delete[] LL_bColInd;
     // delete[] HL_bRowPtr;

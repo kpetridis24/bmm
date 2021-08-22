@@ -37,6 +37,16 @@ typedef struct
   int nnz;
 } csc;
 
+/* -------------------------------- COO type -------------------------------- */
+
+typedef struct
+{
+  int *row;
+  int *col;
+  int n;
+  int nnz;
+} coo;
+
 /* ----------------------------- read functions ----------------------------- */
 
 void readMtxValues(std::string f, int &n, int &nnz);
@@ -65,6 +75,10 @@ namespace util
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
   void initCsr(csr *M, int n, int nnz);
   void initCsc(csr *M, int n, int nnz);
+  void initCoo(coo *M, int nnz);
+  void delCsr(csr *M);
+  void delCsc(csr *M);
+  void delCoo(csr *M);
 };
 
 /* --------------------------- blocking functions --------------------------- */

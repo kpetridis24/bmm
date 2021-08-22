@@ -47,9 +47,7 @@ namespace util
     }
 
     void initCsr(csr *M, int n, int nnz)
-    /* -------------------------------------------------------------------------- */
-    /*                           CSR matrix initializer                           */
-    /* -------------------------------------------------------------------------- */
+    // initialize CSR matrix
     {
         M->rowPtr = new int[n + 1]();
         M->colInd = new int[nnz]();
@@ -58,13 +56,41 @@ namespace util
     }
 
     void initCsc(csc *M, int n, int nnz)
-    /* -------------------------------------------------------------------------- */
-    /*                           CSR matrix initializer                           */
-    /* -------------------------------------------------------------------------- */
+    // initialize CSR matrix
     {
         M->colPtr = new int[n + 1]();
         M->rowInd = new int[nnz]();
         M->n = n;
         M->nnz = nnz;
+    }
+
+    void initCoo(coo *M, int n, int nnz)
+    // initialize COO matrix
+    {
+        M->row = new int[nnz]();
+        M->col = new int[nnz]();
+        M->n = n;
+        M->nnz = nnz;
+    }
+
+    void delCsr(csr *M)
+    // delete CSR matrix
+    {
+        delete[] M->rowPtr;
+        delete[] M->colInd;
+    }
+
+    void delCsc(csc *M)
+    // delete CSR matrix
+    {
+        delete[] M->colPtr;
+        delete[] M->rowInd;
+    }
+
+    void delCoo(coo *M)
+    // delete COO matrix
+    {
+        delete[] M->row;
+        delete[] M->col;
     }
 }
