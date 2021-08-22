@@ -24,7 +24,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "s6.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -49,6 +49,8 @@ int main()
     // prt::csrMat(A);
     // prt::cscMat(B);
 
+    std::cout << "\nMatrix read successfully, n = " << A.n << ", nnz = " << A.nnz << std::endl;
+    
     /* -------------------------------- bmm test -------------------------------- */
 
     coo C;
@@ -56,7 +58,9 @@ int main()
     // bmm(A, B, C);
     maskedBmm(A, A, B, C);
 
-    prt::cooMat(C);
+    // prt::cooMat(C);
+
+    std::cout << "BMM completed\n";
 
     /* ------------------------------- free memory ------------------------------ */
 

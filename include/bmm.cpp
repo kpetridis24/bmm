@@ -18,7 +18,6 @@ void bmm(csr &A, csc &B, coo &C)
     for (int rowA = 0; rowA < A.n; rowA++) {
         for (int colB = 0; colB < B.n; colB++) {
             if (rowColMult(rowA, colB, A, B)) {
-                std::cout << rowA << "\t" << colB << std::endl;
                 C.row[C.nnz] = rowA;
                 C.col[C.nnz] = colB;
                 C.nnz++;
@@ -41,7 +40,6 @@ void maskedBmm(csr &F, csr &A, csc &B, coo &C)
         for (int indF = F.rowPtr[rowF]; indF < F.rowPtr[rowF + 1]; indF++) {
             int colF = F.colInd[indF];
             if (rowColMult(rowF, colF, A, B)) {
-                std::cout << rowF << "\t" << colF << std::endl;
                 C.row[C.nnz] = rowF;
                 C.col[C.nnz] = colF;
                 C.nnz++;
