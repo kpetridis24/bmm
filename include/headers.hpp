@@ -96,8 +96,8 @@ ret csr2blocks( int *rowPtr,
 /* ----------------------------------- bmm ---------------------------------- */
 
 bool rowColMult(int rowA, int colB, csr A, csc B);
-void bmm(csr &A, csr &B);
-void maskedBmm(csr &F, csr &A, csc &B);
+void bmm(csr &A, csr &B, coo &C);
+void maskedBmm(csr &F, csr &A, csc &B, coo &C);
 
 /* -------------------------------------------------------------------------- */
 

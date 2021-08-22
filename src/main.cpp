@@ -63,8 +63,11 @@ int main()
 
     coo C;
     util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
-    // bmm(A, B);
-    maskedBmm(A, A, B);
+    // bmm(A, B, C);
+    maskedBmm(A, A, B, C);
+
+    prt::arr(C.row, C.nnz);
+    prt::arr(C.col, C.nnz);
 
     /* ------------------------------- free memory ------------------------------ */
 
