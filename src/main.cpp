@@ -59,45 +59,6 @@ int main()
     // std::cout << "CSC row_ind:";
     // prt::arr(B.rowInd, nnz);
 
-    /* ------------------------------ blocking test ----------------------------- */
-
-    // int b = 2;
-    // int numBlocks = (n / b) * (n / b);
-    // int LL_bRowPtrSize = numBlocks * (b + 1);
-    // int blocksPerRow = n / b;
-
-    // int *nzBlockIndex;
-    // int *blockNnzCounter;
-
-    // // Low-Level CSR
-    // int *LL_bRowPtr = new int[LL_bRowPtrSize]();
-    // int *LL_bColInd = new int[nnz]();
-
-    // // High-Level B-CSR
-    // int *HL_bRowPtr;
-    // int *HL_bColInd;
-
-    // // blocking
-    // ret _ret = csr2blocks(A.rowPtr, A.colInd, n, nnz, b, LL_bRowPtr, LL_bColInd);
-
-    // HL_bRowPtr = _ret.ret1;
-    // HL_bColInd = _ret.ret2;
-    // nzBlockIndex = _ret.ret3;
-    // blockNnzCounter = _ret.ret4;
-
-    /* ---------------------------- triCounting test ---------------------------- */
-
-    // int trNum = bCsrTriCount( LL_bRowPtr, 
-    //                         LL_bColInd, 
-    //                         HL_bRowPtr, 
-    //                         HL_bColInd,
-    //                         nzBlockIndex,
-    //                         blockNnzCounter, 
-    //                         n, 
-    //                         b );
-
-    // std::cout << "Num of triangles: " << trNum << std::endl;
-
     /* -------------------------------- bmm test -------------------------------- */
 
     // bmm(A, B);
@@ -107,13 +68,6 @@ int main()
 
     util::delCsr(&A);
     util::delCsc(&B);
-
-    // delete[] LL_bRowPtr;
-    // delete[] LL_bColInd;
-    // delete[] HL_bRowPtr;
-    // delete[] HL_bColInd;
-    // delete[] nzBlockIndex;
-    // delete[] blockNnzCounter;
 
     return 0;
 
