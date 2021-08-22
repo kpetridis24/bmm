@@ -6,6 +6,7 @@
 #define __HEADERS_HPP__
 
 #include <iostream>
+#include <sys/time.h>
 
 /* ---------------------- blocking function return type --------------------- */
 
@@ -76,6 +77,8 @@ namespace prt
 
 namespace util
 {
+  struct timeval tic();
+  static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
   void initCsr(csr &M, int n, int nnz);
   void initCsc(csr &M, int n, int nnz);

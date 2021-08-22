@@ -7,7 +7,7 @@
 #include <cstdbool>
 #include <iostream>
 #include <fstream>
-#include <chrono>
+#include <sys/time.h>
 #include <vector>
 
 #include <headers.hpp>
@@ -19,6 +19,8 @@
 
 int main()
 {
+    struct timeval timer;
+
     /* ------------------------------- read matrix ------------------------------ */
 
     int n;
@@ -49,18 +51,23 @@ int main()
     // prt::csrMat(A);
     // prt::cscMat(B);
 
-    std::cout << "\nMatrix read successfully, n = " << A.n << ", nnz = " << A.nnz << std::endl;
+    std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
     
     /* -------------------------------- bmm test -------------------------------- */
 
     coo C;
-    util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
+
+    timer = util::tic();
+
+    // util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
     // bmm(A, B, C);
+    util::initCoo(C, A.n, A.nnz);
     maskedBmm(A, A, B, C);
 
     // prt::cooMat(C);
 
-    std::cout << "BMM completed\n";
+    double t = util::toc(timer);
+    std::cout << "BMM completed\nC.nnz = " << C.nnz << "\nBMM time = " << t << " seconds" << std::endl;
 
     /* ------------------------------- free memory ------------------------------ */
 
