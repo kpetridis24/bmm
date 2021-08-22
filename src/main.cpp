@@ -7,7 +7,7 @@
 #include <cstdbool>
 #include <iostream>
 #include <fstream>
-#include <chrono>
+#include <sys/time.h>
 #include <vector>
 
 #include <headers.hpp>
@@ -19,89 +19,61 @@
 
 int main()
 {
+    struct timeval timer;
+
     /* ------------------------------- read matrix ------------------------------ */
 
     int n;
     int nnz;
 
-    std::string graph = "s6.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
 
-    int *cooRow = new int[nnz]();
-    int *cooCol = new int[nnz]();
+    coo M;
+    util::initCoo(M, n, nnz);
 
-    openMtxFile(file, cooCol, cooRow, n, nnz);
+    openMtxFile(file, M.col, M.row, M.n, M.nnz);
 
-    int *csrRowPtr = new int[n + 1]();
-    int *csrColInd = new int[nnz]();
+    csr A;
+    util::initCsr(A, n, nnz);
+    csc B;
+    util::initCsc(B, n, nnz);
 
-    // std::cout << "\nCOO row:\t";
-    // prt::arr(coo_row, nnz);
-    // std::cout << "COO col:\t";
-    // prt::arr(coo_col, nnz);
+    // prt::cooMat(M);
 
-    coo2csr(csrRowPtr, csrColInd, cooRow, cooCol, nnz, n, 0);
+    coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
+    coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
 
-    delete[] cooRow;
-    delete[] cooCol;
+    util::delCoo(M);
 
-    std::cout << "\nCSR row_ptr:";
-    prt::arr(csrRowPtr, n + 1);
-    std::cout << "CSR col_ind:";
-    prt::arr(csrColInd, nnz);
+    // prt::csrMat(A);
+    // prt::cscMat(B);
 
-    /* ------------------------------ blocking test ----------------------------- */
+    std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
+    
+    /* -------------------------------- bmm test -------------------------------- */
 
-    int b = 2;
-    int numBlocks = (n / b) * (n / b);
-    int LL_bRowPtrSize = numBlocks * (b + 1);
-    int blocksPerRow = n / b;
+    coo C;
 
-    int *nzBlockIndex;
-    int *blockNnzCounter;
+    timer = util::tic();
 
-    // Low-Level CSR
-    int *LL_bRowPtr = new int[LL_bRowPtrSize]();
-    int *LL_bColInd = new int[nnz]();
+    // util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
+    // bmm(A, B, C);
+    util::initCoo(C, A.n, A.nnz);
+    maskedBmm(A, A, B, C);
 
-    // High-Level B-CSR
-    int *HL_bRowPtr;
-    int *HL_bColInd;
+    // prt::cooMat(C);
 
-    // blocking
-    ret _ret = csr2blocks(csrRowPtr, csrColInd, n, nnz, b, LL_bRowPtr, LL_bColInd);
-
-    HL_bRowPtr = _ret.ret1;
-    HL_bColInd = _ret.ret2;
-    nzBlockIndex = _ret.ret3;
-    blockNnzCounter = _ret.ret4;
-
-    /* ---------------------------- triCounting test ---------------------------- */
-
-    int trNum = bCsrTriCount( LL_bRowPtr, 
-                            LL_bColInd, 
-                            HL_bRowPtr, 
-                            HL_bColInd,
-                            nzBlockIndex,
-                            blockNnzCounter, 
-                            n, 
-                            b );
-
-    std::cout << "Num of triangles: " << trNum << std::endl;
-
-    /* -------------------------------------------------------------------------- */
-
+    double t = util::toc(timer);
+    std::cout << "BMM completed\nC.nnz = " << C.nnz << "\nBMM time = " << t << " seconds" << std::endl;
 
     /* ------------------------------- free memory ------------------------------ */
 
-    delete[] csrRowPtr;
-    delete[] csrColInd;
-    delete[] LL_bRowPtr;
-    delete[] LL_bColInd;
-    delete[] HL_bRowPtr;
-    delete[] HL_bColInd;
+    util::delCsr(A);
+    util::delCsc(B);
+    util::delCoo(C);
 
     return 0;
 

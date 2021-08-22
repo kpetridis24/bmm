@@ -6,16 +6,47 @@
 #define __HEADERS_HPP__
 
 #include <iostream>
+#include <sys/time.h>
 
 /* ---------------------- blocking function return type --------------------- */
 
 typedef struct
 {
-    int *ret1;
-    int *ret2;
-    int *ret3;
-    int *ret4;
+  int *ret1;
+  int *ret2;
+  int *ret3;
+  int *ret4;
 } ret;
+
+/* -------------------------------- CSR type -------------------------------- */
+
+typedef struct
+{
+  int *rowPtr;
+  int *colInd;
+  int n;
+  int nnz;
+} csr;
+
+/* -------------------------------- CSC type -------------------------------- */
+
+typedef struct
+{
+  int *colPtr;
+  int *rowInd;
+  int n;
+  int nnz;
+} csc;
+
+/* -------------------------------- COO type -------------------------------- */
+
+typedef struct
+{
+  int *row;
+  int *col;
+  int n;
+  int nnz;
+} coo;
 
 /* ----------------------------- read functions ----------------------------- */
 
@@ -33,16 +64,28 @@ int coo2csr(
 
 /* ----------------------------- print functions ---------------------------- */
 
-namespace prt{
+namespace prt
+{
     void arr(int *arr, int len);
     void mat(int **mat, int rows, int cols);
+    void csrMat(csr &M);
+    void cscMat(csr &M);
+    void cooMat(csr &M);
 };
 
 /* ---------------------------------- utils --------------------------------- */
 
 namespace util
 {
+  struct timeval tic();
+  static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
+  void initCsr(csr &M, int n, int nnz);
+  void initCsc(csr &M, int n, int nnz);
+  void initCoo(coo &M, int n, int nnz);
+  void delCsr(csr &M);
+  void delCsc(csr &M);
+  void delCoo(csr &M);
 };
 
 /* --------------------------- blocking functions --------------------------- */
@@ -54,6 +97,14 @@ ret csr2blocks( int *rowPtr,
                 int b, 
                 int *LL_bRowPtr, 
                 int *LL_bColInd );
+
+
+
+/* ----------------------------------- bmm ---------------------------------- */
+
+bool rowColMult(int rowA, int colB, csr A, csc B);
+void bmm(csr &A, csr &B, coo &C);
+void maskedBmm(csr &F, csr &A, csc &B, coo &C);
 
 /* -------------------------------------------------------------------------- */
 
