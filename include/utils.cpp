@@ -135,4 +135,15 @@ namespace util
         delete[] M.row;
         delete[] M.col;
     }
+
+    void delBcsr(bcsr &M)
+    // delete B-CSR matrix
+    {
+        delete[] M.LL_bRowPtr;
+        delete[] M.LL_bColInd;
+        delete[] M.HL_bRowPtr;
+        delete[] M.HL_bColInd;
+        delete[] M.nzBlockIndex;
+        delete[] M.blockNnzCounter;
+    }
 }

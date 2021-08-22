@@ -5,20 +5,14 @@
 #include <iostream>
 #include <headers.hpp>
 
-ret csr2blocks( int *rowPtr, 
-                int *colInd, 
-                int N, 
-                int nnz, 
-                int b, 
-                int *LL_bRowPtr, 
-                int *LL_bColInd ) 
+ret csr2blocks(csr &M, bcsr &blM) 
 {
-    int numBlocks = (N/b)*(N/b), emptyBlocks = 0;
+    int numBlocks = (M.n / blM.b) * (M.n / blM.b), emptyBlocks = 0;
     int *blockNnzCounter = new int[numBlocks + 1]();
     
-    for(int i = 0; i < N; i++) 
-        for(int j = rowPtr[i]; j < rowPtr[i + 1]; j++) 
-            blockNnzCounter[(i / b) * (N / b) + (colInd[j] / b) + 1]++;
+    for(int i = 0; i < M.n; i++) 
+        for(int j = M.rowPtr[i]; j < M.rowPtr[i + 1]; j++) 
+            blockNnzCounter[(i / blM.b) * (M.n / blM.b) + (M.colInd[j] / blM.b) + 1]++;
     
     for(int i = 0; i < numBlocks; i++) if (blockNnzCounter[i] == 0) emptyBlocks++;
 
@@ -38,17 +32,17 @@ ret csr2blocks( int *rowPtr,
     int *elementCounter = new int[numBlocks]();
     int blockIdx, relativeRowIdx, relativeColInd, colIndOffset;
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < M.n; i++) {
         
-        if (cnt == b) cnt = 0;
+        if (cnt == blM.b) cnt = 0;
 
-        for (int j = rowPtr[i]; j < rowPtr[i + 1]; j++) {
+        for (int j = M.rowPtr[i]; j < M.rowPtr[i + 1]; j++) {
 
-            blockIdx = (i / b) * (N / b) + (colInd[j] / b);
+            blockIdx = (i / blM.b) * (M.n / blM.b) + (M.colInd[j] / blM.b);
             colIndOffset = blockNnzCounter[blockIdx];
-            LL_bColInd[colIndOffset + elementCounter[blockIdx]] = colInd[j] % b;
+            blM.LL_bColInd[colIndOffset + elementCounter[blockIdx]] = M.colInd[j] % blM.b;
             elementCounter[blockIdx]++;
-            LL_bRowPtr[nzBlockIndex[blockIdx] * (b + 1) + cnt + 1]++; 
+            blM.LL_bRowPtr[nzBlockIndex[blockIdx] * (blM.b + 1) + cnt + 1]++; 
         }
         cnt++;
     }
@@ -57,14 +51,16 @@ ret csr2blocks( int *rowPtr,
 
     int cumsum = 0;
     for (int l = 0; l < blkPtrSize; l++) {
-        for (int v = l*(b+1); v < l*(b+1)+(b+1); v++) {
-            cumsum += LL_bRowPtr[v];
-            LL_bRowPtr[v] = cumsum;
+        for (int v = l*(blM.b + 1); v < l * ( blM.b + 1) + (blM.b + 1); v++) {
+            cumsum += blM.LL_bRowPtr[v];
+            blM.LL_bRowPtr[v] = cumsum;
         }
         cumsum = 0;
     }  
 
+    std::cout << "\nblockNnzCounter:";
     prt::arr(blockNnzCounter, numBlocks+1);     //Non zeros of each block, thus externalBlockRowPtr
+    std::cout << "nzBlockIndex:";
     prt::arr(nzBlockIndex, numBlocks);       //Non zero block indices, can be transformed to BCSR with the offsets
     
 /* -------------------------------------------------------------------------- */
@@ -80,15 +76,15 @@ ret csr2blocks( int *rowPtr,
     
     std::cout << "\nLow-Level CSR\n";
     std::cout << "LL-b_rowPtr:\t";
-    prt::arr(LL_bRowPtr, blkPtrSize * (b + 1));   //Inside blkRowPtr
+    prt::arr(blM.LL_bRowPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
     std::cout << "LL-bColInd:\t";
-    prt::arr(LL_bColInd, nnz);
+    prt::arr(blM.LL_bColInd, M.nnz);
 
 /* -------------------------------------------------------------------------- */
 /*                                    B-COO                                   */
 /* -------------------------------------------------------------------------- */
 
-    int num_of_block_rows = N / b;
+    int num_of_block_rows = M.n / blM.b;
     int blocks_per_row = num_of_block_rows;
     int nnzb =  blkPtrSize;
 

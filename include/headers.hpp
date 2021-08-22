@@ -48,6 +48,20 @@ typedef struct
   int nnz;
 } coo;
 
+/* ------------------------------- B-CSR type ------------------------------- */
+
+typedef struct
+{
+  int *LL_bRowPtr;
+  int *LL_bColInd;
+  int *HL_bRowPtr;
+  int *HL_bColInd;
+  int *nzBlockIndex;
+  int *blockNnzCounter;
+  int n;
+  int b;
+} bcsr;
+
 /* ----------------------------- read functions ----------------------------- */
 
 void readMtxValues(std::string f, int &n, int &nnz);
@@ -86,19 +100,12 @@ namespace util
   void delCsr(csr &M);
   void delCsc(csr &M);
   void delCoo(csr &M);
+  void delBcsr(coo &M);
 };
 
 /* --------------------------- blocking functions --------------------------- */
 
-ret csr2blocks( int *rowPtr, 
-                int *colInd, 
-                int N, 
-                int nnz, 
-                int b, 
-                int *LL_bRowPtr, 
-                int *LL_bColInd );
-
-
+ret csr2blocks(csr &M, bcsr &blM);
 
 /* ----------------------------------- bmm ---------------------------------- */
 
