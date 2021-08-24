@@ -10,7 +10,7 @@ void bmm(csr &A, csc &B, coo &C)
 {
     if (A.n != B.n) {
         std::cout << "Dimensions error\n";
-        return;
+        exit(1);
     }
 
     C.nnz = 0;
@@ -26,90 +26,34 @@ void bmm(csr &A, csc &B, coo &C)
     }
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                    test                                    */
-/* -------------------------------------------------------------------------- */
-/*
-bool commonNeighbors2(int rowA, int colB, csr &A, csr &B)
-// commonNeighbors function
-// Compare two rows (row1, row2) and return the number of common neighbors with O(k + l), if row1 has k neighbors and row2 l.
-{
-    int nb = 0;
-    int ptr1 = 0;
-    int ptr2 = 0;
-
-    while(row_ptr[row1] + ptr1 < row_ptr[row1 + 1] && row_ptr[row2] + ptr2 < row_ptr[row2 + 1]) {
-        if(col_ind[row_ptr[row1] + ptr1] < col_ind[row_ptr[row2] + ptr2]) {
-            ptr1++;
-        }
-        else if(col_ind[row_ptr[row1] + ptr1] > col_ind[row_ptr[row2] + ptr2]) {
-            ptr2++;
-        }
-        else {
-            return true;
-            ptr1++;
-            ptr2++;
-        }
-    }
-
-    return false;
-}
-*/
-bool search(int *rowPtr, int *colInd, int col, int loc){
-
-    bool check = false;
-    int row = rowPtr[loc];
-    int num = rowPtr[loc + 1] - rowPtr[loc];
-
-    for(int i = 0; i < num; i++){
-        if(colInd[row + i] == col){
-
-            check = true;
-            break;
-        }
-    }
-    return check;
-}
-
-void bmm2(csr &A, csr &B)
-{
-    int row, num, loc;
-
-    for(int rowA = 0; rowA < A.n; rowA++){
-        for(int ind = 0; ind < A.n; ind++){
-
-            row = A.rowPtr[rowA];
-            num = A.rowPtr[rowA + 1] - A.rowPtr[rowA];
-
-            for(int z = 0; z < num; z++){
-
-                loc = A.colInd[row + z];
-                if(search(B.rowPtr, B.colInd, ind, loc)){
-                    std::cout << rowA <<" , "<< ind << std::endl;
-                    break; //cij = 1
-                }
-                //else cij = 0
-            }
-        }
-    }
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                  end test                                  */
-/* -------------------------------------------------------------------------- */
-
 void maskedBmm(csr &F, csr &A, csc &B, coo &C)
 // masked boolean matrix multiplication F.*(A*B)
 {
     if (F.n != A.n || A.n != B.n) {
         std::cout << "Dimensions error\n";
-        return;
+        exit(1);
     }
-
+    
     C.nnz = 0;
+    
+    /* ---------------------------------- test ---------------------------------- */
+    
+    // int sizeCounter = 0;
+    // for (int rowF = 0; rowF < F.n; rowF++) {
+    //     for (int indF = F.rowPtr[rowF]; indF < F.rowPtr[rowF + 1]; indF++) {
+
+    //         int colF = F.colInd[indF];
+    //         if (rowColMult(rowF, colF, A, B)) {
+    //             sizeCounter++;
+    //         }
+    //     }
+    // }
+
+    /* -------------------------------- end test -------------------------------- */
 
     for (int rowF = 0; rowF < F.n; rowF++) {
         for (int indF = F.rowPtr[rowF]; indF < F.rowPtr[rowF + 1]; indF++) {
+
             int colF = F.colInd[indF];
             if (rowColMult(rowF, colF, A, B)) {
                 C.row[C.nnz] = rowF;
@@ -140,3 +84,103 @@ bool rowColMult(int rowA, int colB, csr A, csc B)
 
     return false;
 }
+
+
+/*
+bool commonNeighbors2(int rowA, int colB, csr &A, csr &B)
+// commonNeighbors function
+// Compare two rows (row1, row2) and return the number of common neighbors with O(k + l), if row1 has k neighbors and row2 l.
+{
+    int nb = 0;
+    int ptr1 = 0;
+    int ptr2 = 0;
+
+    while(row_ptr[row1] + ptr1 < row_ptr[row1 + 1] && row_ptr[row2] + ptr2 < row_ptr[row2 + 1]) {
+        if(col_ind[row_ptr[row1] + ptr1] < col_ind[row_ptr[row2] + ptr2]) {
+            ptr1++;
+        }
+        else if(col_ind[row_ptr[row1] + ptr1] > col_ind[row_ptr[row2] + ptr2]) {
+            ptr2++;
+        }
+        else {
+            return true;
+            ptr1++;
+            ptr2++;
+        }
+    }
+
+    return false;
+}
+*/
+
+/*
+bool search(int *rowPtr, int *colInd, int col, int loc)
+{
+    int row = rowPtr[loc];
+    int num = rowPtr[loc + 1] - rowPtr[loc];
+
+    for(int i = 0; i < num; i++){
+
+        if(colInd[row + i] == col)
+            return true;
+    }
+    return false;
+}
+
+void bmm2(csr &A, csr &B, coo &C)
+{
+    int index, num, colA;
+    C.nnz = 0;
+
+    for(int rowA = 0; rowA < A.n; rowA++) {     // row of A = i
+        for(int colB = 0; colB < A.n; colB++) {    // col of B = j
+
+            index = A.rowPtr[rowA];
+            num = A.rowPtr[rowA + 1] - A.rowPtr[rowA];
+
+            for(int z = 0; z < num; z++){
+
+                colA = A.colInd[index + z];
+                if(search(B.rowPtr, B.colInd, colB, colA)) {
+                    // std::cout << rowA <<" , "<< colB << std::endl;
+                    C.row[C.nnz] = rowA;
+                    C.col[C.nnz] = colB;
+                    C.nnz++;
+                    break; // C(rowA, colB) = 1
+                }
+                //else cij = 0
+            }
+        }
+    }
+}
+
+void maskedBmm2(csr &F, csr &A, csr &B, coo &C)
+{
+    int index, num, rowA, colA, colB;
+    C.nnz = 0;
+
+    for (int rowF = 0; rowF < F.n; rowF++) {
+        for (int indF = F.rowPtr[rowF]; indF < F.rowPtr[rowF + 1]; indF++) {
+            rowA = rowF;
+            colB = F.colInd[indF];
+
+            index = A.rowPtr[rowA];
+            num = A.rowPtr[rowA + 1] - A.rowPtr[rowA];
+
+            for(int z = 0; z < num; z++){
+
+                colA = A.colInd[index + z];
+                if(search(B.rowPtr, B.colInd, colB, colA)) {
+                    C.row[C.nnz] = rowA;
+                    C.col[C.nnz] = colB;
+                    C.nnz++;
+                    // std::cout << rowA <<" , "<< colB << std::endl;
+                    break; // C(rowA, colB) = 1
+                }
+                //else cij = 0
+            }
+
+        }
+    }
+}
+*/

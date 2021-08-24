@@ -13,6 +13,7 @@
 #include <bmm.cpp>
 #include <blocking.cpp>
 #include <triCounting.cpp>
+#include <unistd.h>
 #include <utils.cpp>
 #include <reader.cpp>
 
@@ -25,7 +26,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "s12.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -87,13 +88,13 @@ int main()
     coo C;
 
     timer = util::tic();
-
     // util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
     // bmm(A, B, C);
-    // util::initCoo(C, A.n, A.nnz);
-    // maskedBmm(A, A, B, C);
+    util::initCoo(C, A.n, A.nnz);
+    maskedBmm(A, A, B, C);
 
-    bmm2(A, A);
+    // util::initCoo(C, A.n, A.nnz);
+    // maskedBmm2(A, A, A, C);
 
     // prt::cooMat(C);
 
