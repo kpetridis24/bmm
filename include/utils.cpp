@@ -146,4 +146,15 @@ namespace util
         delete[] M.nzBlockIndex;
         delete[] M.blockNnzCounter;
     }
+
+    void delBcsc(bcsc &M)
+    // delete B-CSC matrix
+    {
+        delete[] M.LL_bColPtr;
+        delete[] M.LL_bRowInd;
+        delete[] M.HL_bColPtr;
+        delete[] M.HL_bRowInd;
+        delete[] M.nzBlockIndex;
+        delete[] M.blockNnzCounter;
+    }
 }
