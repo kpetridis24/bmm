@@ -88,8 +88,10 @@ int main()
     coo C;
 
     timer = util::tic();
+    
     // util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
     // bmm(A, B, C);
+
     util::initCoo(C, A.n, A.nnz);
     maskedBmm(A, A, B, C);
 
@@ -109,5 +111,4 @@ int main()
     // util::delBcsr(blA);
 
     return 0;
-
 }

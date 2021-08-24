@@ -37,7 +37,7 @@ void maskedBmm(csr &F, csr &A, csc &B, coo &C)
     C.nnz = 0;
     
     /* ---------------------------------- test ---------------------------------- */
-    
+
     // int sizeCounter = 0;
     // for (int rowF = 0; rowF < F.n; rowF++) {
     //     for (int indF = F.rowPtr[rowF]; indF < F.rowPtr[rowF + 1]; indF++) {
@@ -84,34 +84,6 @@ bool rowColMult(int rowA, int colB, csr A, csc B)
 
     return false;
 }
-
-
-/*
-bool commonNeighbors2(int rowA, int colB, csr &A, csr &B)
-// commonNeighbors function
-// Compare two rows (row1, row2) and return the number of common neighbors with O(k + l), if row1 has k neighbors and row2 l.
-{
-    int nb = 0;
-    int ptr1 = 0;
-    int ptr2 = 0;
-
-    while(row_ptr[row1] + ptr1 < row_ptr[row1 + 1] && row_ptr[row2] + ptr2 < row_ptr[row2 + 1]) {
-        if(col_ind[row_ptr[row1] + ptr1] < col_ind[row_ptr[row2] + ptr2]) {
-            ptr1++;
-        }
-        else if(col_ind[row_ptr[row1] + ptr1] > col_ind[row_ptr[row2] + ptr2]) {
-            ptr2++;
-        }
-        else {
-            return true;
-            ptr1++;
-            ptr2++;
-        }
-    }
-
-    return false;
-}
-*/
 
 /*
 bool search(int *rowPtr, int *colInd, int col, int loc)
@@ -179,7 +151,6 @@ void maskedBmm2(csr &F, csr &A, csr &B, coo &C)
                 }
                 //else cij = 0
             }
-
         }
     }
 }
