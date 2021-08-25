@@ -74,11 +74,11 @@ ret csr2bcsr(csr &M, bcsr &blM)
 /*                                Low-Level CSR                               */
 /* -------------------------------------------------------------------------- */
     
-    std::cout << "\nLow-Level CSR\n";
-    std::cout << "LL-b_rowPtr:\t";
-    prt::arr(blM.LL_bRowPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
-    std::cout << "LL-bColInd:\t";
-    prt::arr(blM.LL_bColInd, M.nnz);
+    // std::cout << "\nLow-Level CSR\n";
+    // std::cout << "LL-bRowPtr:\t";
+    // prt::arr(blM.LL_bRowPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
+    // std::cout << "LL-bColInd:\t";
+    // prt::arr(blM.LL_bColInd, M.nnz);
 
 /* -------------------------------------------------------------------------- */
 /*                                    B-COO                                   */
@@ -195,11 +195,11 @@ ret csr2bcsc(csc &M, bcsc &blM)
 /*                                Low-Level CSC                               */
 /* -------------------------------------------------------------------------- */
     
-    std::cout << "\nLow-Level CSC\n";
-    std::cout << "LL-bColPtr:\t";
-    prt::arr(blM.LL_bColPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
-    std::cout << "LL-bRowInd:\t";
-    prt::arr(blM.LL_bRowInd, M.nnz);
+    // std::cout << "\nLow-Level CSC\n";
+    // std::cout << "LL-bColPtr:\t";
+    // prt::arr(blM.LL_bColPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
+    // std::cout << "LL-bRowInd:\t";
+    // prt::arr(blM.LL_bRowInd, M.nnz);
 
 /* -------------------------------------------------------------------------- */
 /*                                    B-COO                                   */

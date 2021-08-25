@@ -19,13 +19,6 @@ void blockBmm(bcsr &A, bcsc &B)
 
     int blocksPerRow = A.n / A.b;
 
-    csr HL_A;
-    HL_A.rowPtr = A.HL_bRowPtr;
-    HL_A.colInd = A.HL_bColInd;
-    csc HL_B;
-    HL_B.colPtr = B.HL_bColPtr;
-    HL_B.rowInd = B.HL_bRowInd;
-
     // high level matrix multiplication
     for (int blockRowA = 0; blockRowA < blocksPerRow; blockRowA++) {
         for (int blockColB = 0; blockColB < blocksPerRow; blockColB++) {
@@ -127,9 +120,9 @@ bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B)
             util::blockOffsets(bIndA, A.nzBlockIndex, A.blockNnzCounter, A.b, LL_rowPtrOffsetA, LL_colIndOffsetA);
             util::blockOffsets(bIndB, B.nzBlockIndex, B.blockNnzCounter, B.b, LL_colPtrOffsetB, LL_rowIndOffsetB);
 
-            std::cout << "\nLow-Level Multiplication: A(" << blockRowA << ", " << cN << ")" << " * B(" << cN << ", " << blockColB << ")" << std::endl;
-            std::cout << LL_rowPtrOffsetA << "\t" << LL_colPtrOffsetB << std::endl;
-            std::cout << LL_colIndOffsetA << "\t" << LL_rowIndOffsetB << std::endl;
+            // std::cout << "\nLow-Level Multiplication: A(" << blockRowA << ", " << cN << ")" << " * B(" << cN << ", " << blockColB << ")" << std::endl;
+            // std::cout << "LL_rowPtrOffsetA = " << LL_rowPtrOffsetA << "\t" << "LL_colPtrOffsetB = " << LL_colPtrOffsetB << std::endl;
+            // std::cout << "LL_colIndOffsetA = " << LL_colIndOffsetA << "\t" << "LL_rowIndOffsetB = "<< LL_rowIndOffsetB << std::endl;
 
             // if (LL) 
             // TODO low-level multiplication
