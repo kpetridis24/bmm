@@ -28,7 +28,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "s6.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -61,9 +61,9 @@ int main()
     
     timer = util::tic();
 
-    int b = 2;
+    // int b = 2;
     // int b = 113489;
-    // int b = 226978;
+    int b = 226978;
     int numBlocks = (n / b) * (n / b);
     int LL_bRowPtrSize = numBlocks * (b + 1);
 
@@ -92,9 +92,9 @@ int main()
 
     timer = util::tic();
 
-    b = 2;
+    // b = 2;
     // b = 113489;
-    // b = 226978;
+    b = 226978;
     int LL_bColPtrSize = numBlocks * (b + 1);
 
     bcsc blB;

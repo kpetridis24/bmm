@@ -132,8 +132,22 @@ void maskedBmm(csr &F, csr &A, csc &B, coo &C);
 /* -------------------------------- block-bmm ------------------------------- */
 
 bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B);
-void bbm();
+void bbm( bcsr &A,
+          bcsc &B,
+          bool *_C,
+          int LL_rowPtrOffsetA,
+          int LL_colIndOffsetA,
+          int LL_colPtrOffsetB,
+          int LL_rowIndOffsetB );
 void blockBmm(bcsr &A, bcsc &B);
+bool *maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B);
+void maskedBbm( bcsr &A,
+                bcsc &B,
+                bool *_C,
+                int LL_rowPtrOffsetA,
+                int LL_colIndOffsetA,
+                int LL_colPtrOffsetB,
+                int LL_rowIndOffsetB );
 void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* -------------------------------------------------------------------------- */

@@ -34,62 +34,31 @@ void blockBmm(bcsr &A, bcsc &B)
 void maskedBlockBmm(bcsr F, bcsr A, bcsc B)
 // masked boolean matrix multiplication F.*(A*B) using blocks
 {
-/* -------------------------------------------------------------------------- */
-/*                                    TODO                                    */
-/* -------------------------------------------------------------------------- */
+    if (A.n != B.n || A.n != F.n) {
+        std::cout << "Dimensions error\n";
+        exit(1);
+    }
+
+    if (A.b != B.b || A.b != F.b) {
+        std::cout << "Block size error\n";
+        exit(1);
+    }
+
+    int blocksPerRow = A.n / A.b;
+
+    // high level matrix multiplication
+    for (int blockRowF = 0; blockRowF < blocksPerRow; blockRowF++) {
+        for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
+            int blockColF = F.HL_bColInd[indF];
+            maskedBlockRowColMult(blockRowF, blockColF, F, A, B);
+        }
+    }
 }
-
-
-
-
-// boolean matrix multiplication (A*B) using blocks
-
-// int bCsrTriCount( bcsr A )
-// {
-//     int blocksPerRow = A.n / A.b;
-//     int t = 0;
-//     int *c3 = new int[blocksPerRow]();
-
-//     for (int blockRow1 = 0; blockRow1 < blocksPerRow; blockRow1++) {
-
-//         // std::cout << "\nNon-zero blocks of block-row " << blockRow1 << ":\t";
-//         for (int i = A.HL_bRowPtr[blockRow1]; i < A.HL_bRowPtr[blockRow1 + 1]; i++) {   // for every nz block of blockRow1
-//             // std::cout << A.HL_bColInd[i] << " ";
-            
-//             int blockRow2 = A.HL_bColInd[i];
-
-//             // c3[blockRow1] += HLcommonNeighbors( blockRow1, 
-//             //                                     blockRow2, 
-//             //                                     A.HL_bRowPtr, 
-//             //                                     A.HL_bColInd, 
-//             //                                     LL_b_row_ptr, 
-//             //                                     LL_b_col_ind,
-//             //                                     nzBlockIndex, 
-//             //                                     blockNnzCounter, 
-//             //                                     n, 
-//             //                                     b );
-
-//             // std::cout   << "Num of common block-neighbors between block-rows " 
-//             //             << blockRow1 << " and " << blockRow2 << " = " 
-//             //             << temp
-//             //             << std::endl;
-//         }
-//         // std::cout << std::endl;
-//     }
-
-//     for (int i = 0; i < blocksPerRow; i++) {
-//         t += c3[i];
-//     }
-
-//     delete[] c3;
-    
-//     return t;
-// }
 
 bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B)
 // boolean blockRow-blockCol multiplication - multiply blockRowA of matrix A with blockColB of matrix B
 {
-    bool *_C = new bool[A.b * A.b]();
+    bool *_C; // = new bool[A.b * A.b]();
 
     int ptr1 = 0;
     int ptr2 = 0;
@@ -124,9 +93,7 @@ bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B)
             // std::cout << "LL_rowPtrOffsetA = " << LL_rowPtrOffsetA << "\t" << "LL_colPtrOffsetB = " << LL_colPtrOffsetB << std::endl;
             // std::cout << "LL_colIndOffsetA = " << LL_colIndOffsetA << "\t" << "LL_rowIndOffsetB = "<< LL_rowIndOffsetB << std::endl;
 
-            // if (LL) 
-            // TODO low-level multiplication
-            // return true;
+            bbm(A, B, _C, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB);
 
             ptr1++;
             ptr2++;
@@ -136,8 +103,93 @@ bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B)
     return _C;
 }
 
-void bbm(int blockRowA, int blockColB, bcsr &A, bcsc &B, int ind)
+bool *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B)
+{
+    bool *_C; // = new bool[A.b * A.b]();
+
+    int ptr1 = 0;
+    int ptr2 = 0;
+    int bIndA;
+    int bIndB;
+    int cN;
+    int blocksPerRow = A.n / A.b;
+
+    int blockRowA = blockRowF;
+    int blockColB = blockColF;
+
+    while (A.HL_bRowPtr[blockRowA] + ptr1 < A.HL_bRowPtr[blockRowA + 1] && B.HL_bColPtr[blockColB] + ptr2 < B.HL_bColPtr[blockColB + 1]) {
+        if (A.HL_bColInd[A.HL_bRowPtr[blockRowA] + ptr1] < B.HL_bRowInd[B.HL_bColPtr[blockColB] + ptr2]) {
+            ptr1++;
+        }
+        else if (A.HL_bColInd[A.HL_bRowPtr[blockRowA] + ptr1] > B.HL_bRowInd[B.HL_bColPtr[blockColB] + ptr2]) {
+            ptr2++;
+        }
+        else {
+            cN = A.HL_bColInd[A.HL_bRowPtr[blockRowA] + ptr1]; // common neighbor index
+
+            // TODO F indices
+
+            bIndA = blockRowA * blocksPerRow + cN;
+            bIndB = blockColB * blocksPerRow + cN;
+
+            int LL_rowPtrOffsetA;
+            int LL_colIndOffsetA;
+
+            int LL_colPtrOffsetB;
+            int LL_rowIndOffsetB;
+
+            util::blockOffsets(bIndA, A.nzBlockIndex, A.blockNnzCounter, A.b, LL_rowPtrOffsetA, LL_colIndOffsetA);
+            util::blockOffsets(bIndB, B.nzBlockIndex, B.blockNnzCounter, B.b, LL_colPtrOffsetB, LL_rowIndOffsetB);
+
+            // std::cout << "\nLow-Level Multiplication: A(" << blockRowA << ", " << cN << ")" << " * B(" << cN << ", " << blockColB << ")" << std::endl;
+            // std::cout << "LL_rowPtrOffsetA = " << LL_rowPtrOffsetA << "\t" << "LL_colPtrOffsetB = " << LL_colPtrOffsetB << std::endl;
+            // std::cout << "LL_colIndOffsetA = " << LL_colIndOffsetA << "\t" << "LL_rowIndOffsetB = "<< LL_rowIndOffsetB << std::endl;
+
+            maskedBbm(A, B, _C, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB);
+
+            ptr1++;
+            ptr2++;
+        }
+    }
+
+    return _C;
+}
+
+void bbm(   bcsr &A,
+            bcsc &B,
+            bool *_C,
+            int LL_rowPtrOffsetA,
+            int LL_colIndOffsetA,
+            int LL_colPtrOffsetB,
+            int LL_rowIndOffsetB    )
 // boolean block-block multiplication
 {
+    csr _A;
+    _A.rowPtr = A.LL_bRowPtr + LL_rowPtrOffsetA;
+    _A.colInd = A.LL_bColInd + LL_colIndOffsetA;
+    _A.n = A.b;
+    csc _B;
+    _B.colPtr = B.LL_bColPtr + LL_colPtrOffsetB;
+    _B.rowInd = B.LL_bRowInd + LL_rowIndOffsetB;
+    _B.n = B.b;
 
+    for (int rowA = 0; rowA < A.b; rowA++) {
+        for (int colB = 0; colB < B.b; colB++) {
+                if (rowColMult(rowA, colB, _A, _B)) {
+                    // _C[colB * A.b + rowA] = true;
+                }
+        }
+    }
+}
+
+void maskedBbm( bcsr &A,
+                bcsc &B,
+                bool *_C,
+                int LL_rowPtrOffsetA,
+                int LL_colIndOffsetA,
+                int LL_colPtrOffsetB,
+                int LL_rowIndOffsetB )
+// masked boolean block-block multiplication
+{
+    // TODO
 }
