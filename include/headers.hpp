@@ -125,9 +125,15 @@ ret csr2bcsc(csr &M, bcsc &blM);
 
 /* ----------------------------------- bmm ---------------------------------- */
 
-bool rowColMult(int rowA, int colB, csr A, csc B);
+bool rowColMult(int rowA, int colB, csr &A, csc &B);
 void bmm(csr &A, csr &B, coo &C);
 void maskedBmm(csr &F, csr &A, csc &B, coo &C);
+
+/* -------------------------------- block-bmm ------------------------------- */
+
+bool blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B);
+void blockBmm(bcsr &A, bcsc &B);
+void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* -------------------------------------------------------------------------- */
 

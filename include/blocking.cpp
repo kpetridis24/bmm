@@ -58,10 +58,10 @@ ret csr2bcsr(csr &M, bcsr &blM)
         cumsum = 0;
     }  
 
-    std::cout << "\nblockNnzCounter:";
-    prt::arr(blockNnzCounter, numBlocks+1);     //Non zeros of each block, thus externalBlockRowPtr
-    std::cout << "nzBlockIndex:";
-    prt::arr(nzBlockIndex, numBlocks);       //Non zero block indices, can be transformed to BCSR with the offsets
+    // std::cout << "\nblockNnzCounter:";
+    // prt::arr(blockNnzCounter, numBlocks+1);     //Non zeros of each block, thus externalBlockRowPtr
+    // std::cout << "nzBlockIndex:";
+    // prt::arr(nzBlockIndex, numBlocks);       //Non zero block indices, can be transformed to BCSR with the offsets
     
 /* -------------------------------------------------------------------------- */
 /*                                    TODO                                    */
@@ -74,11 +74,11 @@ ret csr2bcsr(csr &M, bcsr &blM)
 /*                                Low-Level CSR                               */
 /* -------------------------------------------------------------------------- */
     
-    std::cout << "\nLow-Level CSR\n";
-    std::cout << "LL-b_rowPtr:\t";
-    prt::arr(blM.LL_bRowPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
-    std::cout << "LL-bColInd:\t";
-    prt::arr(blM.LL_bColInd, M.nnz);
+    // std::cout << "\nLow-Level CSR\n";
+    // std::cout << "LL-b_rowPtr:\t";
+    // prt::arr(blM.LL_bRowPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
+    // std::cout << "LL-bColInd:\t";
+    // prt::arr(blM.LL_bColInd, M.nnz);
 
 /* -------------------------------------------------------------------------- */
 /*                                    B-COO                                   */
@@ -110,11 +110,11 @@ ret csr2bcsr(csr &M, bcsr &blM)
 
     coo2csr(HL_bRowPtr, HL_bColInd, b_rows, b_cols, nnzb, num_of_block_rows, 0);
 
-    std::cout << "\nHigh-Level B-CSR\n";
-    std::cout << "HL-b_rowPtr:\t";
-    prt::arr(HL_bRowPtr, num_of_block_rows + 1);
-    std::cout << "HL-b_colInd:\t";
-    prt::arr(HL_bColInd, nnzb);
+    // std::cout << "\nHigh-Level B-CSR\n";
+    // std::cout << "HL-b_rowPtr:\t";
+    // prt::arr(HL_bRowPtr, num_of_block_rows + 1);
+    // std::cout << "HL-b_colInd:\t";
+    // prt::arr(HL_bColInd, nnzb);
 
 /* -------------------------------------------------------------------------- */
 
@@ -179,10 +179,10 @@ ret csr2bcsc(csc &M, bcsc &blM)
         cumsum = 0;
     }  
 
-    std::cout << "\nblockNnzCounter:";
-    prt::arr(blockNnzCounter, numBlocks+1);     //Non zeros of each block, thus externalBlockRowPtr
-    std::cout << "nzBlockIndex:";
-    prt::arr(nzBlockIndex, numBlocks);       //Non zero block indices, can be transformed to BCSR with the offsets
+    // std::cout << "\nblockNnzCounter:";
+    // prt::arr(blockNnzCounter, numBlocks+1);     //Non zeros of each block, thus externalBlockRowPtr
+    // std::cout << "nzBlockIndex:";
+    // prt::arr(nzBlockIndex, numBlocks);       //Non zero block indices, can be transformed to BCSR with the offsets
     
 /* -------------------------------------------------------------------------- */
 /*                                    TODO                                    */
@@ -195,11 +195,11 @@ ret csr2bcsc(csc &M, bcsc &blM)
 /*                                Low-Level CSC                               */
 /* -------------------------------------------------------------------------- */
     
-    std::cout << "\nLow-Level CSC\n";
-    std::cout << "LL-bColPtr:\t";
-    prt::arr(blM.LL_bColPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
-    std::cout << "LL-bRowInd:\t";
-    prt::arr(blM.LL_bRowInd, M.nnz);
+    // std::cout << "\nLow-Level CSC\n";
+    // std::cout << "LL-bColPtr:\t";
+    // prt::arr(blM.LL_bColPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
+    // std::cout << "LL-bRowInd:\t";
+    // prt::arr(blM.LL_bRowInd, M.nnz);
 
 /* -------------------------------------------------------------------------- */
 /*                                    B-COO                                   */
@@ -231,11 +231,11 @@ ret csr2bcsc(csc &M, bcsc &blM)
 
     coo2csr(HL_bColPtr, HL_bRowInd, b_cols, b_rows, nnzb, num_of_block_rows, 0);
 
-    std::cout << "\nHigh-Level B-CSC\n";
-    std::cout << "HL-bColPtr:\t";
-    prt::arr(HL_bColPtr, num_of_block_rows + 1);
-    std::cout << "HL-bRowInd:\t";
-    prt::arr(HL_bRowInd, nnzb);
+    // std::cout << "\nHigh-Level B-CSC\n";
+    // std::cout << "HL-bColPtr:\t";
+    // prt::arr(HL_bColPtr, num_of_block_rows + 1);
+    // std::cout << "HL-bRowInd:\t";
+    // prt::arr(HL_bRowInd, nnzb);
 
 /* -------------------------------------------------------------------------- */
 
@@ -246,55 +246,3 @@ ret csr2bcsc(csc &M, bcsc &blM)
 
     return _ret;
 }
-
-/* -------------------------------------------------------------------------- */
-/*                                    main                                    */
-/* -------------------------------------------------------------------------- */
-
-/* ------------------------------ blocking test ----------------------------- */
-
-// int b = 2;
-// int numBlocks = (n / b) * (n / b);
-// int LL_bRowPtrSize = numBlocks * (b + 1);
-// int blocksPerRow = n / b;
-
-// int *nzBlockIndex;
-// int *blockNnzCounter;
-
-// // Low-Level CSR
-// int *LL_bRowPtr = new int[LL_bRowPtrSize]();
-// int *LL_bColInd = new int[nnz]();
-
-// // High-Level B-CSR
-// int *HL_bRowPtr;
-// int *HL_bColInd;
-
-// // blocking
-// ret _ret = csr2blocks(A.rowPtr, A.colInd, n, nnz, b, LL_bRowPtr, LL_bColInd);
-
-// HL_bRowPtr = _ret.ret1;
-// HL_bColInd = _ret.ret2;
-// nzBlockIndex = _ret.ret3;
-// blockNnzCounter = _ret.ret4;
-
-/* ---------------------------- triCounting test ---------------------------- */
-
-// int trNum = bCsrTriCount( LL_bRowPtr, 
-//                         LL_bColInd, 
-//                         HL_bRowPtr, 
-//                         HL_bColInd,
-//                         nzBlockIndex,
-//                         blockNnzCounter, 
-//                         n, 
-//                         b );
-
-// std::cout << "Num of triangles: " << trNum << std::endl;
-
-/* ------------------------------- free memory ------------------------------ */
-
-// delete[] LL_bRowPtr;
-// delete[] LL_bColInd;
-// delete[] HL_bRowPtr;
-// delete[] HL_bColInd;
-// delete[] nzBlockIndex;
-// delete[] blockNnzCounter;

@@ -64,7 +64,7 @@ void maskedBmm(csr &F, csr &A, csc &B, coo &C)
     }
 }
 
-bool rowColMult(int rowA, int colB, csr A, csc B)
+bool rowColMult(int rowA, int colB, csr &A, csc &B)
 // boolean row-col multiplication - multiply rowA of matrix A with colB of matrix B
 {
     int ptr1 = 0;

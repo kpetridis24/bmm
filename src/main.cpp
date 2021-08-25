@@ -21,13 +21,14 @@
 int main()
 {
     struct timeval timer;
+    double t = -1;
 
     /* ------------------------------- read matrix ------------------------------ */
 
     int n;
     int nnz;
 
-    std::string graph = "s6.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -56,9 +57,13 @@ int main()
     
     /* --------------------------- bcsr blocking test --------------------------- */
 
-    std::cout << "\nBlocking A in B-CSR...\n";
+    // std::cout << "\nBlocking A in B-CSR...\n";
+    
+    timer = util::tic();
 
-    int b = 2;
+    // int b = 2;
+    int b = 113489;
+    // int b = 226978;
     int numBlocks = (n / b) * (n / b);
     int LL_bRowPtrSize = numBlocks * (b + 1);
 
@@ -78,11 +83,17 @@ int main()
     blA.nzBlockIndex = _ret.ret3;
     blA.blockNnzCounter = _ret.ret4;
 
+    t = util::toc(timer);
+    std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
     /* --------------------------- bcsc blocking test --------------------------- */
 
-    std::cout << "\nBlocking B in B-CSC...\n";
+    // std::cout << "\nBlocking B in B-CSC...\n";
 
-    b = 2;
+    timer = util::tic();
+
+    b = 113489;
+    // b = 226978;
     int LL_bColPtrSize = numBlocks * (b + 1);
 
     bcsc blB;
@@ -100,6 +111,9 @@ int main()
     blB.HL_bRowInd = _ret.ret2;
     blB.nzBlockIndex = _ret.ret3;
     blB.blockNnzCounter = _ret.ret4;
+
+    t = util::toc(timer);
+    std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
     /* -------------------------------- bmm test -------------------------------- */
 
@@ -120,6 +134,15 @@ int main()
 
     // double t = util::toc(timer);
     // std::cout << "BMM completed\nC.nnz = " << C.nnz << "\nBMM time = " << t << " seconds" << std::endl;
+
+    /* ----------------------------- block bmm test ----------------------------- */
+
+    timer = util::tic();
+
+    blockBmm(blA, blB);
+
+    t = util::toc(timer);
+    std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
 
     /* ------------------------------- free memory ------------------------------ */
 
