@@ -140,7 +140,8 @@ int main()
 
     timer = util::tic();
 
-    blockBmm(blA, blB);
+    // blockBmm(blA, blB);
+    maskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
