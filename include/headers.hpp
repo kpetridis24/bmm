@@ -131,7 +131,8 @@ void maskedBmm(csr &F, csr &A, csc &B, coo &C);
 
 /* -------------------------------- block-bmm ------------------------------- */
 
-bool blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B);
+bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B);
+void bbm();
 void blockBmm(bcsr &A, bcsc &B);
 void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 

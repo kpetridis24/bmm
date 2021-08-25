@@ -71,14 +71,14 @@ namespace util
     return(stime);
     }
 
-    void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset)
+    void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_rowPtrOffset, int &LL_colIndOffset)
     /* -------------------------------------------------------------------------- */
     /*             find the offsets of a specific block in the LL-CSR             */
     /* -------------------------------------------------------------------------- */
     {
         int newBlockInd =  nzBlockIndex[blockInd];
-        LL_row_ptr_offset = newBlockInd * (b + 1);
-        LL_col_ind_offset = blockNnzCounter[blockInd];
+        LL_rowPtrOffset = newBlockInd * (b + 1);
+        LL_colIndOffset = blockNnzCounter[blockInd];
 
     /* -------------------------------------------------------------------------- */
     /*                                    TODO                                    */
