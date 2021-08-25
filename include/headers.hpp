@@ -140,11 +140,12 @@ void bbm( bcsr &A,
           int LL_colPtrOffsetB,
           int LL_rowIndOffsetB );
 void blockBmm(bcsr &A, bcsc &B);
-bool *maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B);
+int *maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B);
 void maskedBbm( bcsr &F,
                 bcsr &A,
                 bcsc &B,
-                bool *_C,
+                int *_C,
+                int &_sizeC,
                 int LL_rowPtrOffsetF,
                 int LL_colIndOffsetF,
                 int LL_rowPtrOffsetA,

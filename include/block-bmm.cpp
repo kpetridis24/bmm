@@ -101,6 +101,9 @@ void bbm(   bcsr &A,
         for (int colB = 0; colB < B.b; colB++) {
                 if (rowColMult(rowA, colB, _A, _B)) {
                     // _C[colB * A.b + rowA] = true;
+/* -------------------------------------------------------------------------- */
+/*                                    TODO                                    */
+/* -------------------------------------------------------------------------- */
                 }
         }
     }
@@ -134,17 +137,19 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
     }
 }
 
-bool *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B)
+int *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B)
 {
-    bool *_C; // = new bool[A.b * A.b]();
-
     int ptr1 = 0;
     int ptr2 = 0;
     int bIndA;
     int bIndB;
     int cN;
     int blocksPerRow = A.n / A.b;
-    int bIndF = blockColF * blocksPerRow + blockRowF;
+    int bIndF = blockRowF * blocksPerRow + blockColF;
+    int nnzF = F.blockNnzCounter[bIndF + 1] - F.blockNnzCounter[bIndF];
+    int *_C = new int[2 * nnzF]; // = new bool[A.b * A.b]();
+    int _sizeC = 0;
+
 
     int blockRowA = blockRowF;
     int blockColB = blockColF;
@@ -179,20 +184,25 @@ bool *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc
             // std::cout << "LL_rowPtrOffsetA = " << LL_rowPtrOffsetA << "\t" << "LL_colPtrOffsetB = " << LL_colPtrOffsetB << std::endl;
             // std::cout << "LL_colIndOffsetA = " << LL_colIndOffsetA << "\t" << "LL_rowIndOffsetB = "<< LL_rowIndOffsetB << std::endl;
 
-            maskedBbm(F, A, B, _C, LL_rowPtrOffsetF, LL_colIndOffsetF, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB);
+            maskedBbm(F, A, B, _C, _sizeC, LL_rowPtrOffsetF, LL_colIndOffsetF, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB);
 
             ptr1++;
             ptr2++;
         }
     }
     
+    delete[] _C;
+/* -------------------------------------------------------------------------- */
+/*                      TODO return _C and store it in C                      */
+/* -------------------------------------------------------------------------- */
     return NULL;
 }
 
 void maskedBbm( bcsr &F,
                 bcsr &A,
                 bcsc &B,
-                bool *_C,
+                int *_C,
+                int &_sizeC,
                 int LL_rowPtrOffsetF,
                 int LL_colIndOffsetF,
                 int LL_rowPtrOffsetA,
@@ -221,7 +231,8 @@ void maskedBbm( bcsr &F,
 
             int _colF = _F.colInd[_indF];
             if (rowColMult(_rowF, _colF, _A, _B)) {
-                // _C[colB * A.b + rowA] = true;
+                _C[_sizeC++] = _rowF;
+                _C[_sizeC++] = _colF;
             }
         }
     }
