@@ -113,7 +113,7 @@ void bbm(   bcsr &A,
 /*                              masked-block-bmm                              */
 /* -------------------------------------------------------------------------- */
 
-void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
+int *maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
 // masked boolean matrix multiplication F.*(A*B) using blocks
 {
     if (A.n != B.n || A.n != F.n) {
@@ -126,26 +126,29 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
         exit(1);
     }
 
+    int nnzF = F.blockNnzCounter[(F.n / F.b) * (F.n / F.b) + 1];
     int blocksPerRow = A.n / A.b;
+
+    int *C = new int[nnzF](); // init result matrix
+    int sizeC = 0;
 
     // high level matrix multiplication
     for (int blockRowF = 0; blockRowF < blocksPerRow; blockRowF++) {
         for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];
-            maskedBlockRowColMult(blockRowF, blockColF, F, A, B);
+            
+            maskedBlockRowColMultRet _C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B);
+            util::addCooBlockToMatrix(C, _C.M, blockRowF, blockColF, A.b, sizeC, _C.sizeM);
         }
     }
+
+    return C;
 }
 
-bool isFirstBlockRowIteration;
-int ptr;
-
-int *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B)
+maskedBlockRowColMultRet maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B)
 {   
-    std::cout<<"Change blockrow x blockcol\n";
-    isFirstBlockRowIteration = true;
-    ptr = 0;
+    //std::cout<<"Change blockrow x blockcol\n";
 
     int ptr1 = 0;
     int ptr2 = 0;
@@ -154,10 +157,9 @@ int *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
     int cN;
     int blocksPerRow = A.n / A.b;
     int bIndF = blockRowF * blocksPerRow + blockColF;
-    int nnzF = F.blockNnzCounter[bIndF + 1] - F.blockNnzCounter[bIndF];
-    int *_C = new int[2 * nnzF]; // = new bool[A.b * A.b]();
+    int _nnzF = F.blockNnzCounter[bIndF + 1] - F.blockNnzCounter[bIndF];
+    int *_C = new int[2 * _nnzF]; // = new bool[A.b * A.b]();
     int _sizeC = 0;
-
 
     int blockRowA = blockRowF;
     int blockColB = blockColF;
@@ -193,20 +195,21 @@ int *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
             // std::cout << "LL_colIndOffsetA = " << LL_colIndOffsetA << "\t" << "LL_rowIndOffsetB = "<< LL_rowIndOffsetB << std::endl;
 
             maskedBbm(F, A, B, _C, _sizeC, LL_rowPtrOffsetF, LL_colIndOffsetF, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB);
-
+            
             ptr1++;
             ptr2++;
         }
     }
     
-    delete[] _C;
 /* -------------------------------------------------------------------------- */
 /*                      TODO return _C and store it in C                      */
 /* -------------------------------------------------------------------------- */
-    return NULL;
+    maskedBlockRowColMultRet ret;
+    ret.M = _C;
+    ret.sizeM = _sizeC;
+
+    return ret;
 }
-
-
 
 void maskedBbm( bcsr &F,
                 bcsr &A,
@@ -221,7 +224,7 @@ void maskedBbm( bcsr &F,
                 int LL_rowIndOffsetB )
 // masked boolean block-block multiplication
 {   
-    std::cout << "Enter BBΜ\n";
+    //std::cout << "Enter BBΜ\n";
     csr _F;
     _F.rowPtr = F.LL_bRowPtr + LL_rowPtrOffsetF;
     _F.colInd = F.LL_bColInd + LL_colIndOffsetF;
@@ -237,70 +240,38 @@ void maskedBbm( bcsr &F,
     _B.rowInd = B.LL_bRowInd + LL_rowIndOffsetB;
     _B.n = B.b;
 
-
     for (int _rowF = 0; _rowF < F.n / F.b; _rowF++) {
         for (int _indF = _F.rowPtr[_rowF]; _indF < _F.rowPtr[_rowF + 1]; _indF++) {
 
             int _colF = _F.colInd[_indF];
-            std::cout<<"("<<_rowF<<" , "<<_colF<<")"<<std::endl;
+            //std::cout<<"("<<_rowF<<" , "<<_colF<<")"<<std::endl;
 
             if (rowColMult(_rowF, _colF, _A, _B)) {
                 
-                std::cout << "Corresponding\n";
+                //std::cout << "Corresponding\n";
                 
-                if(isFirstBlockRowIteration) {
-                    _C[_sizeC++] = _rowF;
-                    _C[_sizeC++] = _colF;
-                }
+                // if(isFirstBlockRowIteration) {
+                //     _C[_sizeC++] = _rowF;
+                //     _C[_sizeC++] = _colF;
+                // }
+
+                //prt::arr(_C, _sizeC);
 
                 util::addCooElement(_rowF, _colF, _C, _sizeC);
-                // else {
-                //     while(_rowF > _C[ptr])
-                //         ptr += 2;
-                //     if(_rowF < _C[ptr]) {
-                //         int i;
-                //         for(i = _sizeC; i > ptr; i-=2) {
-                //             _C[i + 1] = _C[i - 1];
-                //             _C[i] = _C[i - 2];
-                //         }
-                //         _C[i] = _rowF;
-                //         _C[i + 1] = _colF;
-                //         _sizeC += 2;
-                //     }                                   // 01 (12 13 14) 34 (1,5)
-                //     else {
-                        
-                //         while(_rowF == _C[ptr]) {
-                //             if (_colF > _C[ptr + 1]) {
-                //                 std::cout<<"ENTER1\n";
-                //                 ptr += 2;
-                //             }
-                //             else if ((_colF < _C[ptr + 1])) {
-                //                 std::cout<<"ENTER2\n";
-                //                 int i;
-                //                 for(i = _sizeC; i > ptr; i-=2) {
-                //                     _C[i + 1] = _C[i - 1];
-                //                     _C[i] = _C[i - 2];
-                //                 }
-                //                 _C[i] = _rowF;
-                //                 _C[i + 1] = _colF;
-                //                 _sizeC += 2;
-                //                 break;
-                //             }
-                //             else {
-                //                 std::cout<<"ENTER3\n";
-                //                 break; // element already exists
-                //             }
-                //         }
-                //     }   
-                // }
-                // std::cout<<"("<<_rowF<<" , "<<_colF<<")"<<std::endl;
-                prt::arr(_C, _sizeC);
+                // TODO C = _C + offset
+                
+                //std::cout << _sizeC << std::endl;
+                //prt::arr(_C, _sizeC);
             }
         }
     }
     //_sizeC = 0;
-    isFirstBlockRowIteration = false;
 }
+
+
+
+
+
 
 
 // if(_rowF == _C[ptr] && _colF == _C[ptr + 1]) continue;

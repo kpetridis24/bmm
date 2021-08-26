@@ -91,13 +91,20 @@ namespace util
     void addCooElement(int row, int col, int *M, int &sizeM)
     // add an element in the right position of a COO matrix M = [row1, col1, row2, col2, ...]
     {
+        if (sizeM == 0) { // if matrix is empty, add element
+            M[0] = row;
+            M[1] = col;
+            sizeM += 2;
+            return;
+        }
+
         int ptr = 0;
 
         while(row > M[ptr])
             ptr += 2;
 
         if(row < M[ptr]) { // add element here
-            std::cout<<"enter1\n";
+            //std::cout<<"enter1\n";
             int i;
             // move elements right to make space for the adding element
             for(i = sizeM; i > ptr; i-=2) {
@@ -110,10 +117,10 @@ namespace util
             sizeM += 2;
         }
         else { // row == M[ptr] so check the cols
-            std::cout<<"enter2\n";
+            //std::cout<<"enter2\n";
             while(row == M[ptr]) {
                 if (col > M[ptr + 1]) {
-                    std::cout<<"enter21\n";
+                    //std::cout<<"enter21\n";
                     ptr += 2;
 
                     if (ptr == sizeM) { // end of matrix reached so add element here
@@ -138,7 +145,7 @@ namespace util
                     }
                 }
                 else if ((col < M[ptr + 1])) { // add element here
-                    std::cout<<"enter22\n";
+                    //std::cout<<"enter22\n";
                     int i;
                     // move elements right to make space for the adding element
                     for(i = sizeM; i > ptr; i-=2) {
@@ -152,7 +159,7 @@ namespace util
                     break;
                 }
                 else {
-                    std::cout<<"enter23\n";
+                    //std::cout<<"enter23\n";
                     break; // element already exists
                 }
             }
@@ -173,6 +180,16 @@ namespace util
             }
         }
         return false;
+    }
+
+    void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int sizeM, int _sizeM)
+    {
+        int rowOffset = blockRow * b;
+        int colOffset = blockCol * b;
+
+        for (int i = 0; i < _sizeM; i++) {
+            util::addCooElement(_M[i] + rowOffset, _M[i + 1] + colOffset, M, sizeM);
+        }
     }
 
     void initCsr(csr &M, int n, int nnz)

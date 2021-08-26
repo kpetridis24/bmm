@@ -14,9 +14,17 @@ typedef struct
 {
   int *ret1;
   int *ret2;
-  int *ret3;
+  int *ret3; 
   int *ret4;
 } ret;
+
+/* ------------------ masked block row-col mult return type ----------------- */
+
+typedef struct
+{
+    int *M;
+    int sizeM;
+} maskedBlockRowColMultRet;
 
 /* -------------------------------- CSR type -------------------------------- */
 
@@ -109,7 +117,8 @@ namespace util
   static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
   void addCooElement(int row, int col, int *M, int &sizeM);
-  bool searchCooElement(int row, int col, int *M, int &sizeM);  
+  bool searchCooElement(int row, int col, int *M, int &sizeM);
+  void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int sizeM, int _sizeM);
   void initCsr(csr &M, int n, int nnz);
   void initCsc(csr &M, int n, int nnz);
   void initCoo(coo &M, int n, int nnz);
@@ -142,8 +151,8 @@ void bbm( bcsr &A,
           int LL_colPtrOffsetB,
           int LL_rowIndOffsetB );
 void blockBmm(bcsr &A, bcsc &B);
-int *maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B);
-void maskedBbm( bcsr &F,
+maskedBlockRowColMultRet maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B);
+int *maskedBbm( bcsr &F,
                 bcsr &A,
                 bcsc &B,
                 int *_C,
