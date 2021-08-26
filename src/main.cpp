@@ -62,8 +62,8 @@ int main()
     timer = util::tic();
 
     // int b = 2;
-    // int b = 113489;
-    int b = 226978;
+    int b = 113489;
+    // int b = 226978;
     int numBlocks = (n / b) * (n / b);
     int LL_bRowPtrSize = numBlocks * (b + 1);
 
@@ -92,9 +92,6 @@ int main()
 
     timer = util::tic();
 
-    // b = 2;
-    // b = 113489;
-    b = 226978;
     int LL_bColPtrSize = numBlocks * (b + 1);
 
     bcsc blB;
@@ -141,18 +138,70 @@ int main()
     timer = util::tic();
 
     // blockBmm(blA, blB);
-    maskedBlockBmm(blA, blA, blB);
+    ret2 ans = maskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+
+    coo C;
+    util::initCoo(C, A.n, ans.sizeM / 2);
+    
+    // for(int i=0; i<ans.sizeM; i++) std::cout<<ans.M[i];
+
+    for (int i = 0, j = 0; i < ans.sizeM; i += 2, j++) {
+        C.row[j] = ans.M[i];
+        C.col[j] = ans.M[i + 1];
+    }
+
+    // prt::cooMat(C);
 
     /* ------------------------------- free memory ------------------------------ */
 
     util::delCsr(A);
     util::delCsc(B);
-    // util::delCoo(C);
-    util::delBcsr(blA);
-    util::delBcsc(blB);
+    util::delCoo(C);
+    // util::delBcsr(blA); // TODO memory fix error
+    // util::delBcsc(blB);
+    // delete[] ans.M;
+    
+  /* ------------------------- add element in coo test ------------------------ */
 
-    return 0;
+  // int sizeC = 0;
+  // int *C = new int[30]();
+
+  // std::cout << "Original matrix";
+  // prt::arr(C, sizeC);
+
+  // std::cout << "Add (4, 0)";
+  // util::addCooElement(4, 0, C, sizeC);
+  // prt::arr(C, sizeC);
+
+  // std::cout << "Add (1, 2)";
+  // util::addCooElement(1, 2, C, sizeC);
+  // prt::arr(C, sizeC);
+
+  // std::cout << "Add (3, 2)";
+  // util::addCooElement(3, 2, C, sizeC);
+  // prt::arr(C, sizeC);
+
+  // std::cout << "Add (3, 0)";
+  // util::addCooElement(3, 0, C, sizeC);
+  // prt::arr(C, sizeC);
+
+  // std::cout << "Add (0, 10)";
+  // util::addCooElement(0, 10, C, sizeC);
+  // prt::arr(C, sizeC);
+
+  /* ----------------------- search element in coo test ----------------------- */
+
+  // std::cout << "\nSearch (4, 0): " << util::searchCooElement(4, 0, C, sizeC) << std::endl;
+
+  // std::cout << "\nSearch (1, 2): " << util::searchCooElement(1, 2, C, sizeC) << std::endl;
+
+  // std::cout << "\nSearch (3, 2): " << util::searchCooElement(3, 2, C, sizeC) << std::endl;
+
+
+  // delete[] C;
+
+  return 0;
 }
