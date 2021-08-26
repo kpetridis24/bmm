@@ -108,6 +108,8 @@ namespace util
   struct timeval tic();
   static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
+  void addCooElement(int row, int col, int *M, int &sizeM);
+  bool searchCooElement(int row, int col, int *M, int &sizeM);  
   void initCsr(csr &M, int n, int nnz);
   void initCsc(csr &M, int n, int nnz);
   void initCoo(coo &M, int n, int nnz);

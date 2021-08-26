@@ -11,8 +11,8 @@ namespace prt
     {
         std::cout << std::endl;
         for(int i = 0; i < len; i++)
-            std::cout << arr[i] << "\t";
-        std::cout << std::endl << std::endl;
+            std::cout << arr[i] << " ";
+        std::cout << std::endl;
     }
 
 
@@ -86,6 +86,93 @@ namespace util
     /* -------------------------------------------------------------------------- */
     /*          pop the nz blocks of blockNnzCounter and use newBlockInd          */
     /* -------------------------------------------------------------------------- */
+    }
+
+    void addCooElement(int row, int col, int *M, int &sizeM)
+    // add an element in the right position of a COO matrix M = [row1, col1, row2, col2, ...]
+    {
+        int ptr = 0;
+
+        while(row > M[ptr])
+            ptr += 2;
+
+        if(row < M[ptr]) { // add element here
+            std::cout<<"enter1\n";
+            int i;
+            // move elements right to make space for the adding element
+            for(i = sizeM; i > ptr; i-=2) {
+                M[i + 1] = M[i - 1];
+                M[i] = M[i - 2];
+            }
+            // add element and increase matrix size
+            M[i] = row;
+            M[i + 1] = col;
+            sizeM += 2;
+        }
+        else { // row == M[ptr] so check the cols
+            std::cout<<"enter2\n";
+            while(row == M[ptr]) {
+                if (col > M[ptr + 1]) {
+                    std::cout<<"enter21\n";
+                    ptr += 2;
+
+                    if (ptr == sizeM) { // end of matrix reached so add element here
+                        M[ptr] = row;
+                        M[ptr + 1] = col;
+                        sizeM += 2;
+                        break;
+                    }
+
+                    if (row < M[ptr]) { // row changed so add element here
+                        int i;
+                        // move elements right to make space for the adding element
+                        for(i = sizeM; i > ptr; i-=2) {
+                            M[i + 1] = M[i - 1];
+                            M[i] = M[i - 2];
+                        }
+                        // add element and increase matrix size
+                        M[i] = row;
+                        M[i + 1] = col;
+                        sizeM += 2;
+                        break;
+                    }
+                }
+                else if ((col < M[ptr + 1])) { // add element here
+                    std::cout<<"enter22\n";
+                    int i;
+                    // move elements right to make space for the adding element
+                    for(i = sizeM; i > ptr; i-=2) {
+                        M[i + 1] = M[i - 1];
+                        M[i] = M[i - 2];
+                    }
+                    // add element and increase matrix size
+                    M[i] = row;
+                    M[i + 1] = col;
+                    sizeM += 2;
+                    break;
+                }
+                else {
+                    std::cout<<"enter23\n";
+                    break; // element already exists
+                }
+            }
+        }   
+    }
+
+    bool searchCooElement(int row, int col, int *M, int &sizeM)
+    // search an element in a COO matrix M = [row1, col1, row2, col2, ...]
+    {
+        for (int ptr = 0; ptr < sizeM; ptr += 2) {
+            if (row == M[ptr]) {    // row found
+                while (row == M[ptr]) {
+                    if (col == M[ptr + 1])  // element found, so return true
+                        return true;
+                    ptr += 2;
+                }
+                return false;   // element is not found in its the row, so return false
+            }
+        }
+        return false;
     }
 
     void initCsr(csr &M, int n, int nnz)

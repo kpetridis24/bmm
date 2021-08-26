@@ -20,139 +20,177 @@
 
 int main()
 {
-    struct timeval timer;
-    double t = -1;
+    // struct timeval timer;
+    // double t = -1;
 
-    /* ------------------------------- read matrix ------------------------------ */
+    // /* ------------------------------- read matrix ------------------------------ */
 
-    int n;
-    int nnz;
+    // int n;
+    // int nnz;
 
-    std::string graph = "com-Youtube.mtx";
-    std::string file = "graphs/" + graph;
+    // std::string graph = "s12.mtx";
+    // std::string file = "graphs/" + graph;
 
-    readMtxValues(file, n, nnz);
+    // readMtxValues(file, n, nnz);
 
-    coo M;
-    util::initCoo(M, n, nnz);
+    // coo M;
+    // util::initCoo(M, n, nnz);
 
-    openMtxFile(file, M.col, M.row, M.n, M.nnz);
+    // openMtxFile(file, M.col, M.row, M.n, M.nnz);
 
-    csr A;
-    util::initCsr(A, n, nnz);
-    csc B;
-    util::initCsc(B, n, nnz);
+    // csr A;
+    // util::initCsr(A, n, nnz);
+    // csc B;
+    // util::initCsc(B, n, nnz);
 
-    // prt::cooMat(M);
+    // // prt::cooMat(M);
 
-    coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
-    coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
+    // coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
+    // coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
 
-    util::delCoo(M);
+    // util::delCoo(M);
 
-    // prt::csrMat(A);
-    // prt::cscMat(B);
+    // // prt::csrMat(A);
+    // // prt::cscMat(B);
 
-    std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
+    // std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
     
-    /* --------------------------- bcsr blocking test --------------------------- */
+    // /* --------------------------- bcsr blocking test --------------------------- */
 
-    // std::cout << "\nBlocking A in B-CSR...\n";
+    // // std::cout << "\nBlocking A in B-CSR...\n";
     
-    timer = util::tic();
+    // timer = util::tic();
 
-    // int b = 2;
-    // int b = 113489;
-    int b = 226978;
-    int numBlocks = (n / b) * (n / b);
-    int LL_bRowPtrSize = numBlocks * (b + 1);
+    //   int b = 2;
+    // // int b = 113489;
+    // // int b = 226978;
+    // int numBlocks = (n / b) * (n / b);
+    // int LL_bRowPtrSize = numBlocks * (b + 1);
 
-    bcsr blA;
-    blA.n = A.n;
-    blA.b = b;
+    // bcsr blA;
+    // blA.n = A.n;
+    // blA.b = b;
 
-    // init Low-Level CSR
-    blA.LL_bRowPtr = new int[LL_bRowPtrSize]();
-    blA.LL_bColInd = new int[nnz]();
+    // // init Low-Level CSR
+    // blA.LL_bRowPtr = new int[LL_bRowPtrSize]();
+    // blA.LL_bColInd = new int[nnz]();
 
-    // blocking
-    ret _ret = csr2bcsr(A, blA);
+    // // blocking
+    // ret _ret = csr2bcsr(A, blA);
 
-    blA.HL_bRowPtr = _ret.ret1;
-    blA.HL_bColInd = _ret.ret2;
-    blA.nzBlockIndex = _ret.ret3;
-    blA.blockNnzCounter = _ret.ret4;
+    // blA.HL_bRowPtr = _ret.ret1;
+    // blA.HL_bColInd = _ret.ret2;
+    // blA.nzBlockIndex = _ret.ret3;
+    // blA.blockNnzCounter = _ret.ret4;
 
-    t = util::toc(timer);
-    std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+    // t = util::toc(timer);
+    // std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
-    /* --------------------------- bcsc blocking test --------------------------- */
+    // /* --------------------------- bcsc blocking test --------------------------- */
 
-    // std::cout << "\nBlocking B in B-CSC...\n";
-
-    timer = util::tic();
-
-    // b = 2;
-    // b = 113489;
-    b = 226978;
-    int LL_bColPtrSize = numBlocks * (b + 1);
-
-    bcsc blB;
-    blB.n = A.n;
-    blB.b = b;
-
-    // init Low-Level CSC
-    blB.LL_bColPtr = new int[LL_bColPtrSize]();
-    blB.LL_bRowInd = new int[nnz]();
-
-    // blocking
-    _ret = csr2bcsc(B, blB);
-
-    blB.HL_bColPtr = _ret.ret1;
-    blB.HL_bRowInd = _ret.ret2;
-    blB.nzBlockIndex = _ret.ret3;
-    blB.blockNnzCounter = _ret.ret4;
-
-    t = util::toc(timer);
-    std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
-
-    /* -------------------------------- bmm test -------------------------------- */
-
-    // coo C;
+    // // std::cout << "\nBlocking B in B-CSC...\n";
 
     // timer = util::tic();
-    
-    // // util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
-    // // bmm(A, B, C);
 
-    // util::initCoo(C, A.n, A.nnz);
-    // maskedBmm(A, A, B, C);
+    // // b = 2;
+    // // b = 113489;
+    // //b = 226978;
+    // int LL_bColPtrSize = numBlocks * (b + 1);
+
+    // bcsc blB;
+    // blB.n = A.n;
+    // blB.b = b;
+
+    // // init Low-Level CSC
+    // blB.LL_bColPtr = new int[LL_bColPtrSize]();
+    // blB.LL_bRowInd = new int[nnz]();
+
+    // // blocking
+    // _ret = csr2bcsc(B, blB);
+
+    // blB.HL_bColPtr = _ret.ret1;
+    // blB.HL_bRowInd = _ret.ret2;
+    // blB.nzBlockIndex = _ret.ret3;
+    // blB.blockNnzCounter = _ret.ret4;
+
+    // t = util::toc(timer);
+    // std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
+    // /* -------------------------------- bmm test -------------------------------- */
+
+    // // coo C;
+
+    // // timer = util::tic();
+    
+    // // // util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
+    // // // bmm(A, B, C);
 
     // // util::initCoo(C, A.n, A.nnz);
-    // // maskedBmm2(A, A, A, C);
+    // // maskedBmm(A, A, B, C);
 
-    // // prt::cooMat(C);
+    // // // util::initCoo(C, A.n, A.nnz);
+    // // // maskedBmm2(A, A, A, C);
 
-    // double t = util::toc(timer);
-    // std::cout << "BMM completed\nC.nnz = " << C.nnz << "\nBMM time = " << t << " seconds" << std::endl;
+    // // // prt::cooMat(C);
 
-    /* ----------------------------- block bmm test ----------------------------- */
+    // // double t = util::toc(timer);
+    // // std::cout << "BMM completed\nC.nnz = " << C.nnz << "\nBMM time = " << t << " seconds" << std::endl;
 
-    timer = util::tic();
+    // /* ----------------------------- block bmm test ----------------------------- */
 
-    // blockBmm(blA, blB);
-    maskedBlockBmm(blA, blA, blB);
+    // timer = util::tic();
 
-    t = util::toc(timer);
-    std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+    // // blockBmm(blA, blB);
+    // maskedBlockBmm(blA, blA, blB);
 
-    /* ------------------------------- free memory ------------------------------ */
+    // t = util::toc(timer);
+    // std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
 
-    util::delCsr(A);
-    util::delCsc(B);
-    // util::delCoo(C);
-    util::delBcsr(blA);
-    util::delBcsc(blB);
+    // /* ------------------------------- free memory ------------------------------ */
+
+    // util::delCsr(A);
+    // util::delCsc(B);
+    // // util::delCoo(C);
+    // util::delBcsr(blA);
+    // util::delBcsc(blB);
+    
+    /* ------------------------- add element in coo test ------------------------ */
+
+    int sizeC = 0;
+    int *C = new int[30]();
+
+    std::cout << "Original matrix";
+    prt::arr(C, sizeC);
+
+    std::cout << "Add (4, 0)";
+    util::addCooElement(4, 0, C, sizeC);
+    prt::arr(C, sizeC);
+
+    std::cout << "Add (1, 2)";
+    util::addCooElement(1, 2, C, sizeC);
+    prt::arr(C, sizeC);
+
+    std::cout << "Add (3, 2)";
+    util::addCooElement(3, 2, C, sizeC);
+    prt::arr(C, sizeC);
+
+    std::cout << "Add (3, 0)";
+    util::addCooElement(3, 0, C, sizeC);
+    prt::arr(C, sizeC);
+
+    std::cout << "Add (0, 10)";
+    util::addCooElement(0, 10, C, sizeC);
+    prt::arr(C, sizeC);
+
+    // std::cout << "Add (0, 1)";
+    // util::addCooElement(0, 1, C, sizeC);
+    // prt::arr(C, sizeC);
+
+    delete[] C;
+
+  /* ----------------------- search element in coo test ----------------------- */
+
+
 
     return 0;
 }
