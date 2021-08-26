@@ -139,6 +139,10 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
             int blockColF = F.HL_bColInd[indF];
             
             ret2 _C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B);
+
+            // std::cout << "\nC(" << blockRowF << ", " << blockColF << "):";
+            // prt::arr(_C.M, _C.sizeM);
+
             util::addCooBlockToMatrix(C, _C.M, blockRowF, blockColF, A.b, sizeC, _C.sizeM);
         }
     }

@@ -187,7 +187,7 @@ namespace util
         int rowOffset = blockRow * b;
         int colOffset = blockCol * b;
 
-        for (int i = 0; i < _sizeM; i++) {
+        for (int i = 0; i < _sizeM; i += 2) {
             util::addCooElement(_M[i] + rowOffset, _M[i + 1] + colOffset, M, sizeM);
         }
     }

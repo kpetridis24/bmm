@@ -28,7 +28,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "s6.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -61,8 +61,8 @@ int main()
     
     timer = util::tic();
 
-    int b = 2;
-    // int b = 113489;
+    // int b = 2;
+    int b = 113489;
     // int b = 226978;
     int numBlocks = (n / b) * (n / b);
     int LL_bRowPtrSize = numBlocks * (b + 1);
@@ -153,16 +153,16 @@ int main()
         C.col[j] = ans.M[i + 1];
     }
 
-    prt::cooMat(C);
+    // prt::cooMat(C);
 
     /* ------------------------------- free memory ------------------------------ */
 
     util::delCsr(A);
     util::delCsc(B);
     util::delCoo(C);
-    util::delBcsr(blA);
-    util::delBcsc(blB);
-    delete[] ans.M;
+    // util::delBcsr(blA); // TODO memory fix error
+    // util::delBcsc(blB);
+    // delete[] ans.M;
     
   /* ------------------------- add element in coo test ------------------------ */
 
