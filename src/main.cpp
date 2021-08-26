@@ -138,18 +138,31 @@ int main()
     timer = util::tic();
 
     // blockBmm(blA, blB);
-    maskedBlockBmm(blA, blA, blB);
+    ret2 ans = maskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+
+    coo C;
+    util::initCoo(C, A.n, ans.sizeM / 2);
+    
+    // for(int i=0; i<ans.sizeM; i++) std::cout<<ans.M[i];
+
+    for (int i = 0, j = 0; i < ans.sizeM; i += 2, j++) {
+        C.row[j] = ans.M[i];
+        C.col[j] = ans.M[i + 1];
+    }
+
+    prt::cooMat(C);
 
     /* ------------------------------- free memory ------------------------------ */
 
     util::delCsr(A);
     util::delCsc(B);
-    // util::delCoo(C);
+    util::delCoo(C);
     util::delBcsr(blA);
     util::delBcsc(blB);
+    delete[] ans.M;
     
   /* ------------------------- add element in coo test ------------------------ */
 

@@ -182,7 +182,7 @@ namespace util
         return false;
     }
 
-    void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int sizeM, int _sizeM)
+    void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM)
     {
         int rowOffset = blockRow * b;
         int colOffset = blockCol * b;

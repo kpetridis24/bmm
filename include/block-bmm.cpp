@@ -113,7 +113,7 @@ void bbm(   bcsr &A,
 /*                              masked-block-bmm                              */
 /* -------------------------------------------------------------------------- */
 
-int *maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
+ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
 // masked boolean matrix multiplication F.*(A*B) using blocks
 {
     if (A.n != B.n || A.n != F.n) {
@@ -138,15 +138,19 @@ int *maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
 
             int blockColF = F.HL_bColInd[indF];
             
-            maskedBlockRowColMultRet _C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B);
+            ret2 _C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B);
             util::addCooBlockToMatrix(C, _C.M, blockRowF, blockColF, A.b, sizeC, _C.sizeM);
         }
     }
 
-    return C;
+    ret2 ret;
+    ret.M = C;
+    ret.sizeM = sizeC;
+
+    return ret;
 }
 
-maskedBlockRowColMultRet maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B)
+ret2 maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B)
 {   
     //std::cout<<"Change blockrow x blockcol\n";
 
@@ -204,7 +208,7 @@ maskedBlockRowColMultRet maskedBlockRowColMult(int blockRowF, int blockColF, bcs
 /* -------------------------------------------------------------------------- */
 /*                      TODO return _C and store it in C                      */
 /* -------------------------------------------------------------------------- */
-    maskedBlockRowColMultRet ret;
+    ret2 ret;
     ret.M = _C;
     ret.sizeM = _sizeC;
 
