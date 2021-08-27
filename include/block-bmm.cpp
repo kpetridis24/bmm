@@ -126,7 +126,7 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
         exit(1);
     }
 
-    int nnzF = F.blockNnzCounter[(F.n / F.b) * (F.n / F.b) + 1];
+    int nnzF = F.blockNnzCounter[(F.n / F.b) * (F.n / F.b)];
     int blocksPerRow = A.n / A.b;
 
     int *C = new int[nnzF](); // init result matrix
@@ -166,7 +166,8 @@ ret2 maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
     int blocksPerRow = A.n / A.b;
     int bIndF = blockRowF * blocksPerRow + blockColF;
     int _nnzF = F.blockNnzCounter[bIndF + 1] - F.blockNnzCounter[bIndF];
-    int *_C = new int[2 * _nnzF]; // = new bool[A.b * A.b]();
+
+    int *_C = new int[2 * _nnzF](); // = new bool[A.b * A.b]();
     int _sizeC = 0;
 
     int blockRowA = blockRowF;

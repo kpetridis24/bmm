@@ -116,6 +116,7 @@ namespace util
   struct timeval tic();
   static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
+  void insertCooElementInIndex(int row, int col, int ind, int *M, int &sizeM);
   void addCooElement(int row, int col, int *M, int &sizeM);
   bool searchCooElement(int row, int col, int *M, int &sizeM);
   void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM);

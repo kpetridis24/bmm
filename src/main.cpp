@@ -28,7 +28,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "com-Youtube.mtx";
+    std::string graph = "s12.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -54,16 +54,38 @@ int main()
     // prt::cscMat(B);
 
     std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
-    
+
+    /* ----------------------------------- s12 ---------------------------------- */
+    // int b = 2;
+    int b = 3;
+    // int b = 4;
+    // int b = 6;
+
+    /* ------------------------------- com-Youtube ------------------------------ */
+    // int b = 226978;
+    // int b = 113489;
+       
+    /* -------------------------------- dblp-2010 ------------------------------- */
+    // int b = 46598;
+    // int b = 23299;
+    // int b = 14182;
+    // int b = 7091;
+    // int b = 2026;
+    // int b = 1013;
+
+    /* ------------------------------- as-Skitter ------------------------------- */
+    // int b = 242345;
+    // int b = 89285;
+    // int b = 48469;
+    // int b = 17857;
+    // int b = 12755;
+    // int b = 2551;
+
     /* --------------------------- bcsr blocking test --------------------------- */
 
     // std::cout << "\nBlocking A in B-CSR...\n";
     
     timer = util::tic();
-
-    // int b = 2;
-    int b = 113489;
-    // int b = 226978;
     int numBlocks = (n / b) * (n / b);
     int LL_bRowPtrSize = numBlocks * (b + 1);
 
@@ -113,26 +135,6 @@ int main()
     t = util::toc(timer);
     std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
-    /* -------------------------------- bmm test -------------------------------- */
-
-    // coo C;
-
-    // timer = util::tic();
-    
-    // // util::initCoo(C, A.n, A.nnz * B.nnz); // TODO check max size
-    // // bmm(A, B, C);
-
-    // util::initCoo(C, A.n, A.nnz);
-    // maskedBmm(A, A, B, C);
-
-    // // util::initCoo(C, A.n, A.nnz);
-    // // maskedBmm2(A, A, A, C);
-
-    // // prt::cooMat(C);
-
-    // double t = util::toc(timer);
-    // std::cout << "BMM completed\nC.nnz = " << C.nnz << "\nBMM time = " << t << " seconds" << std::endl;
-
     /* ----------------------------- block bmm test ----------------------------- */
 
     timer = util::tic();
@@ -146,62 +148,21 @@ int main()
     coo C;
     util::initCoo(C, A.n, ans.sizeM / 2);
     
-    // for(int i=0; i<ans.sizeM; i++) std::cout<<ans.M[i];
-
     for (int i = 0, j = 0; i < ans.sizeM; i += 2, j++) {
         C.row[j] = ans.M[i];
         C.col[j] = ans.M[i + 1];
     }
 
-    // prt::cooMat(C);
+    prt::cooMat(C);
 
     /* ------------------------------- free memory ------------------------------ */
-
+    
     util::delCsr(A);
     util::delCsc(B);
     util::delCoo(C);
-    // util::delBcsr(blA); // TODO memory fix error
-    // util::delBcsc(blB);
-    // delete[] ans.M;
-    
-  /* ------------------------- add element in coo test ------------------------ */
-
-  // int sizeC = 0;
-  // int *C = new int[30]();
-
-  // std::cout << "Original matrix";
-  // prt::arr(C, sizeC);
-
-  // std::cout << "Add (4, 0)";
-  // util::addCooElement(4, 0, C, sizeC);
-  // prt::arr(C, sizeC);
-
-  // std::cout << "Add (1, 2)";
-  // util::addCooElement(1, 2, C, sizeC);
-  // prt::arr(C, sizeC);
-
-  // std::cout << "Add (3, 2)";
-  // util::addCooElement(3, 2, C, sizeC);
-  // prt::arr(C, sizeC);
-
-  // std::cout << "Add (3, 0)";
-  // util::addCooElement(3, 0, C, sizeC);
-  // prt::arr(C, sizeC);
-
-  // std::cout << "Add (0, 10)";
-  // util::addCooElement(0, 10, C, sizeC);
-  // prt::arr(C, sizeC);
-
-  /* ----------------------- search element in coo test ----------------------- */
-
-  // std::cout << "\nSearch (4, 0): " << util::searchCooElement(4, 0, C, sizeC) << std::endl;
-
-  // std::cout << "\nSearch (1, 2): " << util::searchCooElement(1, 2, C, sizeC) << std::endl;
-
-  // std::cout << "\nSearch (3, 2): " << util::searchCooElement(3, 2, C, sizeC) << std::endl;
-
-
-  // delete[] C;
+    util::delBcsr(blA); // TODO memory fix error
+    util::delBcsc(blB);
+    delete[] ans.M;
 
   return 0;
 }

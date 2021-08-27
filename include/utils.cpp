@@ -56,19 +56,19 @@ namespace util
 
     struct timeval tic()
     {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return tv;
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        return tv;
     }
     
     static double toc(struct timeval begin)
     {
-    struct timeval end;
-    gettimeofday(&end, NULL);
-    double stime = ((double) (end.tv_sec - begin.tv_sec) * 1000 ) +
-        ((double) (end.tv_usec - begin.tv_usec) / 1000 );
-    stime = stime / 1000;
-    return(stime);
+        struct timeval end;
+        gettimeofday(&end, NULL);
+        double stime = ((double) (end.tv_sec - begin.tv_sec) * 1000 ) +
+            ((double) (end.tv_usec - begin.tv_usec) / 1000 );
+        stime = stime / 1000;
+        return(stime);
     }
 
     void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_rowPtrOffset, int &LL_colIndOffset)
@@ -88,82 +88,63 @@ namespace util
     /* -------------------------------------------------------------------------- */
     }
 
+    void insertCooElementInIndex(int row, int col, int ind, int *M, int &sizeM)
+    {
+        //std::cout << "index = " << ind << std::endl;
+
+        // // move elements right to make space for the adding element
+        // std::cout<<"size="<<sizeM<<", ptr="<<ind<<std::endl;
+        int i;
+        for (i = sizeM; i > ind; i-=2) {
+            M[i + 1] = M[i - 1];
+            M[i] = M[i - 2];
+        }
+        // // add element and increase matrix size
+        M[i] = row;
+        M[i + 1] = col;
+        sizeM += 2;
+    }
+
     void addCooElement(int row, int col, int *M, int &sizeM)
     // add an element in the right position of a COO matrix M = [row1, col1, row2, col2, ...]
-    {
+    {   
+        //std::cout<<"("<<row<<" , "<<col<<")"<<std::endl;
+
         if (sizeM == 0) { // if matrix is empty, add element
-            M[0] = row;
-            M[1] = col;
-            sizeM += 2;
+            insertCooElementInIndex(row, col, 0, M, sizeM);
             return;
         }
 
-        int ptr = 0;
+        for(int ptr = 0; ptr <= sizeM; ptr += 2) {
 
-        while(row > M[ptr])
-            ptr += 2;
-
-        if(row < M[ptr]) { // add element here
-            //std::cout<<"enter1\n";
-            int i;
-            // move elements right to make space for the adding element
-            for(i = sizeM; i > ptr; i-=2) {
-                M[i + 1] = M[i - 1];
-                M[i] = M[i - 2];
+            if (ptr == sizeM) {
+                util::insertCooElementInIndex(row, col, ptr, M, sizeM);
             }
-            // add element and increase matrix size
-            M[i] = row;
-            M[i + 1] = col;
-            sizeM += 2;
+
+            if(row > M[ptr]) {
+                //std::cout<<"enter1\n";
+                continue;
+            }
+            else if(row < M[ptr]) {
+                //std::cout<<"enter2\n";
+                util::insertCooElementInIndex(row, col, ptr, M, sizeM);
+                return;
+            }
+            else { // row == M[ptr] -> search index based on col
+                //std::cout<<"enter3\n";
+                if(col > M[ptr + 1]) {
+                    continue;
+                }
+                else if(col < M[ptr + 1]) {
+                    // Insert here
+                    util::insertCooElementInIndex(row, col, ptr, M, sizeM);
+                    return;
+                }
+                else { // element already exists
+                    return;
+                }   
+            }   
         }
-        else { // row == M[ptr] so check the cols
-            //std::cout<<"enter2\n";
-            while(row == M[ptr]) {
-                if (col > M[ptr + 1]) {
-                    //std::cout<<"enter21\n";
-                    ptr += 2;
-
-                    if (ptr == sizeM) { // end of matrix reached so add element here
-                        M[ptr] = row;
-                        M[ptr + 1] = col;
-                        sizeM += 2;
-                        break;
-                    }
-
-                    if (row < M[ptr]) { // row changed so add element here
-                        int i;
-                        // move elements right to make space for the adding element
-                        for(i = sizeM; i > ptr; i-=2) {
-                            M[i + 1] = M[i - 1];
-                            M[i] = M[i - 2];
-                        }
-                        // add element and increase matrix size
-                        M[i] = row;
-                        M[i + 1] = col;
-                        sizeM += 2;
-                        break;
-                    }
-                }
-                else if ((col < M[ptr + 1])) { // add element here
-                    //std::cout<<"enter22\n";
-                    int i;
-                    // move elements right to make space for the adding element
-                    for(i = sizeM; i > ptr; i-=2) {
-                        M[i + 1] = M[i - 1];
-                        M[i] = M[i - 2];
-                    }
-                    // add element and increase matrix size
-                    M[i] = row;
-                    M[i + 1] = col;
-                    sizeM += 2;
-                    break;
-                }
-                else {
-                    //std::cout<<"enter23\n";
-                    break; // element already exists
-                }
-            }
-        }   
     }
 
     bool searchCooElement(int row, int col, int *M, int &sizeM)
@@ -190,6 +171,8 @@ namespace util
         for (int i = 0; i < _sizeM; i += 2) {
             util::addCooElement(_M[i] + rowOffset, _M[i + 1] + colOffset, M, sizeM);
         }
+
+        // prt::arr(M, sizeM);
     }
 
     void initCsr(csr &M, int n, int nnz)
