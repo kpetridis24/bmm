@@ -69,7 +69,7 @@ bool rowColMult(int rowA, int colB, csr &A, csc &B)
 {
     int ptr1 = 0;
     int ptr2 = 0;
-
+    
     while (A.rowPtr[rowA] + ptr1 < A.rowPtr[rowA + 1] && B.colPtr[colB] + ptr2 < B.colPtr[colB + 1]) {
         if (A.colInd[A.rowPtr[rowA] + ptr1] < B.rowInd[B.colPtr[colB] + ptr2]) {
             ptr1++;

@@ -209,10 +209,7 @@ ret2 maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
             ptr2++;
         }
     }
-    
-/* -------------------------------------------------------------------------- */
-/*                      TODO return _C and store it in C                      */
-/* -------------------------------------------------------------------------- */
+
     ret2 ret;
     ret.M = _C;
     ret.sizeM = _sizeC;
@@ -238,25 +235,26 @@ void maskedBbm( bcsr &F,
     _F.rowPtr = F.LL_bRowPtr + LL_rowPtrOffsetF;
     _F.colInd = F.LL_bColInd + LL_colIndOffsetF;
     _F.n = F.b;
+    _F.nnz = _F.rowPtr[_F.n];
 
     csr _A;
     _A.rowPtr = A.LL_bRowPtr + LL_rowPtrOffsetA;
     _A.colInd = A.LL_bColInd + LL_colIndOffsetA;
     _A.n = A.b;
+    _A.nnz = _A.rowPtr[_A.n];
 
     csc _B;
     _B.colPtr = B.LL_bColPtr + LL_colPtrOffsetB;
     _B.rowInd = B.LL_bRowInd + LL_rowIndOffsetB;
     _B.n = B.b;
+    _B.nnz = _B.colPtr[_B.n];
 
-    for (int _rowF = 0; _rowF < F.n / F.b; _rowF++) {
+    for (int _rowF = 0; _rowF < F.b; _rowF++) {
         for (int _indF = _F.rowPtr[_rowF]; _indF < _F.rowPtr[_rowF + 1]; _indF++) {
 
             int _colF = _F.colInd[_indF];
-            //std::cout<<"("<<_rowF<<" , "<<_colF<<")"<<std::endl;
 
             if (rowColMult(_rowF, _colF, _A, _B)) {
-                
                 //std::cout << "Corresponding\n";
                 
                 // if(isFirstBlockRowIteration) {
@@ -276,64 +274,3 @@ void maskedBbm( bcsr &F,
     }
     //_sizeC = 0;
 }
-
-
-
-
-
-
-
-// if(_rowF == _C[ptr] && _colF == _C[ptr + 1]) continue;
-                    // if(_rowF > _C[ptr]) {
-                    //     std::cout<<"enter1\n";
-                    //     while(_rowF > _C[ptr]) ptr += 2;
-                    // }
-                    // if(_rowF < _C[ptr]) {
-                    //     std::cout<<"enter2\n";
-                    //     int i;
-                    //     for(i = _sizeC; i > ptr; i-=2) {
-                    //         _C[i + 1] = _C[i - 1];
-                    //         _C[i] = _C[i - 2];
-                    //     }
-                    //     _C[i] = _rowF;
-                    //     _C[i + 1] = _colF;
-                    //     _sizeC += 2;
-                    //     //_C[_sizeC++] = _rowF;
-                    //     //_C[_sizeC++] = _colF;
-                    // }
-                    // else if(_rowF == _C[ptr]) {
-                    //     std::cout<<"enter3\n";
-                    //     if(_colF > _C[ptr + 1]) {std::cout<<"enter31\n";
-                    //         while(_colF > _C[ptr + 1] && _rowF == _C[ptr]) ptr += 2;
-                    //     }
-                    //     if(_colF < _C[ptr + 1] || _C[ptr] == 0) {std::cout<<"enter32\n";
-                    //         int i;
-                    //         for(i = _sizeC; i > ptr; i-=2) {
-                    //             _C[i + 1] = _C[i - 1];
-                    //             _C[i] = _C[i - 2];
-                    //         }
-                    //         _C[i] = _rowF;
-                    //         _C[i + 1] = _colF;
-                    //         _sizeC += 2;
-                    //     }
-                        
-                        // if(_colF == _C[ptr + 1]) continue;
-                        // if(_colF < _C[])
-                        // int helpCounter = 0;
-
-                        // while(1){
-
-                        //     if(_rowF != _C[ptr + helpCounter]) break;
-                        //     if(_colF < _C[ptr + helpCounter + 1]) {
-                        //         int i;
-                        //         for(i = _sizeC; i > ptr; i-=2) {
-                        //             _C[i + 1] = _C[i - 1];
-                        //             _C[i] = _C[i - 2];
-                        //         }
-                        //     }
-                        //     helpCounter += 2;
-                        // }
-                        //_C[_sizeC++] = _rowF;
-                        //_C[_sizeC++] = _colF;
-                        //prt::arr(_C, _sizeC);
-                    //}

@@ -36,9 +36,9 @@ namespace prt
 
     void cscMat(csc &M)
     {
-        std::cout << "\nrowPtr:";
+        std::cout << "\ncolPtr:";
         prt::arr(M.colPtr, M.n + 1);
-        std::cout << "colInd:";
+        std::cout << "rowInd:";
         prt::arr(M.rowInd, M.nnz);
     }
 
