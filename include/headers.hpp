@@ -109,6 +109,7 @@ namespace prt
     void csrMat(csr &M);
     void cscMat(csc &M);
     void cooMat(coo &M);
+    void map(std::multimap <int, int> m);
 };
 
 /* ---------------------------------- utils --------------------------------- */
@@ -120,16 +121,17 @@ namespace util
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
   void insertCooElementInIndex(int row, int col, int ind, int *M, int &sizeM);
   void addCooElement(int row, int col, int *M, int &sizeM);
-  bool searchCooElement(int row, int col, int *M, int &sizeM);
+  // bool searchCooElement(int row, int col, int *M, int &sizeM);
   void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM);
+  bool checkRes(std::string checkGraph, coo &C);
   void initCsr(csr &M, int n, int nnz);
-  void initCsc(csr &M, int n, int nnz);
+  void initCsc(csc &M, int n, int nnz);
   void initCoo(coo &M, int n, int nnz);
   void delCsr(csr &M);
-  void delCsc(csr &M);
-  void delCoo(csr &M);
-  void delBcsr(coo &M);
-  void delBcsc(coo &M);
+  void delCsc(csc &M);
+  void delCoo(coo &M);
+  void delBcsr(bcsr &M);
+  void delBcsc(bcsc &M);
 };
 
 /* --------------------------- blocking functions --------------------------- */

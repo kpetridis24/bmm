@@ -10,7 +10,6 @@
 
 namespace prt
 {   
-
     void arr(int *arr, int len)
     {
         std::cout << std::endl;
@@ -52,6 +51,13 @@ namespace prt
         prt::arr(M.row, M.nnz);
         std::cout << "col:";
         prt::arr(M.col, M.nnz);
+    }
+
+    void map(std::multimap <int, int> m)
+    {
+        for (const auto& x : m) {
+            std::cout << x.first << ": " << x.second << "\n";
+        }
     }
 }
 
@@ -248,5 +254,52 @@ namespace util
         delete[] M.HL_bRowInd;
         delete[] M.nzBlockIndex;
         delete[] M.blockNnzCounter;
+    }
+
+    bool checkRes(std::string checkGraph, coo &C)
+    {
+        std::vector<std::pair <int, int> > vectC (C.nnz);
+
+        for (int i = 0; i < C.nnz; i++) {
+        vectC[i].first = C.row[i];
+        vectC[i].second = C.col[i];
+        }
+
+        std::sort(vectC.begin(), vectC.end());
+
+        // read correct result
+
+        int checkN;
+        int checkNnz;
+
+        std::string checkFile = "graphs/bmm-res/bmm_res_" + checkGraph;
+
+        readMtxValues(checkFile, checkN, checkNnz);
+
+        // std::cout << checkN << "\t" << checkNnz << std::endl;
+
+        coo checkM;
+        util::initCoo(checkM, checkN, checkNnz);
+
+        openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
+
+        // prt::cooMat(checkM);
+
+        bool pass = true;
+        if (checkM.nnz != vectC.size()) {
+            return false;
+        }
+        else {
+            for (int i = 0; i < vectC.size(); i++) {
+                if (checkM.row[i] != vectC[i].first || checkM.col[i] != vectC[i].second) {
+                    return false;
+                }
+            }
+        }
+
+        // prt::cooMat(checkM);
+        util::delCoo(checkM);
+
+        return true;
     }
 }

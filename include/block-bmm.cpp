@@ -237,13 +237,6 @@ bool rowColMult( int rowA, int colB,
     return false;
 }
 
-void printMap(std::multimap <int, int> m)
-{
-    for (const auto& x : m) {
-        std::cout << x.first << ": " << x.second << "\n";
-    }
-}
-
 void maskedBbm( bcsr &F,
                 bcsr &A,
                 bcsc &B,

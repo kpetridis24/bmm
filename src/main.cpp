@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sys/time.h>
 #include <unistd.h>
+#include <bits/stdc++.h>
 
 #include <headers.hpp>
 #include <bmm.cpp>
@@ -158,6 +159,15 @@ int main()
     }
 
     // prt::cooMat(C);
+
+    /* ------------------------------ check result ------------------------------ */
+
+    if (util::checkRes(graph, C)) {
+      std::cout << "\nTest passed\n";
+    }
+    else {
+      std::cout << "\nTest failed\n";
+    }
 
     /* ------------------------------- free memory ------------------------------ */
     
