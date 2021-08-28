@@ -168,8 +168,7 @@ void maskedBbm( bcsr &F,
                 int LL_colIndOffsetA,
                 int LL_colPtrOffsetB,
                 int LL_rowIndOffsetB,
-                std::multimap <int, int> &map,
-                std::multimap <int, int>::iterator it  );
+                std::multimap <int, int> &map );
 ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* -------------------------------------------------------------------------- */
