@@ -166,7 +166,7 @@ int main()
     }
 
     /* ------------------------------- free memory ------------------------------ */
-    
+
     util::delCsr(A);
     util::delCsc(B);
     util::delCoo(C);
