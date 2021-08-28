@@ -86,8 +86,6 @@ int main()
     // int b = 2551;
 
     /* --------------------------- bcsr blocking test --------------------------- */
-
-    // std::cout << "\nBlocking A in B-CSR...\n";
     
     timer = util::tic();
     int numBlocks = (n / b) * (n / b);
@@ -143,7 +141,6 @@ int main()
 
     timer = util::tic();
 
-    // blockBmm(blA, blB);
     ret2 ans = maskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
@@ -173,7 +170,7 @@ int main()
     util::delCsr(A);
     util::delCsc(B);
     util::delCoo(C);
-    util::delBcsr(blA); // TODO memory fix error
+    util::delBcsr(blA); 
     util::delBcsc(blB);
     delete[] ans.M;
 

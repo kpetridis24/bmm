@@ -119,9 +119,6 @@ namespace util
   struct timeval tic();
   static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
-  void insertCooElementInIndex(int row, int col, int ind, int *M, int &sizeM);
-  void addCooElement(int row, int col, int *M, int &sizeM);
-  // bool searchCooElement(int row, int col, int *M, int &sizeM);
   void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM);
   bool checkRes(std::string checkGraph, coo &C);
   void initCsr(csr &M, int n, int nnz);
@@ -139,14 +136,14 @@ namespace util
 ret csr2bcsr(csr &M, bcsr &blM);
 ret csr2bcsc(csr &M, bcsc &blM);
 
-/* ----------------------------------- bmm ---------------------------------- */
-
-bool rowColMult(int rowA, int colB, csr &A, csc &B);
-void bmm(csr &A, csr &B, coo &C);
-void maskedBmm(csr &F, csr &A, csc &B, coo &C);
-
 /* -------------------------------- block-bmm ------------------------------- */
 
+bool rowColMult( int rowA, int colB,
+                 bcsr &A, bcsc &B,
+                 int LL_rowPtrOffsetA,
+                 int LL_colIndOffsetA,
+                 int LL_colPtrOffsetB,
+                 int LL_rowIndOffsetB );
 bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B);
 void bbm( bcsr &A,
           bcsc &B,
@@ -156,7 +153,9 @@ void bbm( bcsr &A,
           int LL_colPtrOffsetB,
           int LL_rowIndOffsetB );
 void blockBmm(bcsr &A, bcsc &B);
-ret2 maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &map);
+ret2 maskedBlockRowColMult( int blockRowA, int blockColB, 
+                            bcsr &F, bcsr &A, bcsc &B, 
+                            std::multimap<int, int> &map );
 void maskedBbm( bcsr &F,
                 bcsr &A,
                 bcsc &B,

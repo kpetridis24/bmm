@@ -6,8 +6,6 @@
 #include <headers.hpp>
 #include <bits/stdc++.h>
 
-
-
 namespace prt
 {   
     void arr(int *arr, int len)
@@ -63,7 +61,6 @@ namespace prt
 
 namespace util
 {
-
     struct timeval tic()
     {
         struct timeval tv;
@@ -82,79 +79,11 @@ namespace util
     }
 
     void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_rowPtrOffset, int &LL_colIndOffset)
-    /* -------------------------------------------------------------------------- */
-    /*             find the offsets of a specific block in the LL-CSR             */
-    /* -------------------------------------------------------------------------- */
+    // find the offsets of a specific block in the LL-CSR
     {
         int newBlockInd =  nzBlockIndex[blockInd];
         LL_rowPtrOffset = newBlockInd * (b + 1);
         LL_colIndOffset = blockNnzCounter[blockInd];
-
-    /* -------------------------------------------------------------------------- */
-    /*                                    TODO                                    */
-    /* -------------------------------------------------------------------------- */
-    /* -------------------------------------------------------------------------- */
-    /*          pop the nz blocks of blockNnzCounter and use newBlockInd          */
-    /* -------------------------------------------------------------------------- */
-    }
-
-    void insertCooElementInIndex(int row, int col, int ind, int *M, int &sizeM)
-    {
-        //std::cout << "index = " << ind << std::endl;
-
-        // // move elements right to make space for the adding element
-        // std::cout<<"size="<<sizeM<<", ptr="<<ind<<std::endl;
-        int i;
-        for (i = sizeM; i > ind; i-=2) {
-            M[i + 1] = M[i - 1];
-            M[i] = M[i - 2];
-        }
-        // // add element and increase matrix size
-        M[i] = row;
-        M[i + 1] = col;
-        sizeM += 2;
-    }
-
-    void addCooElement(int row, int col, int *M, int &sizeM)
-    // add an element in the right position of a COO matrix M = [row1, col1, row2, col2, ...]
-    {   
-        //std::cout<<"("<<row<<" , "<<col<<")"<<std::endl;
-
-        if (sizeM == 0) { // if matrix is empty, add element
-            insertCooElementInIndex(row, col, 0, M, sizeM);
-            return;
-        }
-
-        for(int ptr = 0; ptr <= sizeM; ptr += 2) {
-
-            if (ptr == sizeM) {
-                util::insertCooElementInIndex(row, col, ptr, M, sizeM);
-            }
-
-            if(row > M[ptr]) {
-                //std::cout<<"enter1\n";
-                continue;
-            }
-            else if(row < M[ptr]) {
-                //std::cout<<"enter2\n";
-                util::insertCooElementInIndex(row, col, ptr, M, sizeM);
-                return;
-            }
-            else { // row == M[ptr] -> search index based on col
-                //std::cout<<"enter3\n";
-                if(col > M[ptr + 1]) {
-                    continue;
-                }
-                else if(col < M[ptr + 1]) {
-                    // Insert here
-                    util::insertCooElementInIndex(row, col, ptr, M, sizeM);
-                    return;
-                }
-                else { // element already exists
-                    return;
-                }   
-            }   
-        }
     }
 
     void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM)
@@ -169,22 +98,6 @@ namespace util
 
         sizeM += _sizeM;
     }
-
-    // bool searchCooElement(int row, int col, int *M, int &sizeM)
-    // // search an element in a COO matrix M = [row1, col1, row2, col2, ...]
-    // {
-    //     for (int ptr = 0; ptr < sizeM; ptr += 2) {
-    //         if (row == M[ptr]) {    // row found
-    //             while (row == M[ptr]) {
-    //                 if (col == M[ptr + 1])  // element found, so return true
-    //                     return true;
-    //                 ptr += 2;
-    //             }
-    //             return false;   // element is not found in its the row, so return false
-    //         }
-    //     }
-    //     return false;
-    // }
 
     void initCsr(csr &M, int n, int nnz)
     // initialize CSR matrix
@@ -221,7 +134,7 @@ namespace util
     }
 
     void delCsc(csc &M)
-    // delete CSR matrix
+    // delete CSC matrix
     {
         delete[] M.colPtr;
         delete[] M.rowInd;
@@ -261,30 +174,25 @@ namespace util
         std::vector<std::pair <int, int> > vectC (C.nnz);
 
         for (int i = 0; i < C.nnz; i++) {
-        vectC[i].first = C.row[i];
-        vectC[i].second = C.col[i];
+            vectC[i].first = C.row[i];
+            vectC[i].second = C.col[i];
         }
 
         std::sort(vectC.begin(), vectC.end());
 
         // read correct result
-
         int checkN;
         int checkNnz;
 
         std::string checkFile = "graphs/bmm-res/bmm_res_" + checkGraph;
 
         readMtxValues(checkFile, checkN, checkNnz);
-
-        // std::cout << checkN << "\t" << checkNnz << std::endl;
-
         coo checkM;
         util::initCoo(checkM, checkN, checkNnz);
 
         openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
 
-        // prt::cooMat(checkM);
-
+        // compare results
         bool pass = true;
         if (checkM.nnz != vectC.size()) {
             return false;
@@ -296,10 +204,7 @@ namespace util
                 }
             }
         }
-
-        // prt::cooMat(checkM);
         util::delCoo(checkM);
-
         return true;
     }
 }
