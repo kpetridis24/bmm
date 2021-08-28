@@ -28,7 +28,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "s12.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -57,7 +57,7 @@ int main()
 
     /* ----------------------------------- s12 ---------------------------------- */
 
-    int b = 2;
+    // int b = 2;
     // int b = 3;
     // int b = 4;
     // int b = 6;
@@ -65,7 +65,7 @@ int main()
     /* ------------------------------- com-Youtube ------------------------------ */
 
     // int b = 226978;
-    // int b = 113489;
+    int b = 113489;
        
     /* -------------------------------- dblp-2010 ------------------------------- */
 
@@ -157,7 +157,7 @@ int main()
         C.col[j] = ans.M[i + 1];
     }
 
-    prt::cooMat(C);
+    // prt::cooMat(C);
 
     /* ------------------------------- free memory ------------------------------ */
     

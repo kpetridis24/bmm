@@ -4,9 +4,13 @@
 
 #include <iostream>
 #include <headers.hpp>
+#include <bits/stdc++.h>
+
+
 
 namespace prt
-{
+{   
+
     void arr(int *arr, int len)
     {
         std::cout << std::endl;
@@ -147,33 +151,34 @@ namespace util
         }
     }
 
-    bool searchCooElement(int row, int col, int *M, int &sizeM)
-    // search an element in a COO matrix M = [row1, col1, row2, col2, ...]
-    {
-        for (int ptr = 0; ptr < sizeM; ptr += 2) {
-            if (row == M[ptr]) {    // row found
-                while (row == M[ptr]) {
-                    if (col == M[ptr + 1])  // element found, so return true
-                        return true;
-                    ptr += 2;
-                }
-                return false;   // element is not found in its the row, so return false
-            }
-        }
-        return false;
-    }
-
     void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM)
     {
         int rowOffset = blockRow * b;
         int colOffset = blockCol * b;
 
         for (int i = 0; i < _sizeM; i += 2) {
-            util::addCooElement(_M[i] + rowOffset, _M[i + 1] + colOffset, M, sizeM);
+            M[sizeM + i] = _M[i] + rowOffset;
+            M[sizeM + i + 1] = _M[i + 1] + colOffset;
         }
 
-        // prt::arr(M, sizeM);
+        sizeM += _sizeM;
     }
+
+    // bool searchCooElement(int row, int col, int *M, int &sizeM)
+    // // search an element in a COO matrix M = [row1, col1, row2, col2, ...]
+    // {
+    //     for (int ptr = 0; ptr < sizeM; ptr += 2) {
+    //         if (row == M[ptr]) {    // row found
+    //             while (row == M[ptr]) {
+    //                 if (col == M[ptr + 1])  // element found, so return true
+    //                     return true;
+    //                 ptr += 2;
+    //             }
+    //             return false;   // element is not found in its the row, so return false
+    //         }
+    //     }
+    //     return false;
+    // }
 
     void initCsr(csr &M, int n, int nnz)
     // initialize CSR matrix

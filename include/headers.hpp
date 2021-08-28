@@ -6,6 +6,7 @@
 #define __HEADERS_HPP__
 
 #include <iostream>
+#include <bits/stdc++.h>
 #include <sys/time.h>
 
 /* -------------------------------- COO type -------------------------------- */
@@ -50,6 +51,7 @@ typedef struct
   int *blockNnzCounter;
   int n;
   int b;
+  int nnz;
 } bcsr;
 
 /* ------------------------------- B-CSC type ------------------------------- */
@@ -152,7 +154,7 @@ void bbm( bcsr &A,
           int LL_colPtrOffsetB,
           int LL_rowIndOffsetB );
 void blockBmm(bcsr &A, bcsc &B);
-ret2 maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B);
+ret2 maskedBlockRowColMult(int blockRowA, int blockColB, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &map);
 void maskedBbm( bcsr &F,
                 bcsr &A,
                 bcsc &B,
@@ -163,7 +165,9 @@ void maskedBbm( bcsr &F,
                 int LL_rowPtrOffsetA,
                 int LL_colIndOffsetA,
                 int LL_colPtrOffsetB,
-                int LL_rowIndOffsetB );
+                int LL_rowIndOffsetB,
+                std::multimap <int, int> &map,
+                std::multimap <int, int>::iterator it  );
 ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* -------------------------------------------------------------------------- */
