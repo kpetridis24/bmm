@@ -58,7 +58,6 @@ ret2 maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
     int blocksPerRow = A.n / A.b;
     int bIndF = blockRowF * blocksPerRow + blockColF;
     int _nnzF = F.blockNnzCounter[bIndF + 1] - F.blockNnzCounter[bIndF];
-    F.nnz = _nnzF;
 
     int LL_rowPtrOffsetF, LL_colIndOffsetF;
     int LL_rowPtrOffsetA, LL_colIndOffsetA;
