@@ -4,9 +4,6 @@
 
 #include <headers.hpp>
 #include <bits/stdc++.h>
-// #include <cilk/cilk.h>
-// #include <cilk/cilk_api.h>
-// #include <omp.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
@@ -36,8 +33,10 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
             int blockColF = F.HL_bColInd[indF];
             std::multimap <int, int> map;
 
-            ret2 _C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B, map);
-            util::addCooBlockToMatrix(C, _C.M, blockRowF, blockColF, A.b, sizeC, _C.sizeM);
+            ret2 *_C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B, map);
+            util::addCooBlockToMatrix(C, _C->M, blockRowF, blockColF, A.b, sizeC, _C->sizeM);
+            delete[] _C->M;
+            delete _C;
         }
     }
 
@@ -48,7 +47,7 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
     return ret;
 }
 
-ret2 maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &map)
+ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &map)
 {   
     int ptr1 = 0;
     int ptr2 = 0;
@@ -93,9 +92,11 @@ ret2 maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
         }
     }
 
-    ret2 ret;
-    ret.M = _C;
-    ret.sizeM = _sizeC;
+    ret2 *ret = new ret2;
+    ret->M = _C;
+    ret->sizeM = _sizeC;
+
+    // prt::arr(_C, _sizeC);
 
     return ret;
 }
@@ -181,11 +182,8 @@ void maskedBbm( bcsr &F,
                     continue;
                 }
                 map.insert(std::pair <int, int> (_rowF, _colF));
-               
-                if (_sizeC <= F.nnz + 2) {
-                    _C[_sizeC++] = _rowF;
-                    _C[_sizeC++] = _colF;
-                }
+                _C[_sizeC++] = _rowF;
+                _C[_sizeC++] = _colF;
             }
         }
     }
