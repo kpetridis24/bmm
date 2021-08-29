@@ -28,7 +28,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "com-Youtube.mtx";
+    std::string graph = "belgium_osm.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -65,7 +65,7 @@ int main()
     /* ------------------------------- com-Youtube ------------------------------ */
 
     // int b = 226978;
-    int b = 113489;
+    // int b = 113489;
        
     /* -------------------------------- dblp-2010 ------------------------------- */
 
@@ -84,6 +84,10 @@ int main()
     // int b = 17857;
     // int b = 12755;
     // int b = 2551;
+
+    /* ------------------------------- belgium_osm ------------------------------ */
+
+    int b = 62665;
 
     /* --------------------------- bcsr blocking test --------------------------- */
     

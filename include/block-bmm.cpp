@@ -148,9 +148,17 @@ void maskedBbm( bcsr &F,
         for (int _indF = F.LL_bRowPtr[_rowF + LL_rowPtrOffsetF]; _indF < F.LL_bRowPtr[_rowF + LL_rowPtrOffsetF + 1]; _indF++) {
             
             int _colF = F.LL_bColInd[_indF + LL_colIndOffsetF];
-                
+
+            // check if index is already true
+            // auto it = map.find(_rowF);
+            // if (it != map.end()) {
+            //     if (it->second == _colF) {
+            //         continue;
+            //     }
+            // }
+
             if (rowColMult(_rowF, _colF, A, B, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB )) {
-                
+
                 auto iter = map.find(_rowF);
                 if (iter != map.end()) {
 
