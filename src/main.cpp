@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <bits/stdc++.h>
+#include <mpi.h>
 
 #include <headers.hpp>
 #include <bmm.cpp>
@@ -21,166 +22,183 @@
 #include <utils.cpp>
 #include <reader.cpp>
 
-int main()
+int main(int argc, char **argv)
 {
-    struct timeval timer;
-    double t = -1;
+    /* -------------------------------------------------------------------------- */
+    /*                        OpenMPI bmm distribution test                       */
+    /* -------------------------------------------------------------------------- */
 
-    /* ------------------------------- read matrix ------------------------------ */
+    int numProcesses, pId;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
+    MPI_Comm_rank(MPI_COMM_WORLD, &pId);
+    MPI_Status stat;
 
-    int n;
-    int nnz;
+    if(pId == 1) {
+        
+        struct timeval timer;
+        double t = -1;
 
-    std::string graph = "com-Youtube.mtx";
-    std::string file = "graphs/" + graph;
+        /* ------------------------------- read matrix ------------------------------ */
 
-    readMtxValues(file, n, nnz);
+        int n;
+        int nnz;
 
-    coo M;
-    util::initCoo(M, n, nnz);
+        std::string graph = "com-Youtube.mtx";
+        std::string file = "graphs/" + graph;
 
-    openMtxFile(file, M.col, M.row, M.n, M.nnz);
+        readMtxValues(file, n, nnz);
 
-    csr A;
-    util::initCsr(A, n, nnz);
-    csc B;
-    util::initCsc(B, n, nnz);
+        coo M;
+        util::initCoo(M, n, nnz);
 
-    // prt::cooMat(M);
+        openMtxFile(file, M.col, M.row, M.n, M.nnz);
 
-    coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
-    coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
+        csr A;
+        util::initCsr(A, n, nnz);
+        csc B;
+        util::initCsc(B, n, nnz);
 
-    util::delCoo(M);
+        // prt::cooMat(M);
 
-    // prt::csrMat(A);
-    // prt::cscMat(B);
+        coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
+        coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
 
-    std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
+        util::delCoo(M);
 
-    /* ----------------------------------- s12 ---------------------------------- */
+        // prt::csrMat(A);
+        // prt::cscMat(B);
 
-    // int b = 2;
-    // int b = 3;
-    // int b = 4;
-    // int b = 6;
+        std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
 
-    /* ------------------------------- com-Youtube ------------------------------ */
+        /* ----------------------------------- s12 ---------------------------------- */
 
-    // int b = 226978;
-    int b = 113489;
-       
-    /* -------------------------------- dblp-2010 ------------------------------- */
+        // int b = 2;
+        // int b = 3;
+        // int b = 4;
+        // int b = 6;
 
-    // int b = 46598;
-    // int b = 23299;
-    // int b = 14182;
-    // int b = 7091;
-    // int b = 2026;
-    // int b = 1013;
+        /* ------------------------------- com-Youtube ------------------------------ */
 
-    /* ------------------------------- as-Skitter ------------------------------- */
+        // int b = 226978;
+        int b = 113489;
+        
+        /* -------------------------------- dblp-2010 ------------------------------- */
 
-    // int b = 242345;
-    // int b = 89285;
-    // int b = 48469;
-    // int b = 17857;
-    // int b = 12755;
-    // int b = 2551;
+        // int b = 46598;
+        // int b = 23299;
+        // int b = 14182;
+        // int b = 7091;
+        // int b = 2026;
+        // int b = 1013;
 
-    /* ------------------------------- belgium_osm ------------------------------ */
+        /* ------------------------------- as-Skitter ------------------------------- */
 
-    // int b = 62665;
+        // int b = 242345;
+        // int b = 89285;
+        // int b = 48469;
+        // int b = 17857;
+        // int b = 12755;
+        // int b = 2551;
 
-    /* --------------------------- bcsr blocking test --------------------------- */
-    
-    timer = util::tic();
-    int numBlocks = (n / b) * (n / b);
-    int LL_bRowPtrSize = numBlocks * (b + 1);
+        /* ------------------------------- belgium_osm ------------------------------ */
 
-    bcsr blA;
-    blA.n = A.n;
-    blA.b = b;
+        // int b = 62665;
 
-    // init Low-Level CSR
-    blA.LL_bRowPtr = new int[LL_bRowPtrSize]();
-    blA.LL_bColInd = new int[nnz]();
+        /* --------------------------- bcsr blocking test --------------------------- */
+        
+        timer = util::tic();
+        int numBlocks = (n / b) * (n / b);
+        int LL_bRowPtrSize = numBlocks * (b + 1);
 
-    // blocking
-    ret _ret = csr2bcsr(A, blA);
+        bcsr blA;
+        blA.n = A.n;
+        blA.b = b;
 
-    blA.HL_bRowPtr = _ret.ret1;
-    blA.HL_bColInd = _ret.ret2;
-    blA.nzBlockIndex = _ret.ret3;
-    blA.blockNnzCounter = _ret.ret4;
+        // init Low-Level CSR
+        blA.LL_bRowPtr = new int[LL_bRowPtrSize]();
+        blA.LL_bColInd = new int[nnz]();
 
-    t = util::toc(timer);
-    std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+        // blocking
+        ret _ret = csr2bcsr(A, blA);
 
-    /* --------------------------- bcsc blocking test --------------------------- */
+        blA.HL_bRowPtr = _ret.ret1;
+        blA.HL_bColInd = _ret.ret2;
+        blA.nzBlockIndex = _ret.ret3;
+        blA.blockNnzCounter = _ret.ret4;
 
-    // std::cout << "\nBlocking B in B-CSC...\n";
+        t = util::toc(timer);
+        std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
-    timer = util::tic();
+        /* --------------------------- bcsc blocking test --------------------------- */
 
-    int LL_bColPtrSize = numBlocks * (b + 1);
+        // std::cout << "\nBlocking B in B-CSC...\n";
 
-    bcsc blB;
-    blB.n = A.n;
-    blB.b = b;
+        timer = util::tic();
 
-    // init Low-Level CSC
-    blB.LL_bColPtr = new int[LL_bColPtrSize]();
-    blB.LL_bRowInd = new int[nnz]();
+        int LL_bColPtrSize = numBlocks * (b + 1);
 
-    // blocking
-    _ret = csr2bcsc(B, blB);
+        bcsc blB;
+        blB.n = A.n;
+        blB.b = b;
 
-    blB.HL_bColPtr = _ret.ret1;
-    blB.HL_bRowInd = _ret.ret2;
-    blB.nzBlockIndex = _ret.ret3;
-    blB.blockNnzCounter = _ret.ret4;
+        // init Low-Level CSC
+        blB.LL_bColPtr = new int[LL_bColPtrSize]();
+        blB.LL_bRowInd = new int[nnz]();
 
-    t = util::toc(timer);
-    std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+        // blocking
+        _ret = csr2bcsc(B, blB);
+
+        blB.HL_bColPtr = _ret.ret1;
+        blB.HL_bRowInd = _ret.ret2;
+        blB.nzBlockIndex = _ret.ret3;
+        blB.blockNnzCounter = _ret.ret4;
+
+        t = util::toc(timer);
+        std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
+        
+    }
+
+    MPI_Finalize();
 
     /* ----------------------------- block bmm test ----------------------------- */
 
-    timer = util::tic();
+    // timer = util::tic();
 
-    std::multimap<int, int> C;
+    // std::multimap<int, int> C;
 
-    // blockBmm(blA, blB, C);
-    maskedBlockBmm(blA, blA, blB, C);
-    // ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
+    // // blockBmm(blA, blB, C);
+    // maskedBlockBmm(blA, blA, blB, C);
+    // // ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
 
-    t = util::toc(timer);
-    std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+    // t = util::toc(timer);
+    // std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
 
-    std::vector<std::pair<int, int>> vecC;
+    // std::vector<std::pair<int, int>> vecC;
 
-    for (const auto& x : C) {
-      vecC.push_back(std::pair<int, int> (x.first, x.second));
-    }
-    std::sort(vecC.begin(), vecC.end());
+    // for (const auto& x : C) {
+    //   vecC.push_back(std::pair<int, int> (x.first, x.second));
+    // }
+    // std::sort(vecC.begin(), vecC.end());
 
-    // prt::vec(vecC);
+    // // prt::vec(vecC);
 
-    /* ------------------------------ check result ------------------------------ */
+    // /* ------------------------------ check result ------------------------------ */
 
-    if (util::checkRes(graph, vecC)) {
-      std::cout << "\nTest passed\n";
-    }
-    else {
-      std::cout << "\nTest failed\n";
-    }
+    // if (util::checkRes(graph, vecC)) {
+    //   std::cout << "\nTest passed\n";
+    // }
+    // else {
+    //   std::cout << "\nTest failed\n";
+    // }
 
-    /* ------------------------------- free memory ------------------------------ */
+    // /* ------------------------------- free memory ------------------------------ */
 
-    util::delCsr(A);
-    util::delCsc(B);
-    util::delBcsr(blA); 
-    util::delBcsc(blB);
+    // util::delCsr(A);
+    // util::delCsc(B);
+    // util::delBcsr(blA); 
+    // util::delBcsc(blB);
 
   return 0;
 }

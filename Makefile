@@ -1,5 +1,6 @@
 CC=g++
 CILKCC=/usr/local/OpenCilk-9.0.1-Linux/bin/clang++
+OPENMPI=mpic++
 CFLAGS=-O3
 BUILD_DIR=build
 SRC_DIR=src
@@ -22,6 +23,10 @@ openmp:
 	$(CC) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) -fopenmp
 	./build/main
 	@printf "\n"
+
+openmpi:
+	$(OPENMPI) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) 
+	mpirun -np 2 ./build/main
 
 clean:
 	rm test
