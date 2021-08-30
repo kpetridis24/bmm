@@ -11,7 +11,7 @@ namespace prt
     void arr(int *arr, int len)
     {
         std::cout << std::endl;
-        for(int i = 0; i < len; i++)
+        for (int i = 0; i < len; i++)
             std::cout << arr[i] << " ";
         std::cout << std::endl;
     }
@@ -19,12 +19,18 @@ namespace prt
 
     void mat(int **mat, int rows, int cols)
     {
-        for(int i = 0; i < rows; i++){
-            for(int j = 0; j < cols; j++){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 std::cout << mat[i][j] << " ";
             }
             std::cout << std::endl;
         }
+    }
+
+    void vec(std::vector<std::pair<int, int>> vec)
+    {
+        for (auto x : vec)
+        std::cout << x.first << " " << x.second << std::endl;
     }
 
     void csrMat(csr &M)
@@ -168,8 +174,6 @@ namespace util
 
     bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC)
     {
-        std::sort(vecC.begin(), vecC.end());
-
         // read correct result
         int checkN;
         int checkNnz;

@@ -144,16 +144,20 @@ bool rowColMult( int rowA, int colB,
                  int LL_colIndOffsetA,
                  int LL_colPtrOffsetB,
                  int LL_rowIndOffsetB );
-bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B);
+
+void blockBmm(bcsr &A, bcsc &B, std::multimap<int, int> &C);
+void blockRowColMult( int blockRowA, int blockColB, 
+                      bcsr &A, bcsc &B, 
+                      std::multimap<int, int> &_mapC );
 void bbm( bcsr &A,
           bcsc &B,
-          bool *_C,
           int LL_rowPtrOffsetA,
           int LL_colIndOffsetA,
           int LL_colPtrOffsetB,
-          int LL_rowIndOffsetB );
-void blockBmm(bcsr &A, bcsc &B);
+          int LL_rowIndOffsetB,
+          std::multimap <int, int> &_C );
 
+void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &mapC);
 void maskedBlockRowColMult( int blockRowA, int blockColB, 
                             bcsr &F, bcsr &A, bcsc &B, 
                             std::multimap<int, int> &_mapC );
@@ -167,7 +171,7 @@ void maskedBbm( bcsr &F,
                 int LL_colPtrOffsetB,
                 int LL_rowIndOffsetB,
                 std::multimap <int, int> &_mapC );
-void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &mapC);
+
 ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* -------------------------------------------------------------------------- */
