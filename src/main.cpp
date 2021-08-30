@@ -15,7 +15,7 @@
 #include <bmm.cpp>
 #include <blocking.cpp>
 #include <block-bmm.cpp>
-#include <parallel-block-bmm.cpp>
+// #include <parallel-block-bmm.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
@@ -29,7 +29,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "belgium_osm.mtx";
+    std::string graph = "com-Youtube.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -66,7 +66,7 @@ int main()
     /* ------------------------------- com-Youtube ------------------------------ */
 
     // int b = 226978;
-    // int b = 113489;
+    int b = 113489;
        
     /* -------------------------------- dblp-2010 ------------------------------- */
 
@@ -88,7 +88,7 @@ int main()
 
     /* ------------------------------- belgium_osm ------------------------------ */
 
-    int b = 62665;
+    // int b = 62665;
 
     /* --------------------------- bcsr blocking test --------------------------- */
     
@@ -146,8 +146,8 @@ int main()
 
     timer = util::tic();
 
-    // ret2 ans = maskedBlockBmm(blA, blA, blB);
-    ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
+    ret2 ans = maskedBlockBmm(blA, blA, blB);
+    // ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;

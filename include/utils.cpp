@@ -86,17 +86,24 @@ namespace util
         LL_colIndOffset = blockNnzCounter[blockInd];
     }
 
-    void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM)
+    void addCooBlockToMatrix(int *M, int blockRow, int blockCol, int b, int &sizeM, std::multimap<int, int> &_mapC)
     {
         int rowOffset = blockRow * b;
         int colOffset = blockCol * b;
 
-        for (int i = 0; i < _sizeM; i += 2) {
-            M[sizeM + i] = _M[i] + rowOffset;
-            M[sizeM + i + 1] = _M[i + 1] + colOffset;
+        // for (int i = 0; i < _sizeM; i += 2) {
+        //     M[sizeM + i] = _M[i] + rowOffset;
+        //     M[sizeM + i + 1] = _M[i + 1] + colOffset;
+        // }
+
+        int i = 0;
+        for (const auto& x : _mapC) {            
+            M[sizeM + i] = x.first + rowOffset;
+            M[sizeM + i + 1] = x.second + colOffset;
+            i += 2;
         }
 
-        sizeM += _sizeM;
+        sizeM += i;
     }
 
     void initCsr(csr &M, int n, int nnz)

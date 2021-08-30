@@ -31,12 +31,15 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
         for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];
-            std::multimap <int, int> map;
+            std::multimap <int, int> _mapC; // block of matrix C
 
-            ret2 *_C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B, map);
-            util::addCooBlockToMatrix(C, _C->M, blockRowF, blockColF, A.b, sizeC, _C->sizeM);
-            delete[] _C->M;
-            delete _C;
+            maskedBlockRowColMult(blockRowF, blockColF, F, A, B, _mapC);
+            util::addCooBlockToMatrix(C, blockRowF, blockColF, A.b, sizeC, _mapC);
+
+            // ret2 *_C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B, map);
+            // util::addCooBlockToMatrix(C, _C->M, blockRowF, blockColF, A.b, sizeC, _C->sizeM);
+            // delete[] _C->M;
+            // delete _C;
         }
     }
 
@@ -47,7 +50,7 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
     return ret;
 }
 
-ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &map)
+ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &_mapC)
 {   
     int ptr1 = 0;
     int ptr2 = 0;
@@ -62,8 +65,8 @@ ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc
     int LL_rowPtrOffsetA, LL_colIndOffsetA;
     int LL_colPtrOffsetB, LL_rowIndOffsetB;
 
-    int *_C = new int[2 * _nnzF](); 
-    int _sizeC = 0;
+    // int *_C = new int[2 * _nnzF]();
+    // int _sizeC = 0;
 
     int blockRowA = blockRowF;
     int blockColB = blockColF;
@@ -85,7 +88,7 @@ ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc
             util::blockOffsets(bIndA, A.nzBlockIndex, A.blockNnzCounter, A.b, LL_rowPtrOffsetA, LL_colIndOffsetA);
             util::blockOffsets(bIndB, B.nzBlockIndex, B.blockNnzCounter, B.b, LL_colPtrOffsetB, LL_rowIndOffsetB);
 
-            maskedBbm(F, A, B, _C, _sizeC, LL_rowPtrOffsetF, LL_colIndOffsetF, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB, map);
+            maskedBbm(F, A, B, LL_rowPtrOffsetF, LL_colIndOffsetF, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB, _mapC);
             
             ptr1++;
             ptr2++;
@@ -93,12 +96,67 @@ ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc
     }
 
     ret2 *ret = new ret2;
-    ret->M = _C;
-    ret->sizeM = _sizeC;
+    // ret->M = _C;
+    // ret->sizeM = _sizeC;
 
     // prt::arr(_C, _sizeC);
 
     return ret;
+}
+
+void maskedBbm( bcsr &F,
+                bcsr &A,
+                bcsc &B,
+                int LL_rowPtrOffsetF,
+                int LL_colIndOffsetF,
+                int LL_rowPtrOffsetA,
+                int LL_colIndOffsetA,
+                int LL_colPtrOffsetB,
+                int LL_rowIndOffsetB,
+                std::multimap <int, int> &_mapC )
+// masked boolean block-block multiplication
+{   
+    struct timeval t0 = util::tic();
+    bool isExistingElement = false;
+
+    for (int _rowF = 0; _rowF < F.b; _rowF++) {
+        for (int _indF = F.LL_bRowPtr[_rowF + LL_rowPtrOffsetF]; _indF < F.LL_bRowPtr[_rowF + LL_rowPtrOffsetF + 1]; _indF++) {
+            
+            int _colF = F.LL_bColInd[_indF + LL_colIndOffsetF];
+
+            // check if index is already true
+            // auto it = map.find(_rowF);
+            // if (it != map.end()) {
+            //     if (it->second == _colF) {
+            //         continue;
+            //     }
+            // }
+
+            if (rowColMult(_rowF, _colF, A, B, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB )) {
+
+                auto iter = _mapC.find(_rowF);
+                if (iter != _mapC.end()) {
+
+                    auto itr1 = _mapC.lower_bound(_rowF);
+                    auto itr2 = _mapC.upper_bound(_rowF);
+                    
+                    while (itr1 != itr2)
+                    {   
+                        if (itr1 -> first == _rowF && itr1 -> second == _colF) { // already exists.
+                            isExistingElement = true;
+                            break;
+                        }
+                        itr1++;
+                    }
+                 }
+                if (isExistingElement) {
+                    isExistingElement = false;
+                    continue;
+                }
+                _mapC.insert(std::pair <int, int> (_rowF, _colF));
+            }
+        }
+    }
 }
 
 bool rowColMult( int rowA, int colB, 
@@ -128,63 +186,4 @@ bool rowColMult( int rowA, int colB,
     }
 
     return false;
-}
-
-void maskedBbm( bcsr &F,
-                bcsr &A,
-                bcsc &B,
-                int *_C,
-                int &_sizeC,
-                int LL_rowPtrOffsetF,
-                int LL_colIndOffsetF,
-                int LL_rowPtrOffsetA,
-                int LL_colIndOffsetA,
-                int LL_colPtrOffsetB,
-                int LL_rowIndOffsetB,
-                std::multimap <int, int> &map )
-// masked boolean block-block multiplication
-{   
-    struct timeval t0 = util::tic();
-    bool isExistingElement = false;
-
-    for (int _rowF = 0; _rowF < F.b; _rowF++) {
-        for (int _indF = F.LL_bRowPtr[_rowF + LL_rowPtrOffsetF]; _indF < F.LL_bRowPtr[_rowF + LL_rowPtrOffsetF + 1]; _indF++) {
-            
-            int _colF = F.LL_bColInd[_indF + LL_colIndOffsetF];
-
-            // check if index is already true
-            // auto it = map.find(_rowF);
-            // if (it != map.end()) {
-            //     if (it->second == _colF) {
-            //         continue;
-            //     }
-            // }
-
-            if (rowColMult(_rowF, _colF, A, B, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB )) {
-
-                auto iter = map.find(_rowF);
-                if (iter != map.end()) {
-
-                    auto itr1 = map.lower_bound(_rowF);
-                    auto itr2 = map.upper_bound(_rowF);
-                    
-                    while (itr1 != itr2)
-                    {   
-                        if (itr1 -> first == _rowF && itr1 -> second == _colF) { // already exists.
-                            isExistingElement = true;
-                            break;
-                        }
-                        itr1++;
-                    }
-                 }
-                if (isExistingElement) {
-                    isExistingElement = false;
-                    continue;
-                }
-                map.insert(std::pair <int, int> (_rowF, _colF));
-                _C[_sizeC++] = _rowF;
-                _C[_sizeC++] = _colF;
-            }
-        }
-    }
 }
