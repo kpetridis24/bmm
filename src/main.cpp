@@ -146,25 +146,22 @@ int main()
 
     timer = util::tic();
 
-    ret2 ans = maskedBlockBmm(blA, blA, blB);
+    std::multimap<int, int> ans;
+    maskedBlockBmm(blA, blA, blB, ans);
     // ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
 
-    coo C;
-    util::initCoo(C, A.n, ans.sizeM / 2);
-    
-    for (int i = 0, j = 0; i < ans.sizeM; i += 2, j++) {
-        C.row[j] = ans.M[i];
-        C.col[j] = ans.M[i + 1];
-    }
+    std::vector<std::pair<int, int>> vecC;
 
-    // prt::cooMat(C);
+    for (const auto& x : ans) {
+      vecC.push_back(std::pair<int, int> (x.first, x.second));
+    }
 
     /* ------------------------------ check result ------------------------------ */
 
-    if (util::checkRes(graph, C)) {
+    if (util::checkRes(graph, vecC)) {
       std::cout << "\nTest passed\n";
     }
     else {
@@ -175,10 +172,8 @@ int main()
 
     util::delCsr(A);
     util::delCsc(B);
-    util::delCoo(C);
     util::delBcsr(blA); 
     util::delBcsc(blB);
-    delete[] ans.M;
 
   return 0;
 }

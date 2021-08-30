@@ -119,8 +119,8 @@ namespace util
   struct timeval tic();
   static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
-  void addCooBlockToMatrix(int *M, int blockRow, int blockCol, int b, int &sizeM, std::multimap<int, int> &_mapC);
-  bool checkRes(std::string checkGraph, coo &C);
+  void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM);
+  bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC);
   void initCsr(csr &M, int n, int nnz);
   void initCsc(csc &M, int n, int nnz);
   void initCoo(coo &M, int n, int nnz);
@@ -154,7 +154,7 @@ void bbm( bcsr &A,
           int LL_rowIndOffsetB );
 void blockBmm(bcsr &A, bcsc &B);
 
-ret2 *maskedBlockRowColMult( int blockRowA, int blockColB, 
+void maskedBlockRowColMult( int blockRowA, int blockColB, 
                             bcsr &F, bcsr &A, bcsc &B, 
                             std::multimap<int, int> &_mapC );
 void maskedBbm( bcsr &F,
@@ -167,7 +167,7 @@ void maskedBbm( bcsr &F,
                 int LL_colPtrOffsetB,
                 int LL_rowIndOffsetB,
                 std::multimap <int, int> &_mapC );
-ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
+void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &mapC);
 ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* -------------------------------------------------------------------------- */

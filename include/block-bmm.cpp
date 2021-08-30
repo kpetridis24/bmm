@@ -7,7 +7,7 @@
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
-ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
+void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &mapC)
 // masked boolean matrix multiplication F.*(A*B) using blocks
 {
     if (A.n != B.n || A.n != F.n) {
@@ -20,11 +20,7 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
         exit(1);
     }
 
-    int nnzF = F.blockNnzCounter[(F.n / F.b) * (F.n / F.b)];
     int blocksPerRow = A.n / A.b;
-
-    int *C = new int[nnzF](); 
-    int sizeC = 0;
 
     // high level matrix multiplication
     for (int blockRowF = 0; blockRowF < blocksPerRow; blockRowF++) {
@@ -34,23 +30,12 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
             std::multimap <int, int> _mapC; // block of matrix C
 
             maskedBlockRowColMult(blockRowF, blockColF, F, A, B, _mapC);
-            util::addCooBlockToMatrix(C, blockRowF, blockColF, A.b, sizeC, _mapC);
-
-            // ret2 *_C = maskedBlockRowColMult(blockRowF, blockColF, F, A, B, map);
-            // util::addCooBlockToMatrix(C, _C->M, blockRowF, blockColF, A.b, sizeC, _C->sizeM);
-            // delete[] _C->M;
-            // delete _C;
+            util::addCooBlockToMatrix(mapC, blockRowF, blockColF, A.b, _mapC);
         }
     }
-
-    ret2 ret;
-    ret.M = C;
-    ret.sizeM = sizeC;
-
-    return ret;
 }
 
-ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &_mapC)
+void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &_mapC)
 {   
     int ptr1 = 0;
     int ptr2 = 0;
@@ -64,9 +49,6 @@ ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc
     int LL_rowPtrOffsetF, LL_colIndOffsetF;
     int LL_rowPtrOffsetA, LL_colIndOffsetA;
     int LL_colPtrOffsetB, LL_rowIndOffsetB;
-
-    // int *_C = new int[2 * _nnzF]();
-    // int _sizeC = 0;
 
     int blockRowA = blockRowF;
     int blockColB = blockColF;
@@ -94,14 +76,6 @@ ret2 *maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc
             ptr2++;
         }
     }
-
-    ret2 *ret = new ret2;
-    // ret->M = _C;
-    // ret->sizeM = _sizeC;
-
-    // prt::arr(_C, _sizeC);
-
-    return ret;
 }
 
 void maskedBbm( bcsr &F,
@@ -125,8 +99,8 @@ void maskedBbm( bcsr &F,
             int _colF = F.LL_bColInd[_indF + LL_colIndOffsetF];
 
             // check if index is already true
-            // auto it = map.find(_rowF);
-            // if (it != map.end()) {
+            // auto it = _mapC.find(_rowF);
+            // if (it != _mapC.end()) {
             //     if (it->second == _colF) {
             //         continue;
             //     }

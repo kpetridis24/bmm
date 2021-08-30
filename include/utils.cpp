@@ -86,24 +86,14 @@ namespace util
         LL_colIndOffset = blockNnzCounter[blockInd];
     }
 
-    void addCooBlockToMatrix(int *M, int blockRow, int blockCol, int b, int &sizeM, std::multimap<int, int> &_mapC)
+    void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM)
     {
         int rowOffset = blockRow * b;
         int colOffset = blockCol * b;
 
-        // for (int i = 0; i < _sizeM; i += 2) {
-        //     M[sizeM + i] = _M[i] + rowOffset;
-        //     M[sizeM + i + 1] = _M[i + 1] + colOffset;
-        // }
-
-        int i = 0;
-        for (const auto& x : _mapC) {            
-            M[sizeM + i] = x.first + rowOffset;
-            M[sizeM + i + 1] = x.second + colOffset;
-            i += 2;
+        for (const auto& x : _mapM) {
+            mapM.insert(std::pair <int, int> (x.first + rowOffset, x.second + colOffset));
         }
-
-        sizeM += i;
     }
 
     void initCsr(csr &M, int n, int nnz)
@@ -176,16 +166,9 @@ namespace util
         delete[] M.blockNnzCounter;
     }
 
-    bool checkRes(std::string checkGraph, coo &C)
+    bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC)
     {
-        std::vector<std::pair <int, int> > vectC (C.nnz);
-
-        for (int i = 0; i < C.nnz; i++) {
-            vectC[i].first = C.row[i];
-            vectC[i].second = C.col[i];
-        }
-
-        std::sort(vectC.begin(), vectC.end());
+        std::sort(vecC.begin(), vecC.end());
 
         // read correct result
         int checkN;
@@ -201,12 +184,12 @@ namespace util
 
         // compare results
         bool pass = true;
-        if (checkM.nnz != vectC.size()) {
+        if (checkM.nnz != vecC.size()) {
             return false;
         }
         else {
-            for (int i = 0; i < vectC.size(); i++) {
-                if (checkM.row[i] != vectC[i].first || checkM.col[i] != vectC[i].second) {
+            for (int i = 0; i < vecC.size(); i++) {
+                if (checkM.row[i] != vecC[i].first || checkM.col[i] != vecC[i].second) {
                     return false;
                 }
             }
