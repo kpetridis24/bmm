@@ -14,8 +14,8 @@
 #include <headers.hpp>
 #include <bmm.cpp>
 #include <blocking.cpp>
-#include <block-bmm.cpp>
-// #include <parallel-block-bmm.cpp>
+#include <masked-block-bmm.cpp>
+// #include <parallel-masked-block-bmm.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
@@ -146,8 +146,8 @@ int main()
 
     timer = util::tic();
 
-    std::multimap<int, int> ans;
-    maskedBlockBmm(blA, blA, blB, ans);
+    std::multimap<int, int> C;
+    maskedBlockBmm(blA, blA, blB, C);
     // ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
@@ -155,7 +155,7 @@ int main()
 
     std::vector<std::pair<int, int>> vecC;
 
-    for (const auto& x : ans) {
+    for (const auto& x : C) {
       vecC.push_back(std::pair<int, int> (x.first, x.second));
     }
 
