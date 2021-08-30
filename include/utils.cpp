@@ -11,7 +11,7 @@ namespace prt
     void arr(int *arr, int len)
     {
         std::cout << std::endl;
-        for(int i = 0; i < len; i++)
+        for (int i = 0; i < len; i++)
             std::cout << arr[i] << " ";
         std::cout << std::endl;
     }
@@ -19,12 +19,18 @@ namespace prt
 
     void mat(int **mat, int rows, int cols)
     {
-        for(int i = 0; i < rows; i++){
-            for(int j = 0; j < cols; j++){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 std::cout << mat[i][j] << " ";
             }
             std::cout << std::endl;
         }
+    }
+
+    void vec(std::vector<std::pair<int, int>> vec)
+    {
+        for (auto x : vec)
+        std::cout << x.first << " " << x.second << std::endl;
     }
 
     void csrMat(csr &M)
@@ -86,17 +92,14 @@ namespace util
         LL_colIndOffset = blockNnzCounter[blockInd];
     }
 
-    void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM)
+    void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM)
     {
         int rowOffset = blockRow * b;
         int colOffset = blockCol * b;
 
-        for (int i = 0; i < _sizeM; i += 2) {
-            M[sizeM + i] = _M[i] + rowOffset;
-            M[sizeM + i + 1] = _M[i + 1] + colOffset;
+        for (const auto& x : _mapM) {
+            mapM.insert(std::pair <int, int> (x.first + rowOffset, x.second + colOffset));
         }
-
-        sizeM += _sizeM;
     }
 
     void initCsr(csr &M, int n, int nnz)
@@ -169,17 +172,8 @@ namespace util
         delete[] M.blockNnzCounter;
     }
 
-    bool checkRes(std::string checkGraph, coo &C)
+    bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC)
     {
-        std::vector<std::pair <int, int> > vectC (C.nnz);
-
-        for (int i = 0; i < C.nnz; i++) {
-            vectC[i].first = C.row[i];
-            vectC[i].second = C.col[i];
-        }
-
-        std::sort(vectC.begin(), vectC.end());
-
         // read correct result
         int checkN;
         int checkNnz;
@@ -194,12 +188,12 @@ namespace util
 
         // compare results
         bool pass = true;
-        if (checkM.nnz != vectC.size()) {
+        if (checkM.nnz != vecC.size()) {
             return false;
         }
         else {
-            for (int i = 0; i < vectC.size(); i++) {
-                if (checkM.row[i] != vectC[i].first || checkM.col[i] != vectC[i].second) {
+            for (int i = 0; i < vecC.size(); i++) {
+                if (checkM.row[i] != vecC[i].first || checkM.col[i] != vecC[i].second) {
                     return false;
                 }
             }

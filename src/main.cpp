@@ -15,7 +15,8 @@
 #include <bmm.cpp>
 #include <blocking.cpp>
 #include <block-bmm.cpp>
-#include <parallel-block-bmm.cpp>
+#include <masked-block-bmm.cpp>
+// #include <parallel-masked-block-bmm.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
@@ -29,7 +30,7 @@ int main()
     int n;
     int nnz;
 
-    std::string graph = "belgium_osm.mtx";
+    std::string graph = "s12.mtx";
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
@@ -59,7 +60,7 @@ int main()
     /* ----------------------------------- s12 ---------------------------------- */
 
     // int b = 2;
-    // int b = 3;
+    int b = 3;
     // int b = 4;
     // int b = 6;
 
@@ -88,7 +89,7 @@ int main()
 
     /* ------------------------------- belgium_osm ------------------------------ */
 
-    int b = 62665;
+    // int b = 62665;
 
     /* --------------------------- bcsr blocking test --------------------------- */
     
@@ -146,25 +147,26 @@ int main()
 
     timer = util::tic();
 
-    // ret2 ans = maskedBlockBmm(blA, blA, blB);
-    ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
+    std::multimap<int, int> C;
+    blockBmm(blA, blB, C);
+    // maskedBlockBmm(blA, blA, blB, C);
+    // ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
 
-    coo C;
-    util::initCoo(C, A.n, ans.sizeM / 2);
-    
-    for (int i = 0, j = 0; i < ans.sizeM; i += 2, j++) {
-        C.row[j] = ans.M[i];
-        C.col[j] = ans.M[i + 1];
-    }
+    std::vector<std::pair<int, int>> vecC;
 
-    // prt::cooMat(C);
+    for (const auto& x : C) {
+      vecC.push_back(std::pair<int, int> (x.first, x.second));
+    }
+    std::sort(vecC.begin(), vecC.end());
+
+    prt::vec(vecC);
 
     /* ------------------------------ check result ------------------------------ */
 
-    if (util::checkRes(graph, C)) {
+    if (util::checkRes(graph, vecC)) {
       std::cout << "\nTest passed\n";
     }
     else {
@@ -175,10 +177,8 @@ int main()
 
     util::delCsr(A);
     util::delCsc(B);
-    util::delCoo(C);
     util::delBcsr(blA); 
     util::delBcsc(blB);
-    delete[] ans.M;
 
   return 0;
 }
