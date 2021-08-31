@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     MPI_Request req;
     MPI_Status stat;
 
-    int arg1, arg2, arg3, arg4, arg5, arg6;
+    int LL_bColPtrSize, LL_bRowIndSize, HL_bColPtrSize, HL_bRowIndSize, nzBlockIndexSize, blockNnzCounterSize;
     int rxBuffer[6];
     bcsc blB;
     
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 
         timer = util::tic();
 
-        int LL_bColPtrSize = numBlocks * (b + 1);
+        LL_bColPtrSize = numBlocks * (b + 1);
 
         // bcsc blB;
         blB.n = A.n;
@@ -160,31 +160,21 @@ int main(int argc, char **argv)
         blB.nzBlockIndex = _ret.ret3;
         blB.blockNnzCounter = _ret.ret4;
 
+        LL_bRowIndSize = nnz;
+        HL_bColPtrSize = _ret.size1;
+        HL_bRowIndSize = _ret.size2;
+        nzBlockIndexSize = _ret.size3;
+        blockNnzCounterSize = _ret.size4;
+
         /* ------------------- Send parameters to create bcsc type ------------------ */
 
-        int sendBuffer[6] = {LL_bColPtrSize, nnz, _ret.size1, _ret.size2, _ret.size3, _ret.size4};
-
-        arg1 = LL_bColPtrSize;
-        arg2 = nnz;
-        arg3 = _ret.size1;
-        arg4 = _ret.size2;
-        arg5 = _ret.size3;
-        arg6 = _ret.size4;
+        int sendBuffer[6] = {LL_bColPtrSize, LL_bRowIndSize, HL_bColPtrSize, HL_bRowIndSize,
+            nzBlockIndexSize, blockNnzCounterSize};
 
         for(int p = 1; p < numProcesses; p++) {
 
             MPI_Isend(&sendBuffer, 6, MPI_INT, p, 0, MPI_COMM_WORLD, &req);
-            MPI_Send(blB.LL_bColPtr, arg1, MPI_INT, p, 1, MPI_COMM_WORLD);
         }
-
-        // std::cout<<blB.HL_bColPtr[1]<<std::endl;
-        //for(int p = 1; p < numProcesses; p++) {
-            
-            // Send parameters to create bcsc mpi type
-            // MPI_Isend(&sendBuffer, 6, MPI_INT, p, 0, MPI_COMM_WORLD, &req);
-            // Send bcsc B array
-            //MPI_Isend(&blB, 1, MPI_BCSC, p, 1, MPI_COMM_WORLD, &req);
-        //}
 
         t = util::toc(timer);
         std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
@@ -193,20 +183,30 @@ int main(int argc, char **argv)
 
         MPI_Recv(&rxBuffer, 6, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
 
-        arg1 = rxBuffer[0];
-        arg2 = rxBuffer[1];
-        arg3 = rxBuffer[2];
-        arg4 = rxBuffer[3];
-        arg5 = rxBuffer[4];
-        arg6 = rxBuffer[5];
+        LL_bColPtrSize = rxBuffer[0];
+        LL_bRowIndSize = rxBuffer[1];
+        HL_bColPtrSize = rxBuffer[2];
+        HL_bRowIndSize = rxBuffer[3];
+        nzBlockIndexSize = rxBuffer[4];
+        blockNnzCounterSize = rxBuffer[5];
 
-        blB.LL_bColPtr = new int[arg1]();
-
-        MPI_Recv(blB.LL_bColPtr, arg1, MPI_INT, 0, 1, MPI_COMM_WORLD, &stat);
-        prt::arr(blB.LL_bColPtr, arg1);
+        blB.LL_bColPtr = new int[LL_bColPtrSize]();
+        blB.LL_bRowInd = new int[LL_bRowIndSize]();
+        blB.HL_bColPtr = new int[HL_bColPtrSize]();
+        blB.HL_bRowInd = new int[HL_bRowIndSize]();
+        blB.nzBlockIndex = new int[nzBlockIndexSize]();
+        blB.blockNnzCounter = new int[blockNnzCounterSize]();
     }
 
+    MPI_Bcast(blB.LL_bColPtr, LL_bColPtrSize, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(blB.LL_bRowInd, LL_bRowIndSize, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(blB.HL_bColPtr, HL_bColPtrSize, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(blB.HL_bRowInd, HL_bRowIndSize, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(blB.nzBlockIndex, nzBlockIndexSize, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(blB.blockNnzCounter, blockNnzCounterSize, MPI_INT, 0, MPI_COMM_WORLD);
     
+    // prt::arr(blB.blockNnzCounter, blockNnzCounterSize);
+
 
 
 
