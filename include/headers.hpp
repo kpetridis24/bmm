@@ -76,6 +76,10 @@ typedef struct
   int *ret2;
   int *ret3; 
   int *ret4;
+  int size1;
+  int size2;
+  int size3;
+  int size4;
 } ret;
 
 /* ------------------ masked block row-col mult return type ----------------- */

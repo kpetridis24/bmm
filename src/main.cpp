@@ -22,19 +22,29 @@
 #include <utils.cpp>
 #include <reader.cpp>
 
+
+
 int main(int argc, char **argv)
 {
     /* -------------------------------------------------------------------------- */
     /*                        OpenMPI bmm distribution test                       */
     /* -------------------------------------------------------------------------- */
 
+    /* --------------------------- Initialize OpenMPI --------------------------- */
+
     int numProcesses, pId;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
     MPI_Comm_rank(MPI_COMM_WORLD, &pId);
+    // MPI_Datatype MPI_BCSC;
+    MPI_Request req;
     MPI_Status stat;
 
-    if(pId == 1) {
+    int arg1, arg2, arg3, arg4, arg5, arg6;
+    int rxBuffer[6];
+    bcsc blB;
+    
+    if(pId == 0) {
         
         struct timeval timer;
         double t = -1;
@@ -44,7 +54,7 @@ int main(int argc, char **argv)
         int n;
         int nnz;
 
-        std::string graph = "com-Youtube.mtx";
+        std::string graph = "s12.mtx";
         std::string file = "graphs/" + graph;
 
         readMtxValues(file, n, nnz);
@@ -59,8 +69,6 @@ int main(int argc, char **argv)
         csc B;
         util::initCsc(B, n, nnz);
 
-        // prt::cooMat(M);
-
         coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
         coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
 
@@ -74,14 +82,14 @@ int main(int argc, char **argv)
         /* ----------------------------------- s12 ---------------------------------- */
 
         // int b = 2;
-        // int b = 3;
+        int b = 3;
         // int b = 4;
         // int b = 6;
 
         /* ------------------------------- com-Youtube ------------------------------ */
 
         // int b = 226978;
-        int b = 113489;
+        // int b = 113489;
         
         /* -------------------------------- dblp-2010 ------------------------------- */
 
@@ -132,13 +140,11 @@ int main(int argc, char **argv)
 
         /* --------------------------- bcsc blocking test --------------------------- */
 
-        // std::cout << "\nBlocking B in B-CSC...\n";
-
         timer = util::tic();
 
         int LL_bColPtrSize = numBlocks * (b + 1);
 
-        bcsc blB;
+        // bcsc blB;
         blB.n = A.n;
         blB.b = b;
 
@@ -154,11 +160,143 @@ int main(int argc, char **argv)
         blB.nzBlockIndex = _ret.ret3;
         blB.blockNnzCounter = _ret.ret4;
 
+        /* ------------------- Send parameters to create bcsc type ------------------ */
+
+        int sendBuffer[6] = {LL_bColPtrSize, nnz, _ret.size1, _ret.size2, _ret.size3, _ret.size4};
+
+        arg1 = LL_bColPtrSize;
+        arg2 = nnz;
+        arg3 = _ret.size1;
+        arg4 = _ret.size2;
+        arg5 = _ret.size3;
+        arg6 = _ret.size4;
+
+        for(int p = 1; p < numProcesses; p++) {
+
+            MPI_Isend(&sendBuffer, 6, MPI_INT, p, 0, MPI_COMM_WORLD, &req);
+            MPI_Send(blB.LL_bColPtr, arg1, MPI_INT, p, 1, MPI_COMM_WORLD);
+        }
+
+        // std::cout<<blB.HL_bColPtr[1]<<std::endl;
+        //for(int p = 1; p < numProcesses; p++) {
+            
+            // Send parameters to create bcsc mpi type
+            // MPI_Isend(&sendBuffer, 6, MPI_INT, p, 0, MPI_COMM_WORLD, &req);
+            // Send bcsc B array
+            //MPI_Isend(&blB, 1, MPI_BCSC, p, 1, MPI_COMM_WORLD, &req);
+        //}
+
         t = util::toc(timer);
         std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
-
-        
     }
+    else {
+
+        MPI_Recv(&rxBuffer, 6, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
+
+        arg1 = rxBuffer[0];
+        arg2 = rxBuffer[1];
+        arg3 = rxBuffer[2];
+        arg4 = rxBuffer[3];
+        arg5 = rxBuffer[4];
+        arg6 = rxBuffer[5];
+
+        blB.LL_bColPtr = new int[arg1]();
+
+        MPI_Recv(blB.LL_bColPtr, arg1, MPI_INT, 0, 1, MPI_COMM_WORLD, &stat);
+        prt::arr(blB.LL_bColPtr, arg1);
+    }
+
+    
+
+
+
+
+
+
+
+
+    // else {
+    //     /* --------------------------- Receive parameters --------------------------- */
+        
+    //     bcsc blockB;
+    //     MPI_Recv(&rxBuffer, 6, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
+
+    //     arg1 = rxBuffer[0];
+    //     arg2 = rxBuffer[1];
+    //     arg3 = rxBuffer[2];
+    //     arg4 = rxBuffer[3];
+    //     arg5 = rxBuffer[4];
+    //     arg6 = rxBuffer[5];
+        
+    //     // Create new MPI type
+    //     //MPI_BCSC = createMpiTypeBcsc(arg1, arg2, arg3, arg4, arg5, arg6);
+    //     const int nitems = 8;
+    //     int blocklengths[8] = {arg1, arg2, arg3, arg4, arg5, arg6, 1, 1};
+    //     MPI_Datatype types[8] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
+    //     MPI_Datatype MPI_BCSC;
+    //     MPI_Aint offsets[8];
+
+    //     offsets[0] = offsetof(bcsc, LL_bColPtr);
+    //     offsets[1] = offsetof(bcsc, LL_bRowInd);
+    //     offsets[2] = offsetof(bcsc, HL_bColPtr);
+    //     offsets[3] = offsetof(bcsc, HL_bRowInd);
+    //     offsets[4] = offsetof(bcsc, nzBlockIndex);
+    //     offsets[5] = offsetof(bcsc, blockNnzCounter);
+    //     offsets[6] = offsetof(bcsc, n);
+    //     offsets[7] = offsetof(bcsc, b);
+
+    //     MPI_Type_create_struct(nitems, blocklengths, offsets, types, &MPI_BCSC);
+    //     MPI_Type_commit(&MPI_BCSC);
+    //     // Receive bcsc B array
+    //     MPI_Recv(&blockB, 1, MPI_BCSC, 0, 1, MPI_COMM_WORLD, &stat);
+    //     std::cout<<blockB.HL_bColPtr[1]<<std::endl;
+    // }
+    
+    // MPI_BCSC = createMpiTypeBcsc(arg1, arg2, arg3, arg4, arg5, arg6);
+
+    /* ------------------------ Creation of MPI_BCSC type ----------------------- */
+
+    // const int nitems = 8;
+    // int blocklengths[8] = {arg1, arg2, arg3, arg4, arg5, arg6, 1, 1};
+    // MPI_Datatype types[8] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
+    // MPI_Datatype MPI_BCSC;
+    // MPI_Aint offsets[8];
+
+    // offsets[0] = offsetof(bcsc, LL_bColPtr);
+    // offsets[1] = offsetof(bcsc, LL_bRowInd);
+    // offsets[2] = offsetof(bcsc, HL_bColPtr);
+    // offsets[3] = offsetof(bcsc, HL_bRowInd);
+    // offsets[4] = offsetof(bcsc, nzBlockIndex);
+    // offsets[5] = offsetof(bcsc, blockNnzCounter);
+    // offsets[6] = offsetof(bcsc, n);
+    // offsets[7] = offsetof(bcsc, b);
+
+    // MPI_Type_create_struct(nitems, blocklengths, offsets, types, &MPI_BCSC);
+    // MPI_Type_commit(&MPI_BCSC);
+
+    // /* ---------------------------- Send BCSC array B --------------------------- */
+    // //MPI_Bcast(&blB, 1, MPI_BCSC, 0, MPI_COMM_WORLD);
+    
+    // if(pId == 0) {
+
+    //     for(int p = 0; p < numProcesses; p++)
+    //         MPI_Send(&blB, 1, MPI_BCSC, p, 1, MPI_COMM_WORLD);
+    // }
+    // else {
+
+    //     MPI_Recv(&blB, 1, MPI_BCSC, 0, 1, MPI_COMM_WORLD, &stat);
+    //     //std::cout<<blB.HL_bColPtr[0]<<std::endl;
+    // }
+    //std::cout<<blB.HL_bColPtr[0]<<std::endl;
+    
+
+    // if(pId == 1) {
+
+    //     bcsc blockB;
+    //     MPI_Recv(&blockB, 1, MPI_BCSC, 0, 0, MPI_COMM_WORLD, &stat);
+    // }
+    
+    // MPI_Bcast(&blB, 1, MPI_BCSC, 0, MPI_COMM_WORLD);
 
     MPI_Finalize();
 
