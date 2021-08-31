@@ -121,8 +121,8 @@ ret csr2bcsr(csr &M, bcsr &blM)
     delete[] b_rows;
     delete[] b_cols;
 
-    ret _ret = {HL_bRowPtr, HL_bColInd, nzBlockIndex, blockNnzCounter};
-
+    ret _ret = {HL_bRowPtr, HL_bColInd, nzBlockIndex, blockNnzCounter, num_of_block_rows+1,
+                nnzb, numBlocks, numBlocks+1};
     return _ret;
 }
 
@@ -242,7 +242,8 @@ ret csr2bcsc(csc &M, bcsc &blM)
     delete[] b_rows;
     delete[] b_cols;
 
-    ret _ret = {HL_bColPtr, HL_bRowInd, nzBlockIndex, blockNnzCounter, num_of_block_rows+1, nnzb, numBlocks, numBlocks + 1};
+    ret _ret = {HL_bColPtr, HL_bRowInd, nzBlockIndex, blockNnzCounter, num_of_block_rows+1,
+                nnzb, numBlocks, numBlocks + 1};
 
     return _ret;
 }

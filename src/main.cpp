@@ -32,21 +32,28 @@ int main(int argc, char **argv)
 
     /* --------------------------- Initialize OpenMPI --------------------------- */
 
-    int numProcesses, pId;
+    int numProcesses, rank;
+
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
-    MPI_Comm_rank(MPI_COMM_WORLD, &pId);
-    // MPI_Datatype MPI_BCSC;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Request req;
     MPI_Status stat;
 
+    // BCSR array sizes
+    int LL_bRowPtrSize, LL_bColIndSize, HL_bRowPtrSize, HL_bColIndSize;
+    // BCSC array sizes
     int LL_bColPtrSize, LL_bRowIndSize, HL_bColPtrSize, HL_bRowIndSize, nzBlockIndexSize, blockNnzCounterSize;
+
     int rxBuffer[6];
     bcsc blB;
+    bcsr blA;
+
+    int numBlockRows, blockRowChunkSize;
     
     /* --------------- Only process-0 runs the blocking functions --------------- */
 
-    if(pId == 0) {
+    if(rank == 0) {
         
         struct timeval timer;
         double t = -1;
@@ -56,7 +63,7 @@ int main(int argc, char **argv)
         int n;
         int nnz;
 
-        std::string graph = "s12.mtx";
+        std::string graph = "com-Youtube.mtx";
         std::string file = "graphs/" + graph;
 
         readMtxValues(file, n, nnz);
@@ -84,13 +91,13 @@ int main(int argc, char **argv)
         /* ----------------------------------- s12 ---------------------------------- */
 
         // int b = 2;
-        int b = 3;
+        // int b = 3;
         // int b = 4;
         // int b = 6;
 
         /* ------------------------------- com-Youtube ------------------------------ */
 
-        // int b = 226978;
+        int b = 226978;
         // int b = 113489;
         
         /* -------------------------------- dblp-2010 ------------------------------- */
@@ -119,9 +126,9 @@ int main(int argc, char **argv)
         
         timer = util::tic();
         int numBlocks = (n / b) * (n / b);
-        int LL_bRowPtrSize = numBlocks * (b + 1);
+        LL_bRowPtrSize = numBlocks * (b + 1);
 
-        bcsr blA;
+        // bcsr blA;
         blA.n = A.n;
         blA.b = b;
 
@@ -136,6 +143,15 @@ int main(int argc, char **argv)
         blA.HL_bColInd = _ret.ret2;
         blA.nzBlockIndex = _ret.ret3;
         blA.blockNnzCounter = _ret.ret4;
+
+        LL_bColIndSize = nnz;
+        HL_bRowPtrSize = _ret.size1;
+        HL_bColIndSize = _ret.size2;
+
+        // prt::arr(blA.HL_bRowPtr, HL_bRowPtrSize);
+        // prt::arr(blA.HL_bColInd, HL_bColIndSize);
+        // prt::arr(blA.LL_bRowPtr, LL_bRowPtrSize);
+        // prt::arr(blA.LL_bColInd, LL_bColIndSize);
 
         t = util::toc(timer);
         std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
@@ -168,6 +184,11 @@ int main(int argc, char **argv)
         nzBlockIndexSize = _ret.size3;
         blockNnzCounterSize = _ret.size4;
 
+        numBlockRows = _ret.size1 - 1; // num_of_block_rows
+        blockRowChunkSize = numBlockRows / numProcesses;
+        std::cout<<"Blockrows:\t"<<numBlockRows<<std::endl<<"Blockrows per process:\t"<<
+            blockRowChunkSize<<std::endl;
+
         /* ---------- Send array sizes to allocate memory on all processes ---------- */
 
         int sendBuffer[6] = {LL_bColPtrSize, LL_bRowIndSize, HL_bColPtrSize, HL_bRowIndSize,
@@ -178,6 +199,9 @@ int main(int argc, char **argv)
         
         t = util::toc(timer);
         std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+        
+        /* ---------------------------- Distribution test --------------------------- */
+
     }
     else {
         /* --------------------------- Receive array sizes -------------------------- */
@@ -191,6 +215,9 @@ int main(int argc, char **argv)
         nzBlockIndexSize = rxBuffer[4];
         blockNnzCounterSize = rxBuffer[5];
 
+        numBlockRows = rxBuffer[2] - 1; // num_of_block_rows
+        blockRowChunkSize = numBlockRows / numProcesses;
+
         /* ------------------- Memory allocation on all processes ------------------- */
 
         blB.LL_bColPtr = new int[LL_bColPtrSize]();
@@ -203,17 +230,17 @@ int main(int argc, char **argv)
 
     /* ------------------------ BCSC B array distribution ----------------------- */
 
-    MPI_Bcast(blB.LL_bColPtr, LL_bColPtrSize, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(blB.LL_bRowInd, LL_bRowIndSize, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(blB.HL_bColPtr, HL_bColPtrSize, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(blB.HL_bRowInd, HL_bRowIndSize, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(blB.nzBlockIndex, nzBlockIndexSize, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(blB.blockNnzCounter, blockNnzCounterSize, MPI_INT, 0, MPI_COMM_WORLD);
+    // MPI_Bcast(blB.LL_bColPtr, LL_bColPtrSize, MPI_INT, 0, MPI_COMM_WORLD);
+    // MPI_Bcast(blB.LL_bRowInd, LL_bRowIndSize, MPI_INT, 0, MPI_COMM_WORLD);
+    // MPI_Bcast(blB.HL_bColPtr, HL_bColPtrSize, MPI_INT, 0, MPI_COMM_WORLD);
+    // MPI_Bcast(blB.HL_bRowInd, HL_bRowIndSize, MPI_INT, 0, MPI_COMM_WORLD);
+    // MPI_Bcast(blB.nzBlockIndex, nzBlockIndexSize, MPI_INT, 0, MPI_COMM_WORLD);
+    // MPI_Bcast(blB.blockNnzCounter, blockNnzCounterSize, MPI_INT, 0, MPI_COMM_WORLD);
     
     // prt::arr(blB.blockNnzCounter, blockNnzCounterSize);
 
 
-
+    distributeBcsrMatrix(numProcesses, numBlockRows, rank, blA);
 
 
 
@@ -282,7 +309,7 @@ int main(int argc, char **argv)
     // /* ---------------------------- Send BCSC array B --------------------------- */
     // //MPI_Bcast(&blB, 1, MPI_BCSC, 0, MPI_COMM_WORLD);
     
-    // if(pId == 0) {
+    // if(rank == 0) {
 
     //     for(int p = 0; p < numProcesses; p++)
     //         MPI_Send(&blB, 1, MPI_BCSC, p, 1, MPI_COMM_WORLD);
@@ -295,7 +322,7 @@ int main(int argc, char **argv)
     //std::cout<<blB.HL_bColPtr[0]<<std::endl;
     
 
-    // if(pId == 1) {
+    // if(rank == 1) {
 
     //     bcsc blockB;
     //     MPI_Recv(&blockB, 1, MPI_BCSC, 0, 0, MPI_COMM_WORLD, &stat);
