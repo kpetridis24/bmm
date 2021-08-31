@@ -44,6 +44,8 @@ int main(int argc, char **argv)
     int rxBuffer[6];
     bcsc blB;
     
+    /* --------------- Only process-0 runs the blocking functions --------------- */
+
     if(pId == 0) {
         
         struct timeval timer;
@@ -166,20 +168,19 @@ int main(int argc, char **argv)
         nzBlockIndexSize = _ret.size3;
         blockNnzCounterSize = _ret.size4;
 
-        /* ------------------- Send parameters to create bcsc type ------------------ */
+        /* ---------- Send array sizes to allocate memory on all processes ---------- */
 
         int sendBuffer[6] = {LL_bColPtrSize, LL_bRowIndSize, HL_bColPtrSize, HL_bRowIndSize,
             nzBlockIndexSize, blockNnzCounterSize};
 
-        for(int p = 1; p < numProcesses; p++) {
-
+        for(int p = 1; p < numProcesses; p++) 
             MPI_Isend(&sendBuffer, 6, MPI_INT, p, 0, MPI_COMM_WORLD, &req);
-        }
-
+        
         t = util::toc(timer);
         std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
     }
     else {
+        /* --------------------------- Receive array sizes -------------------------- */
 
         MPI_Recv(&rxBuffer, 6, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
 
@@ -190,6 +191,8 @@ int main(int argc, char **argv)
         nzBlockIndexSize = rxBuffer[4];
         blockNnzCounterSize = rxBuffer[5];
 
+        /* ------------------- Memory allocation on all processes ------------------- */
+
         blB.LL_bColPtr = new int[LL_bColPtrSize]();
         blB.LL_bRowInd = new int[LL_bRowIndSize]();
         blB.HL_bColPtr = new int[HL_bColPtrSize]();
@@ -197,6 +200,8 @@ int main(int argc, char **argv)
         blB.nzBlockIndex = new int[nzBlockIndexSize]();
         blB.blockNnzCounter = new int[blockNnzCounterSize]();
     }
+
+    /* ------------------------ BCSC B array distribution ----------------------- */
 
     MPI_Bcast(blB.LL_bColPtr, LL_bColPtrSize, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(blB.LL_bRowInd, LL_bRowIndSize, MPI_INT, 0, MPI_COMM_WORLD);
