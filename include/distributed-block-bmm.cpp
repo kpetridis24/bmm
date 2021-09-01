@@ -72,6 +72,7 @@ void distributeBcsrMatrix(int numProcesses, int numBlockRows, int rank, bcsr &M)
     
         // prt::arr(numBlocksInChunk, numProcesses);
 
+        // fix blockNnzCounter, add empty blocks
         int curChunk = -1;
         for (int i = 0, chunkInd = 0, cnt = 0; i < (M.n / M.b) * (M.n / M.b) + 1; i++) {
 
@@ -96,6 +97,9 @@ void distributeBcsrMatrix(int numProcesses, int numBlockRows, int rank, bcsr &M)
 
         self_chunkSize_LL_bRowPtr = chunkSizes_LL_bRowPtr[0];
         // prt::arr(numBlocksInChunk, numProcesses);
+
+        /* ----------------- send chunk sizes to the other processes ---------------- */
+
         for(int i = 1; i < numProcesses; i++) {
 
             MPI_Isend(&chunkSizes_LL_bRowPtr[i], 1, MPI_INT, i, 0, MPI_COMM_WORLD, &req);
@@ -117,6 +121,8 @@ void distributeBcsrMatrix(int numProcesses, int numBlockRows, int rank, bcsr &M)
 
     }
     else{
+        /* ------------------- receive chunk sizes from process 0 ------------------- */
+
         MPI_Recv(&self_chunkSize_LL_bRowPtr, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
         M.LL_bRowPtr = new int[self_chunkSize_LL_bRowPtr];  // Every process allocates exact ammount of memory
         // std::cout<< self_chunkSize_LL_bRowPtr <<std::endl;
@@ -127,6 +133,8 @@ void distributeBcsrMatrix(int numProcesses, int numBlockRows, int rank, bcsr &M)
         MPI_Recv(&self_chunkSize_blockNnzCounter, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &stat);
         M.blockNnzCounter = new int[self_chunkSize_blockNnzCounter];
     }
+
+    /* --------------------------- distribute matrix A -------------------------- */
 
     MPI_Scatterv(M.LL_bRowPtr, chunkSizes_LL_bRowPtr, offsets_LL_bRowPtr, MPI_INT, M.LL_bRowPtr,
                  self_chunkSize_LL_bRowPtr, MPI_INT, 0, MPI_COMM_WORLD);

@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         csr A;
         csc B;
 
-        readMtx(2, n, nnz, b, A, B);
+        readMtx(1, n, nnz, b, A, B);
 
         std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
 
