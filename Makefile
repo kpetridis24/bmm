@@ -26,7 +26,7 @@ openmp:
 
 mpi:
 	$(OPENMPI) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) 
-	mpirun -np 8 ./build/main 
+	mpirun -np 4 ./build/main 
 
 clean:
 	rm test

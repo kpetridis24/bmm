@@ -92,6 +92,7 @@ typedef struct
 
 /* ----------------------------- read functions ----------------------------- */
 
+void readMtx(int graphId, int &n, int&nnz, int &b, csr &A, csc &B);
 void readMtxValues(std::string f, int &n, int &nnz);
 void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz);
 int coo2csr(

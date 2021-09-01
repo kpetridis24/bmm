@@ -5,6 +5,69 @@
 #include <iostream>
 #include <fstream>
 
+#include <headers.hpp>
+
+void readMtx(int graphId, int &n, int&nnz, int &b, csr &A, csc &B)
+{
+    std::string graph;
+
+    switch(graphId) {
+        case 0:
+            graph = "s6.mtx";
+            // b = 2;
+            b = 3;
+            break;
+        case 1:
+            graph = "s12.mtx";
+            b = 2;
+            // b = 3;
+            // b = 4;
+            // b = 6;
+            break;
+        case 2:
+            graph = "com-Youtube.mtx";
+            b = 226978;
+            // b = 113489;
+            break;
+        case 3:
+            graph = "belgium_osm.mtx";
+            b = 62665;
+            break;
+        case 4:
+            graph = "dblp-2010.mtx";
+            b = 23299;
+            // b = 14182;
+            break;
+        case 5:
+            graph = "as-Skitter.mtx";
+            b = 48469;
+            // b = 17857;
+            break;
+        default:
+            exit(1);
+    }
+
+    std::string file = "graphs/" + graph;
+
+    readMtxValues(file, n, nnz);
+
+    coo M;
+    util::initCoo(M, n, nnz);
+
+    openMtxFile(file, M.col, M.row, M.n, M.nnz);
+
+    util::initCsr(A, n, nnz);
+    util::initCsc(B, n, nnz);
+
+    coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
+    coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
+
+    util::delCoo(M);
+
+    // prt::csrMat(A);
+    // prt::cscMat(B);
+}
+
 void readMtxValues(std::string f, int &n, int &nnz)
 {
     // Open the file:

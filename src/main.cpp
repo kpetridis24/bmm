@@ -22,8 +22,6 @@
 #include <utils.cpp>
 #include <reader.cpp>
 
-
-
 int main(int argc, char **argv)
 {
     /* -------------------------------------------------------------------------- */
@@ -50,80 +48,23 @@ int main(int argc, char **argv)
     bcsr blA;
 
     int numBlockRows, blockRowChunkSize;
+    struct timeval timer;
+    double t = -1;
+
     
     /* --------------- Only process-0 runs the blocking functions --------------- */
 
     if(rank == 0) {
-        
-        struct timeval timer;
-        double t = -1;
 
         /* ------------------------------- read matrix ------------------------------ */
 
         int n;
         int nnz;
         int b;
-
-        std::string graph;
-        int graphId = 1;
-
-        switch(graphId) {
-            case 0:
-                graph = "s6.mtx";
-                b = 2;
-                // b = 3;
-                break;
-            case 1:
-                graph = "s12.mtx";
-                b = 2;
-                // b = 3;
-                // b = 4;
-                // b = 6;
-                break;
-            case 2:
-                graph = "com-Youtube.mtx";
-                b = 226978;
-                // b = 113489;
-                break;
-            case 3:
-                graph = "belgium_osm.mtx";
-                b = 62665;
-                break;
-            case 4:
-                graph = "dblp-2010.mtx";
-                b = 23299;
-                // b = 14182;
-                break;
-            case 5:
-                graph = "as-Skitter.mtx";
-                b = 48469;
-                // b = 17857;
-                break;
-            default:
-                exit(1);
-        }
-
-        std::string file = "graphs/" + graph;
-
-        readMtxValues(file, n, nnz);
-
-        coo M;
-        util::initCoo(M, n, nnz);
-
-        openMtxFile(file, M.col, M.row, M.n, M.nnz);
-
         csr A;
-        util::initCsr(A, n, nnz);
         csc B;
-        util::initCsc(B, n, nnz);
 
-        coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
-        coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
-
-        util::delCoo(M);
-
-        // prt::csrMat(A);
-        // prt::cscMat(B);
+        readMtx(1, n, nnz, b, A, B);
 
         std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
 
@@ -204,9 +145,6 @@ int main(int argc, char **argv)
         
         t = util::toc(timer);
         std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
-        
-        /* ---------------------------- Distribution test --------------------------- */
-
     }
     else {
         /* --------------------------- Receive array sizes -------------------------- */
@@ -245,128 +183,16 @@ int main(int argc, char **argv)
     // prt::arr(blB.blockNnzCounter, blockNnzCounterSize);
 
 
-    // distributeBcsrMatrix(numProcesses, numBlockRows, rank, blA);
+    /* ----------------------- Matrix A distribution test ----------------------- */
 
+    timer = util::tic();
 
+    distributeBcsrMatrix(numProcesses, numBlockRows, rank, blA);
 
-
-
-
-    // else {
-    //     /* --------------------------- Receive parameters --------------------------- */
-        
-    //     bcsc blockB;
-    //     MPI_Recv(&rxBuffer, 6, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
-
-    //     arg1 = rxBuffer[0];
-    //     arg2 = rxBuffer[1];
-    //     arg3 = rxBuffer[2];
-    //     arg4 = rxBuffer[3];
-    //     arg5 = rxBuffer[4];
-    //     arg6 = rxBuffer[5];
-        
-    //     // Create new MPI type
-    //     //MPI_BCSC = createMpiTypeBcsc(arg1, arg2, arg3, arg4, arg5, arg6);
-    //     const int nitems = 8;
-    //     int blocklengths[8] = {arg1, arg2, arg3, arg4, arg5, arg6, 1, 1};
-    //     MPI_Datatype types[8] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
-    //     MPI_Datatype MPI_BCSC;
-    //     MPI_Aint offsets[8];
-
-    //     offsets[0] = offsetof(bcsc, LL_bColPtr);
-    //     offsets[1] = offsetof(bcsc, LL_bRowInd);
-    //     offsets[2] = offsetof(bcsc, HL_bColPtr);
-    //     offsets[3] = offsetof(bcsc, HL_bRowInd);
-    //     offsets[4] = offsetof(bcsc, nzBlockIndex);
-    //     offsets[5] = offsetof(bcsc, blockNnzCounter);
-    //     offsets[6] = offsetof(bcsc, n);
-    //     offsets[7] = offsetof(bcsc, b);
-
-    //     MPI_Type_create_struct(nitems, blocklengths, offsets, types, &MPI_BCSC);
-    //     MPI_Type_commit(&MPI_BCSC);
-    //     // Receive bcsc B array
-    //     MPI_Recv(&blockB, 1, MPI_BCSC, 0, 1, MPI_COMM_WORLD, &stat);
-    //     std::cout<<blockB.HL_bColPtr[1]<<std::endl;
-    // }
-    
-    // MPI_BCSC = createMpiTypeBcsc(arg1, arg2, arg3, arg4, arg5, arg6);
-
-    /* ------------------------ Creation of MPI_BCSC type ----------------------- */
-
-    // const int nitems = 8;
-    // int blocklengths[8] = {arg1, arg2, arg3, arg4, arg5, arg6, 1, 1};
-    // MPI_Datatype types[8] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
-    // MPI_Datatype MPI_BCSC;
-    // MPI_Aint offsets[8];
-
-    // offsets[0] = offsetof(bcsc, LL_bColPtr);
-    // offsets[1] = offsetof(bcsc, LL_bRowInd);
-    // offsets[2] = offsetof(bcsc, HL_bColPtr);
-    // offsets[3] = offsetof(bcsc, HL_bRowInd);
-    // offsets[4] = offsetof(bcsc, nzBlockIndex);
-    // offsets[5] = offsetof(bcsc, blockNnzCounter);
-    // offsets[6] = offsetof(bcsc, n);
-    // offsets[7] = offsetof(bcsc, b);
-
-    // MPI_Type_create_struct(nitems, blocklengths, offsets, types, &MPI_BCSC);
-    // MPI_Type_commit(&MPI_BCSC);
-
-    // /* ---------------------------- Send BCSC array B --------------------------- */
-    // //MPI_Bcast(&blB, 1, MPI_BCSC, 0, MPI_COMM_WORLD);
-    
-    // if(rank == 0) {
-
-    //     for(int p = 0; p < numProcesses; p++)
-    //         MPI_Send(&blB, 1, MPI_BCSC, p, 1, MPI_COMM_WORLD);
-    // }
-    // else {
-
-    //     MPI_Recv(&blB, 1, MPI_BCSC, 0, 1, MPI_COMM_WORLD, &stat);
-    //     //std::cout<<blB.HL_bColPtr[0]<<std::endl;
-    // }
-    //std::cout<<blB.HL_bColPtr[0]<<std::endl;
-    
-
-    // if(rank == 1) {
-
-    //     bcsc blockB;
-    //     MPI_Recv(&blockB, 1, MPI_BCSC, 0, 0, MPI_COMM_WORLD, &stat);
-    // }
-    
-    // MPI_Bcast(&blB, 1, MPI_BCSC, 0, MPI_COMM_WORLD);
+    t = util::toc(timer);
+    std::cout << "Distribution of matrix A time = " << t << std::endl;
 
     MPI_Finalize();
-
-    /* ----------------------------- block bmm test ----------------------------- */
-
-    // timer = util::tic();
-
-    // std::multimap<int, int> C;
-
-    // // blockBmm(blA, blB, C);
-    // maskedBlockBmm(blA, blA, blB, C);
-    // // ret2 ans = parallelMaskedBlockBmm(blA, blA, blB);
-
-    // t = util::toc(timer);
-    // std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
-
-    // std::vector<std::pair<int, int>> vecC;
-
-    // for (const auto& x : C) {
-    //   vecC.push_back(std::pair<int, int> (x.first, x.second));
-    // }
-    // std::sort(vecC.begin(), vecC.end());
-
-    // // prt::vec(vecC);
-
-    // /* ------------------------------ check result ------------------------------ */
-
-    // if (util::checkRes(graph, vecC)) {
-    //   std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //   std::cout << "\nTest failed\n";
-    // }
 
     // /* ------------------------------- free memory ------------------------------ */
 
