@@ -24,9 +24,9 @@ openmp:
 	./build/main
 	@printf "\n"
 
-openmpi:
+mpi:
 	$(OPENMPI) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) 
-	mpirun -np 2 ./build/main
+	mpirun -np 8 ./build/main 
 
 clean:
 	rm test

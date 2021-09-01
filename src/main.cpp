@@ -62,6 +62,46 @@ int main(int argc, char **argv)
 
         int n;
         int nnz;
+        int b;
+
+        std::string graph;
+        int graphId = 0;
+
+        switch(graphId) {
+            case 0:
+                graph = "s6.mtx";
+                b = 2;
+                // b = 3;
+                break;
+            case 1:
+                graph = "s12.mtx";
+                b = 2;
+                // b = 3;
+                // b = 4;
+                // b = 6;
+                break;
+            case 2:
+                graph = "com-Youtube.mtx";
+                b = 226978;
+                // b = 113489;
+                break;
+            case 3:
+                graph = "belgium_osm.mtx";
+                b = 62665;
+                break;
+            case 4:
+                graph = "dblp-2010.mtx";
+                b = 23299;
+                // b = 14182;
+                break;
+            case 5:
+                graph = "as-Skitter.mtx"
+                b = 48469;
+                // b = 17857;
+                break;
+            default:
+                exit(1);
+        }
 
         std::string graph = "com-Youtube.mtx";
         std::string file = "graphs/" + graph;
@@ -88,42 +128,8 @@ int main(int argc, char **argv)
 
         std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
 
-        /* ----------------------------------- s12 ---------------------------------- */
-
-        // int b = 2;
-        // int b = 3;
-        // int b = 4;
-        // int b = 6;
-
-        /* ------------------------------- com-Youtube ------------------------------ */
-
-        int b = 226978;
-        // int b = 113489;
-        
-        /* -------------------------------- dblp-2010 ------------------------------- */
-
-        // int b = 46598;
-        // int b = 23299;
-        // int b = 14182;
-        // int b = 7091;
-        // int b = 2026;
-        // int b = 1013;
-
-        /* ------------------------------- as-Skitter ------------------------------- */
-
-        // int b = 242345;
-        // int b = 89285;
-        // int b = 48469;
-        // int b = 17857;
-        // int b = 12755;
-        // int b = 2551;
-
-        /* ------------------------------- belgium_osm ------------------------------ */
-
-        // int b = 62665;
-
         /* --------------------------- bcsr blocking test --------------------------- */
-        
+
         timer = util::tic();
         int numBlocks = (n / b) * (n / b);
         LL_bRowPtrSize = numBlocks * (b + 1);
