@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         csr A;
         csc B;
 
-        readMtx(1, n, nnz, b, A, B);
+        readMtx(2, n, nnz, b, A, B);
 
         std::cout << "\nMatrix read successfully\nn = " << A.n << ", nnz = " << A.nnz << std::endl;
 
@@ -98,6 +98,7 @@ int main(int argc, char **argv)
         // prt::arr(blA.HL_bColInd, HL_bColIndSize);
         // prt::arr(blA.LL_bRowPtr, LL_bRowPtrSize);
         // prt::arr(blA.LL_bColInd, LL_bColIndSize);
+        // prt::arr(blA.blockNnzCounter, numBlocks + 1);
 
         t = util::toc(timer);
         std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
