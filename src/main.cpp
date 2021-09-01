@@ -65,7 +65,7 @@ int main(int argc, char **argv)
         int b;
 
         std::string graph;
-        int graphId = 0;
+        int graphId = 1;
 
         switch(graphId) {
             case 0:
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
                 // b = 14182;
                 break;
             case 5:
-                graph = "as-Skitter.mtx"
+                graph = "as-Skitter.mtx";
                 b = 48469;
                 // b = 17857;
                 break;
@@ -103,7 +103,6 @@ int main(int argc, char **argv)
                 exit(1);
         }
 
-        std::string graph = "com-Youtube.mtx";
         std::string file = "graphs/" + graph;
 
         readMtxValues(file, n, nnz);
@@ -246,7 +245,7 @@ int main(int argc, char **argv)
     // prt::arr(blB.blockNnzCounter, blockNnzCounterSize);
 
 
-    distributeBcsrMatrix(numProcesses, numBlockRows, rank, blA);
+    // distributeBcsrMatrix(numProcesses, numBlockRows, rank, blA);
 
 
 
