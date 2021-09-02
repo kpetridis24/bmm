@@ -20,10 +20,15 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &C)
         exit(1);
     }
 
-    int blocksPerRow = A.m / A.b;
+    int numBlockRowsF = F.m / F.b;
+    int blocksPerRowF = F.n / F.b;
+    int numBlockRowsA = A.m / A.b;
+    int blocksPerRowA = A.n / A.b;
+    int numBlockRowsB = B.m / A.b;
+    int blocksPerRowB = B.n / A.b;
 
     // high level matrix multiplication
-    for (int blockRowF = 0; blockRowF < blocksPerRow; blockRowF++) {
+    for (int blockRowF = 0; blockRowF < numBlockRowsF; blockRowF++) {
         for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];
@@ -42,8 +47,8 @@ void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
     int bIndA;
     int bIndB;
     int cN;
-    int blocksPerRow = A.m / A.b;
-    int bIndF = blockRowF * blocksPerRow + blockColF;
+    int blocksPerRowA = A.n / A.b;
+    int bIndF = blockRowF * blocksPerRowA + blockColF;
 
     int LL_rowPtrOffsetF, LL_colIndOffsetF;
     int LL_rowPtrOffsetA, LL_colIndOffsetA;
@@ -62,8 +67,8 @@ void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
         else {
             cN = A.HL_bColInd[A.HL_bRowPtr[blockRowA] + ptr1]; // common neighbor index
 
-            bIndA = blockRowA * blocksPerRow + cN;
-            bIndB = blockColB * blocksPerRow + cN;
+            bIndA = blockRowA * blocksPerRowA + cN;
+            bIndB = blockColB * blocksPerRowA + cN;
 
             util::blockOffsets(bIndF, F.nzBlockIndex, F.blockNnzCounter, F.b, LL_rowPtrOffsetF, LL_colIndOffsetF);
             util::blockOffsets(bIndA, A.nzBlockIndex, A.blockNnzCounter, A.b, LL_rowPtrOffsetA, LL_colIndOffsetA);

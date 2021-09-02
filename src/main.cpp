@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     /* ---------------------- distribute A and broadcast B ---------------------- */
 
     distributeCooMatrix(numProcesses, rank, cooA, _cooA, graphInd, blockSizeA);
-    // broadcastCooMatrix(numProcesses, rank, cooB, graphInd, blockSizeB);
+    broadcastCooMatrix(numProcesses, rank, cooB, graphInd, blockSizeB);
 
     /* ---------------- fix indices of matrix A - remove offsets ---------------- */
 
@@ -67,10 +67,10 @@ int main(int argc, char **argv)
 
     // prt::csrMat(csrA);
 
-    // csc cscB;
-    // util::initCsc(cscB, cooB.m, cooB.n, cooB.nnz);
+    csc cscB;
+    util::initCsc(cscB, cooB.m, cooB.n, cooB.nnz);
 
-    // coo2csr(cscB.colPtr, cscB.rowInd, cooB.col, cooB.row, cooB.nnz, cooB.n, 0);
+    coo2csr(cscB.colPtr, cscB.rowInd, cooB.col, cooB.row, cooB.nnz, cooB.n, 0);
 
     // prt::cscMat(cscB);
 
@@ -83,71 +83,80 @@ int main(int argc, char **argv)
     bcsrA.n = _cooA.n;
     bcsrA.b = blockSizeA;
 
-    int numBlocks = (bcsrA.m / bcsrA.b) * (bcsrA.n / bcsrA.b);
-    int LL_bRowPtrSize = numBlocks * (bcsrA.b + 1);
+    int numBlocksA = (bcsrA.m / bcsrA.b) * (bcsrA.n / bcsrA.b);
+    int LL_bRowPtrSize = numBlocksA * (bcsrA.b + 1);
 
     // init Low-Level CSR
     bcsrA.LL_bRowPtr = new int[LL_bRowPtrSize]();
     bcsrA.LL_bColInd = new int[_cooA.nnz]();
 
     // blocking
-    ret _ret = csr2bcsr(csrA, bcsrA);
+    ret _ret1 = csr2bcsr(csrA, bcsrA);
 
-    bcsrA.HL_bRowPtr = _ret.ret1;
-    bcsrA.HL_bColInd = _ret.ret2;
-    bcsrA.nzBlockIndex = _ret.ret3;
-    bcsrA.blockNnzCounter = _ret.ret4;
-    int HL_bRowPtrSize = _ret.size1;
-    int HL_bColIndSize = _ret.size2;
-    int nzBlockIndexSizeA = _ret.size3;
-    int blockNnzCounterSizeA = _ret.size4;
+    bcsrA.HL_bRowPtr = _ret1.ret1;
+    bcsrA.HL_bColInd = _ret1.ret2;
+    bcsrA.nzBlockIndex = _ret1.ret3;
+    bcsrA.blockNnzCounter = _ret1.ret4;
+    int HL_bRowPtrSize = _ret1.size1;
+    int HL_bColIndSize = _ret1.size2;
+    int nzBlockIndexSizeA = _ret1.size3;
+    int blockNnzCounterSizeA = _ret1.size4;
 
 
     t = util::toc(timer);
     std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
-    if (rank == 0) {
-      prt::arr(bcsrA.HL_bRowPtr, HL_bRowPtrSize);
-      prt::arr(bcsrA.LL_bRowPtr, LL_bRowPtrSize);
-    }
-
-
     /* -------------------------- blocking of B Matrix -------------------------- */
 
-    // timer = util::tic();
+    timer = util::tic();
 
-    // bcsc bcscB;
-    // bcscB.m = cooB.m;
-    // bcscB.n = cooB.n;
-    // bcscB.b = blockSizeB;
+    bcsc bcscB;
+    bcscB.m = cooB.m;
+    bcscB.n = cooB.n;
+    bcscB.b = blockSizeB;
 
-    // int numBlocks = (bcscB.m / bcscB.b) * (bcscB.n / bcscB.b);
-    // int LL_bColPtrSize = numBlocks * (bcscB.b + 1);
+    int numBlocks = (bcscB.m / bcscB.b) * (bcscB.n / bcscB.b);
+    int LL_bColPtrSize = numBlocks * (bcscB.b + 1);
 
+    // init Low-Level CSC
+    bcscB.LL_bColPtr = new int[LL_bColPtrSize]();
+    bcscB.LL_bRowInd = new int[cooB.nnz]();
 
-    // // init Low-Level CSC
-    // bcscB.LL_bColPtr = new int[LL_bColPtrSize]();
-    // bcscB.LL_bRowInd = new int[cooB.nnz]();
-
-    // // blocking
-    // ret _ret = csc2bcsc(cscB, bcscB);
+    // blocking
+    ret _ret2 = csc2bcsc(cscB, bcscB);
     
-    // bcscB.HL_bColPtr = _ret.ret1;
-    // bcscB.HL_bRowInd = _ret.ret2;
-    // bcscB.nzBlockIndex = _ret.ret3;
-    // bcscB.blockNnzCounter = _ret.ret4;
-    // int HL_bColPtrSize = _ret.size1;
-    // int HL_bRowIndSize = _ret.size2;
-    // int nzBlockIndexSizeB = _ret.size3;
-    // int blockNnzCounterSizeB = _ret.size4;
+    bcscB.HL_bColPtr = _ret2.ret1;
+    bcscB.HL_bRowInd = _ret2.ret2;
+    bcscB.nzBlockIndex = _ret2.ret3;
+    bcscB.blockNnzCounter = _ret2.ret4;
+    int HL_bColPtrSize = _ret2.size1;
+    int HL_bRowIndSize = _ret2.size2;
+    int nzBlockIndexSizeB = _ret2.size3;
+    int blockNnzCounterSizeB = _ret2.size4;
 
 
-    // t = util::toc(timer);
-    // std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+    t = util::toc(timer);
+    std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
-    // prt::arr(bcscB.HL_bColPtr, HL_bColPtrSize);
-    // prt::arr(bcscB.LL_bColPtr, LL_bColPtrSize);
+    /* ---------------------------- block BMM (A * B) --------------------------- */
 
+    timer = util::tic();
+
+    std::multimap<int, int> _cooC;
+    // blockBmm(bcsrA, bcscB, _cooC);
+    maskedBlockBmm(bcsrA, bcsrA, bcscB, _cooC);
+
+    t = util::toc(timer);
+    std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+
+    std::vector<std::pair<int, int>> _vecC;
+
+    for (const auto& x : _cooC) {
+      _vecC.push_back(std::pair<int, int> (x.first, x.second));
+    }
+    std::sort(_vecC.begin(), _vecC.end());
+
+    prt::vec(_vecC);
 
     /* ------------------------------ MPI finalize ------------------------------ */
 
