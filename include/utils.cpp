@@ -36,7 +36,7 @@ namespace prt
     void csrMat(csr &M)
     {
         std::cout << "\nrowPtr:";
-        prt::arr(M.rowPtr, M.n + 1);
+        prt::arr(M.rowPtr, M.m + 1);
         std::cout << "colInd:";
         prt::arr(M.colInd, M.nnz);
     }
@@ -99,6 +99,13 @@ namespace util
 
         for (const auto& x : _mapM) {
             mapM.insert(std::pair <int, int> (x.first + rowOffset, x.second + colOffset));
+        }
+    }
+
+    void removeCooRowOffsets(coo &M, int chunkStartingRow)
+    {
+        for (int i = 0; i < M.nnz; i++) {
+            M.row[i] -= chunkStartingRow;
         }
     }
 

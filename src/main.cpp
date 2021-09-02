@@ -23,7 +23,7 @@
 #include <reader.cpp>
 
 int main(int argc, char **argv)
-{
+{   
     /* -------------------------------------------------------------------------- */
     /*                        OpenMPI BMM distribution test                       */
     /* -------------------------------------------------------------------------- */
@@ -31,10 +31,12 @@ int main(int argc, char **argv)
     struct timeval timer;
     double t = -1;
 
-    /* --------------------------- Initialize OpenMPI --------------------------- */
+    /* --------------------------- initialize OpenMPI --------------------------- */
 
     int numProcesses, rank;
-    int graphInd = 2;
+    int graphInd = 1;
+    int blockSizeA;
+    int blockSizeB;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
@@ -42,13 +44,112 @@ int main(int argc, char **argv)
 
     coo cooA;
     coo cooB;
-
-    /* ----------------------- Matrix A distribution test ----------------------- */
     coo _cooA;
 
-    distributeCooMatrix(numProcesses, rank, cooA, _cooA, graphInd);
+    /* ---------------------- distribute A and broadcast B ---------------------- */
 
-    broadcastCooMatrix(numProcesses, rank, cooB, graphInd);
+    distributeCooMatrix(numProcesses, rank, cooA, _cooA, graphInd, blockSizeA);
+    // broadcastCooMatrix(numProcesses, rank, cooB, graphInd, blockSizeB);
+
+    /* ---------------- fix indices of matrix A - remove offsets ---------------- */
+
+    int rowsPerChunk = _cooA.n / numProcesses;
+    int chunkStartingRow = rowsPerChunk * rank;
+
+    util::removeCooRowOffsets(_cooA, chunkStartingRow);
+
+    /* ---------------------- convert A to CSR and B to CSC --------------------- */
+
+    csr csrA;
+    util::initCsr(csrA, _cooA.m, _cooA.n, _cooA.nnz);
+
+    coo2csr(csrA.rowPtr, csrA.colInd, _cooA.row, _cooA.col, _cooA.nnz, _cooA.m, 0);
+
+    // prt::csrMat(csrA);
+
+    // csc cscB;
+    // util::initCsc(cscB, cooB.m, cooB.n, cooB.nnz);
+
+    // coo2csr(cscB.colPtr, cscB.rowInd, cooB.col, cooB.row, cooB.nnz, cooB.n, 0);
+
+    // prt::cscMat(cscB);
+
+    /* -------------------------- blocking of A Matrix -------------------------- */
+
+    timer = util::tic();
+
+    bcsr bcsrA;
+    bcsrA.m = _cooA.m;
+    bcsrA.n = _cooA.n;
+    bcsrA.b = blockSizeA;
+
+    int numBlocks = (bcsrA.m / bcsrA.b) * (bcsrA.n / bcsrA.b);
+    int LL_bRowPtrSize = numBlocks * (bcsrA.b + 1);
+
+    // init Low-Level CSR
+    bcsrA.LL_bRowPtr = new int[LL_bRowPtrSize]();
+    bcsrA.LL_bColInd = new int[_cooA.nnz]();
+
+    // blocking
+    ret _ret = csr2bcsr(csrA, bcsrA);
+
+    bcsrA.HL_bRowPtr = _ret.ret1;
+    bcsrA.HL_bColInd = _ret.ret2;
+    bcsrA.nzBlockIndex = _ret.ret3;
+    bcsrA.blockNnzCounter = _ret.ret4;
+    int HL_bRowPtrSize = _ret.size1;
+    int HL_bColIndSize = _ret.size2;
+    int nzBlockIndexSizeA = _ret.size3;
+    int blockNnzCounterSizeA = _ret.size4;
+
+
+    t = util::toc(timer);
+    std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
+    if (rank == 0) {
+      prt::arr(bcsrA.HL_bRowPtr, HL_bRowPtrSize);
+      prt::arr(bcsrA.LL_bRowPtr, LL_bRowPtrSize);
+    }
+
+
+    /* -------------------------- blocking of B Matrix -------------------------- */
+
+    // timer = util::tic();
+
+    // bcsc bcscB;
+    // bcscB.m = cooB.m;
+    // bcscB.n = cooB.n;
+    // bcscB.b = blockSizeB;
+
+    // int numBlocks = (bcscB.m / bcscB.b) * (bcscB.n / bcscB.b);
+    // int LL_bColPtrSize = numBlocks * (bcscB.b + 1);
+
+
+    // // init Low-Level CSC
+    // bcscB.LL_bColPtr = new int[LL_bColPtrSize]();
+    // bcscB.LL_bRowInd = new int[cooB.nnz]();
+
+    // // blocking
+    // ret _ret = csc2bcsc(cscB, bcscB);
+    
+    // bcscB.HL_bColPtr = _ret.ret1;
+    // bcscB.HL_bRowInd = _ret.ret2;
+    // bcscB.nzBlockIndex = _ret.ret3;
+    // bcscB.blockNnzCounter = _ret.ret4;
+    // int HL_bColPtrSize = _ret.size1;
+    // int HL_bRowIndSize = _ret.size2;
+    // int nzBlockIndexSizeB = _ret.size3;
+    // int blockNnzCounterSizeB = _ret.size4;
+
+
+    // t = util::toc(timer);
+    // std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
+    // prt::arr(bcscB.HL_bColPtr, HL_bColPtrSize);
+    // prt::arr(bcscB.LL_bColPtr, LL_bColPtrSize);
+
+
+    /* ------------------------------ MPI finalize ------------------------------ */
 
     MPI_Finalize();
 

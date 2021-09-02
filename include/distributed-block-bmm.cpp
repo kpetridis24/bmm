@@ -7,14 +7,13 @@
 #include <headers.hpp>
 #include <mpi.h>
 
-void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int graphInd)
+void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int graphInd, int &b)
 {
     MPI_Request req;
     MPI_Status stat;
 
     int n;
     int nnz;
-    int b;
     int numBlockRows;
     int bRowsPerChunk;
     int rowsPerChunk; // = _m
@@ -114,11 +113,10 @@ void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int graphI
     // prt::cooMat(_M);
 }
 
-void broadcastCooMatrix(int numProcesses, int rank, coo &M, int graphInd)
+void broadcastCooMatrix(int numProcesses, int rank, coo &M, int graphInd, int &b)
 {
     int n;
     int nnz;
-    int b;
     struct timeval timer;
     double t = -1;
 
