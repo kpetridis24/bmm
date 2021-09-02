@@ -26,8 +26,8 @@ void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
             break;
         case 2:
             graph = "com-Youtube.mtx";
-            b = 226978;
-            // b = 113489;
+            // b = 226978;
+            b = 113489;
             break;
         case 3:
             graph = "belgium_osm.mtx";

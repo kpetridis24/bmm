@@ -187,7 +187,8 @@ ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* ------------------------------ mpi functions ----------------------------- */
 
-void distributeCooMatrix(int numProcesses, int rank, coo &M, int graphInd);
+void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int graphInd);
+void broadcastCooMatrix(int numProcesses, int rank, coo &M, int graphInd);
 
 /* -------------------------------------------------------------------------- */
 

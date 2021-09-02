@@ -10,7 +10,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <bits/stdc++.h>
-// #include <mpi.h>
+#include <mpi.h>
 
 #include <headers.hpp>
 #include <bmm.cpp>
@@ -18,7 +18,7 @@
 #include <block-bmm.cpp>
 #include <masked-block-bmm.cpp>
 // #include <parallel-masked-block-bmm.cpp>
-// #include <distributed-block-bmm.cpp>
+#include <distributed-block-bmm.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
@@ -28,29 +28,29 @@ int main(int argc, char **argv)
     /*                        OpenMPI BMM distribution test                       */
     /* -------------------------------------------------------------------------- */
 
+    struct timeval timer;
+    double t = -1;
+
     /* --------------------------- Initialize OpenMPI --------------------------- */
 
-    // int numProcesses, rank;
-    // int graphInd = 1;
+    int numProcesses, rank;
+    int graphInd = 2;
 
-    // MPI_Init(&argc, &argv);
-    // MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
-    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    // coo cooA;
-    // coo cooB;
+    coo cooA;
+    coo cooB;
 
     /* ----------------------- Matrix A distribution test ----------------------- */
+    coo _cooA;
 
-    // timer = util::tic();
+    distributeCooMatrix(numProcesses, rank, cooA, _cooA, graphInd);
 
-    // distributeCooMatrix(numProcesses, rank, cooA, graphInd);
-    // distributeBcsrMatrix(numProcesses, numBlockRows, rank, blA);
+    broadcastCooMatrix(numProcesses, rank, cooB, graphInd);
 
-    // t = util::toc(timer);
-    // std::cout << "Distribution of matrix A time = " << t << std::endl;
-
-    // MPI_Finalize();
+    MPI_Finalize();
 
     // /* ------------------------------- free memory ------------------------------ */
 

@@ -10,7 +10,7 @@
 void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &C)
 // masked boolean matrix multiplication F.*(A*B) using blocks
 {
-    if (A.n != B.m || A.m != F.m || A.n != F.n) {
+    if (A.n != B.m || A.m != F.m || B.n != F.n) {
         std::cout << "Dimensions error\n";
         exit(1);
     }
