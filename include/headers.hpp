@@ -131,7 +131,8 @@ namespace util
   static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
   void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM);
-  void removeCooRowOffsets(coo &M, int chunkStartingRow);
+  void removeCooRowOffsets(coo &M, int offset);
+  void addCooRowOffsets(std::vector<std::pair<int, int>> &vecCooM, int *rowsM, int *colsM, int offset);
   bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC);
   void initCsr(csr &M, int m, int n, int nnz);
   void initCsc(csc &M, int m, int n, int nnz);
@@ -188,8 +189,9 @@ ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 
 /* ------------------------------ mpi functions ----------------------------- */
 
-void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int graphInd, int &b);
-void broadcastCooMatrix(int numProcesses, int rank, coo &M, int graphInd, int &b);
+void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv);
+void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b);
+void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b);
 
 /* -------------------------------------------------------------------------- */
 

@@ -102,12 +102,21 @@ namespace util
         }
     }
 
-    void removeCooRowOffsets(coo &M, int chunkStartingRow)
+    void removeCooRowOffsets(coo &M, int offset)
     {
         for (int i = 0; i < M.nnz; i++) {
-            M.row[i] -= chunkStartingRow;
+            M.row[i] -= offset;
         }
     }
+
+    void addCooRowOffsets(std::vector<std::pair<int, int>> &vecCooM, int *rowsM, int *colsM, int offset)
+    {
+        for (int i = 0; i < vecCooM.size(); i++) {
+            rowsM[i] = vecCooM[i].first + offset;
+            colsM[i] = vecCooM[i].second;
+        }
+    }
+
 
     void initCsr(csr &M, int m, int n, int nnz)
     // initialize CSR matrix
