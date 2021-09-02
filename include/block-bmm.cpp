@@ -10,7 +10,7 @@
 void blockBmm(bcsr &A, bcsc &B, std::multimap<int, int> &C)
 // boolean matrix multiplication (A*B) using blocks
 {
-    if (A.n != B.n) {
+    if (A.n != B.m) {
         std::cout << "Dimensions error\n";
         exit(1);
     }
@@ -20,7 +20,7 @@ void blockBmm(bcsr &A, bcsc &B, std::multimap<int, int> &C)
         exit(1);
     }
 
-    int blocksPerRow = A.n / A.b;
+    int blocksPerRow = A.m / A.b;
 
     // high level matrix multiplication
     for (int blockRowA = 0; blockRowA < blocksPerRow; blockRowA++) {
@@ -41,7 +41,7 @@ void blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B, std::multim
     int bIndA;
     int bIndB;
     int cN;
-    int blocksPerRow = A.n / A.b;
+    int blocksPerRow = A.m / A.b;
 
     int LL_rowPtrOffsetA, LL_colIndOffsetA;
     int LL_colPtrOffsetB, LL_rowIndOffsetB;
