@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     /* --------------------------- initialize OpenMPI --------------------------- */
 
     int numProcesses, rank;
-    int graphInd = 1;
+    int graphInd = 2;
     int blockSizeA;
     int blockSizeB;
 
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
     t = util::toc(timer);
     std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
-    /* ---------------------------- block BMM (A * B) --------------------------- */
+    /* -------------------------------- block BMM ------------------------------- */
 
     timer = util::tic();
 
@@ -151,12 +151,35 @@ int main(int argc, char **argv)
 
     std::vector<std::pair<int, int>> _vecC;
 
+
+    timer = util::tic();
+
     for (const auto& x : _cooC) {
       _vecC.push_back(std::pair<int, int> (x.first, x.second));
     }
     std::sort(_vecC.begin(), _vecC.end());
 
-    prt::vec(_vecC);
+    t = util::toc(timer);
+    std::cout << "\nVector processing time = " << t << " seconds" << std::endl;
+
+    // prt::vec(_vecC);
+
+    /* ----------------------------- gather results ----------------------------- */
+
+    /* -------------------------------------------------------------------------- */
+    /*                                    TODO                                    */
+    /* -------------------------------------------------------------------------- */
+
+    // gather _vecC from each process to process 0
+
+    /* ------------------------------- construct C ------------------------------ */
+
+    /* -------------------------------------------------------------------------- */
+    /*                                    TODO                                    */
+    /* -------------------------------------------------------------------------- */
+
+    // having the local result of each process, add row offsets to each result and 
+    // add them to the result C (C can be a vector of pairs to be sorted easier and used by the tester)
 
     /* ------------------------------ MPI finalize ------------------------------ */
 
@@ -168,95 +191,6 @@ int main(int argc, char **argv)
     // util::delCsc(B);
     // util::delBcsr(blA); 
     // util::delBcsc(blB);
-
-
-    /* -------------------------------------------------------------------------- */
-    /*                               block BMM test                               */
-    /* -------------------------------------------------------------------------- */
-
-    // struct timeval timer;
-    // double t = -1;
-
-    // csr A;
-    // csc B;
-    // int n;
-    // int nnz;
-    // int b = 2;
-
-    // /* ------------------------------ read matrices ----------------------------- */
-
-    // std::string graph = read2csr(1, n, nnz, b, A, B);
-
-    // prt::csrMat(A);
-
-    // /* --------------------------------- block A -------------------------------- */
-
-    // timer = util::tic();
-
-    // bcsr blA;
-    // int numBlocks = (A.m / b) * (A.m / b);
-    // int LL_bRowPtrSize = numBlocks * (b + 1);
-    // blA.m = A.m;
-    // blA.n = A.n;
-    // blA.b = b;
-    // blA.LL_bRowPtr = new int[LL_bRowPtrSize]();
-    // blA.LL_bColInd = new int[A.nnz]();
-
-    // ret _ret = csr2bcsr(A, blA);
-
-    // blA.HL_bRowPtr = _ret.ret1;
-    // blA.HL_bColInd = _ret.ret2;
-    // blA.nzBlockIndex = _ret.ret3;
-    // blA.blockNnzCounter = _ret.ret4;
-
-    // t = util::toc(timer);
-    // std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
-
-    // /* --------------------------------- block B -------------------------------- */
-
-
-    // timer = util::tic();
-    // int LL_bColPtrSize = numBlocks * (b + 1);
-
-    // bcsc blB;
-    // blB.m = B.m;
-    // blB.n = B.n;
-    // blB.b = b;
-
-    // // init Low-Level CSC
-    // blB.LL_bColPtr = new int[LL_bColPtrSize]();
-    // blB.LL_bRowInd = new int[nnz]();
-
-    // // blocking
-    // _ret = csr2bcsc(B, blB);
-
-    // blB.HL_bColPtr = _ret.ret1;
-    // blB.HL_bRowInd = _ret.ret2;
-    // blB.nzBlockIndex = _ret.ret3;
-    // blB.blockNnzCounter = _ret.ret4;
-
-    // t = util::toc(timer);
-    // std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
-
-    // /* -------------------------------- block BMM ------------------------------- */
-
-    // timer = util::tic();
-
-    // std::multimap<int, int> C;
-    // // blockBmm(blA, blB, C);
-    // maskedBlockBmm(blA, blA, blB, C);
-
-    // t = util::toc(timer);
-    // std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
-
-    // std::vector<std::pair<int, int>> vecC;
-
-    // for (const auto& x : C) {
-    //   vecC.push_back(std::pair<int, int> (x.first, x.second));
-    // }
-    // std::sort(vecC.begin(), vecC.end());
-
-    // prt::vec(vecC);
 
     // /* ------------------------------ check result ------------------------------ */
 
