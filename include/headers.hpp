@@ -15,6 +15,7 @@ typedef struct
 {
   int *row;
   int *col;
+  int m;
   int n;
   int nnz;
 } coo;
@@ -25,6 +26,7 @@ typedef struct
 {
   int *rowPtr;
   int *colInd;
+  int m;
   int n;
   int nnz;
 } csr;
@@ -35,6 +37,7 @@ typedef struct
 {
   int *colPtr;
   int *rowInd;
+  int m;
   int n;
   int nnz;
 } csc;
@@ -49,6 +52,7 @@ typedef struct
   int *HL_bColInd;
   int *nzBlockIndex;
   int *blockNnzCounter;
+  int m;
   int n;
   int b;
   int nnz;
@@ -64,6 +68,7 @@ typedef struct
   int *HL_bRowInd;
   int *nzBlockIndex;
   int *blockNnzCounter;
+  int m;
   int n;
   int b;
 } bcsc;
@@ -92,8 +97,8 @@ typedef struct
 
 /* ----------------------------- read functions ----------------------------- */
 
-void read2coo(int graphId, int &n, int &nnz, int &b, coo &A, coo &B);
-void read2csr(int graphId, int &n, int &nnz, int &b, csr &A, csc &B);
+void read2coo(int graphId, int &n, int &nnz, int &b, coo &M);
+std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A, csc &B);
 void readMtxValues(std::string f, int &n, int &nnz);
 void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz);
 int coo2csr(
@@ -102,7 +107,7 @@ int coo2csr(
   int const * const cooRow,
   int const * const cooCol,  
   int const         nnz,      
-  int const         n,         
+  int const         m,         
   int const         isOneBased 
 );
 
@@ -127,9 +132,9 @@ namespace util
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
   void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM);
   bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC);
-  void initCsr(csr &M, int n, int nnz);
-  void initCsc(csc &M, int n, int nnz);
-  void initCoo(coo &M, int n, int nnz);
+  void initCsr(csr &M, int m, int n, int nnz);
+  void initCsc(csc &M, int m, int n, int nnz);
+  void initCoo(coo &M, int m, int n, int nnz);
   void delCsr(csr &M);
   void delCsc(csc &M);
   void delCoo(coo &M);
@@ -179,6 +184,10 @@ void maskedBbm( bcsr &F,
                 std::multimap <int, int> &_mapC );
 
 ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
+
+/* ------------------------------ mpi functions ----------------------------- */
+
+void distributeCooMatrix(int numProcesses, int rank, coo &M, int graphInd);
 
 /* -------------------------------------------------------------------------- */
 

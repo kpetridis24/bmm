@@ -7,7 +7,7 @@
 
 #include <headers.hpp>
 
-void read2coo(int graphId, int &n, int &nnz, int &b, coo &A, coo &B)
+void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
 {
     std::string graph;
 
@@ -50,15 +50,12 @@ void read2coo(int graphId, int &n, int &nnz, int &b, coo &A, coo &B)
     std::string file = "graphs/" + graph;
 
     readMtxValues(file, n, nnz);
-
-    util::initCoo(A, n, nnz);
-    util::initCoo(B, n, nnz);
-
-    openMtxFile(file, A.col, A.row, A.n, A.nnz);
-    openMtxFile(file, B.col, B.row, B.n, B.nnz);
+    util::initCoo(M, n, n, nnz);
+    openMtxFile(file, M.col, M.row, M.n, M.nnz);
+    M.m = M.n;
 }
 
-void read2csr(int graphId, int &n, int &nnz, int &b, csr &A, csc &B)
+std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A, csc &B)
 {
     std::string graph;
 
@@ -103,20 +100,24 @@ void read2csr(int graphId, int &n, int &nnz, int &b, csr &A, csc &B)
     readMtxValues(file, n, nnz);
 
     coo M;
-    util::initCoo(M, n, nnz);
+    util::initCoo(M, n, n, nnz);
 
     openMtxFile(file, M.col, M.row, M.n, M.nnz);
 
-    util::initCsr(A, n, nnz);
-    util::initCsc(B, n, nnz);
+    util::initCsr(A, n, n, nnz);
+    util::initCsc(B, n, n, nnz);
 
     coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
     coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
+    A.m = A.n;
+    B.m = B.n;
 
     util::delCoo(M);
 
     // prt::csrMat(A);
     // prt::cscMat(B);
+    
+    return graph;
 }
 
 void readMtxValues(std::string f, int &n, int &nnz)
@@ -171,24 +172,24 @@ int coo2csr(
   int const * const cooRow,
   int const * const cooCol,  
   int const         nnz,      
-  int const         n,         
+  int const         m,         
   int const         isOneBased 
 )
 {
   // ----- cannot assume that input is already 0!
-    for(int l = 0; l < n + 1; l++) row[l] = 0;
+    for(int l = 0; l < m + 1; l++) row[l] = 0;
 
   // ----- find the correct column sizes
     for(int l = 0; l < nnz; l++)
         row[cooRow[l] - isOneBased]++;
 
   // ----- cumulative sum
-    for(int i = 0, cumsum = 0; i < n; i++) {
+    for(int i = 0, cumsum = 0; i < m; i++) {
         int temp = row[i];
         row[i] = cumsum;
         cumsum += temp;
     }
-    row[n] = nnz;
+    row[m] = nnz;
 
   // ----- copy the row indices to the correct place
     for(int l = 0; l < nnz; l++) {
@@ -201,13 +202,13 @@ int coo2csr(
     }
 
   // ----- revert the column pointers
-    for(int i = 0, last = 0; i < n; i++) {
+    for(int i = 0, last = 0; i < m; i++) {
         int temp = row[i];
         row[i] = last;
         last = temp;
     }
 
-    return n;
+    return m;
 }
 
 /* -------------------------------------------------------------------------- */

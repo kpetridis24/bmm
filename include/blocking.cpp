@@ -7,12 +7,12 @@
 
 ret csr2bcsr(csr &M, bcsr &blM) 
 {
-    int numBlocks = (M.n / blM.b) * (M.n / blM.b), emptyBlocks = 0;
+    int numBlocks = (M.m / blM.b) * (M.m / blM.b), emptyBlocks = 0;
     int *blockNnzCounter = new int[numBlocks + 1]();
     
-    for(int i = 0; i < M.n; i++) 
+    for(int i = 0; i < M.m; i++) 
         for(int j = M.rowPtr[i]; j < M.rowPtr[i + 1]; j++) 
-            blockNnzCounter[(i / blM.b) * (M.n / blM.b) + (M.colInd[j] / blM.b) + 1]++;
+            blockNnzCounter[(i / blM.b) * (M.m / blM.b) + (M.colInd[j] / blM.b) + 1]++;
     
     for(int i = 0; i < numBlocks; i++) if (blockNnzCounter[i] == 0) emptyBlocks++;
 
@@ -32,13 +32,13 @@ ret csr2bcsr(csr &M, bcsr &blM)
     int *elementCounter = new int[numBlocks]();
     int blockIdx, colIndOffset;
 
-    for (int i = 0; i < M.n; i++) {
+    for (int i = 0; i < M.m; i++) {
         
         if (cnt == blM.b) cnt = 0;
 
         for (int j = M.rowPtr[i]; j < M.rowPtr[i + 1]; j++) {
 
-            blockIdx = (i / blM.b) * (M.n / blM.b) + (M.colInd[j] / blM.b);
+            blockIdx = (i / blM.b) * (M.m / blM.b) + (M.colInd[j] / blM.b);
             colIndOffset = blockNnzCounter[blockIdx];
             blM.LL_bColInd[colIndOffset + elementCounter[blockIdx]] = M.colInd[j] % blM.b;
             elementCounter[blockIdx]++;
@@ -84,7 +84,7 @@ ret csr2bcsr(csr &M, bcsr &blM)
 /*                                    B-COO                                   */
 /* -------------------------------------------------------------------------- */
 
-    int num_of_block_rows = M.n / blM.b;
+    int num_of_block_rows = M.m / blM.b;
     int blocks_per_row = num_of_block_rows;
     int nnzb =  blkPtrSize;
 

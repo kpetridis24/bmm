@@ -7,8 +7,123 @@
 #include <headers.hpp>
 #include <mpi.h>
 
-void distributeBcsrMatrix(int numProcesses, int numBlockRows, int rank, bcsr &M) {
+void distributeCooMatrix(int numProcesses, int rank, coo &M, int graphInd)
+{
+    MPI_Request req;
+    MPI_Status stat;
 
+    int n;
+    int nnz;
+    int b;
+    int numBlockRows;
+    int bRowsPerChunk;
+    int rowsPerChunk;
+    int _elemsInChunk;
+    struct timeval timer;
+    double t = -1;
+
+    /* -------------------------------- process 0 ------------------------------- */
+
+    if(rank == 0) {
+
+        /* ------------------------------- read matrix ------------------------------ */
+
+        read2coo(graphInd, n, nnz, b, M);
+        std::cout << "\nMatrix read successfully\nn = " << M.n << ", nnz = " << M.nnz << std::endl;
+        // prt::cooMat(M);
+
+        /* ------------------- compute num of block rows per chunk ------------------ */
+
+        numBlockRows = n / b;
+
+        if (numBlockRows % numProcesses) {
+            std::cout << "numBlockRows % numProcesses != 0 \n";
+            exit(1);
+        }
+
+        bRowsPerChunk = numBlockRows / numProcesses;
+        rowsPerChunk = bRowsPerChunk * b;
+
+        std::cout << "b = " << b << std::endl;
+        std::cout << "numProcesses = " << numProcesses << std::endl;
+        std::cout << "numBlockRows = " << numBlockRows << std::endl;
+        std::cout << "bRowsPerChunk = " << bRowsPerChunk << std::endl;
+
+        /* -------------------- compute num of elements per chunk ------------------- */
+
+        int *elemsInChunk = new int[numProcesses]();
+        int chunkStartingRow = 0;
+        int curRow = M.row[0];
+        int nextChunkOffset = 0;
+
+        for (int i = 0; i < numProcesses; i++) {  // i iterates the processes
+            // std::cout << "chunk " << i << std::endl;
+
+            chunkStartingRow = M.row[nextChunkOffset];
+            // std::cout << "chunkStartingRow = " << chunkStartingRow << std::endl;
+
+            for (int j = nextChunkOffset; j < M.nnz;) {  // j iterates the nnz of COO matrix
+
+                curRow = M.row[j];
+
+                if (curRow - chunkStartingRow < rowsPerChunk) {
+                    elemsInChunk[i]++;
+                    j++;
+                }
+                else {
+                    // std::cout << "curRow - chunkStartingRow = " << curRow - chunkStartingRow << std::endl;
+                    nextChunkOffset = j;
+                    break;
+                }
+            }
+        }
+
+        _elemsInChunk = elemsInChunk[0];
+
+        // prt::arr(elemsInChunk, numProcesses);
+
+        /* ---------- send array sizes to allocate memory on all processes ---------- */
+
+        for(int p = 1; p < numProcesses; p++)
+            MPI_Send(&elemsInChunk[p], 1, MPI_INT, p, 0, MPI_COMM_WORLD);
+
+        /* ---------------------- send n and b to all processes --------------------- */
+        
+        for(int p = 1; p < numProcesses; p++) {
+            MPI_Send(&n, 1, MPI_INT, p, 1, MPI_COMM_WORLD);
+            MPI_Send(&b, 1, MPI_INT, p, 2, MPI_COMM_WORLD);
+        }
+    }
+
+    /* ------------------------------ process != 0 ------------------------------ */
+
+    else {
+
+    //     /* --------------------------- receive array sizes -------------------------- */
+
+        MPI_Recv(&_elemsInChunk, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
+
+        std::cout << "chunk " << rank << " _elemsInChunk = " << _elemsInChunk << std::endl;
+
+    //     /* ----------------------------- receive n and b ---------------------------- */
+
+        MPI_Recv(&n, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &stat);
+        MPI_Recv(&b, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &stat);
+
+        std::cout << "chunk " << rank << " n = " << n << " b = " << b << std::endl;
+
+        /* ------------------- Memory allocation on all processes ------------------- */
+
+        // util::initCoo(cooA, n / b, _elemsInChunk);
+    }
+}
+
+
+
+
+
+void distributeBcsrMatrix(int numProcesses, int numBlockRows, int rank, bcsr &M)
+{
     MPI_Status stat;
     MPI_Request req;
 
@@ -160,25 +275,3 @@ void distributeBcsrMatrix(int numProcesses, int numBlockRows, int rank, bcsr &M)
     delete[] offsets_LL_bRowPtr;
     // TODO free memory
 }
-
-
-
-
-
-// int cnt = 0, cnt2 = 0;
-        // for (int i = 0; i < numProcesses; i ++) {
-            
-        //     int size = numBlocksInChunk[i];
-
-        //     for (int j = 0; j < size; j++, cnt++) {
-        //     //while(cnt2 < size) {
-
-        //         if (M.blockNnzCounter[cnt + 1] == M.blockNnzCounter[cnt]) {
-        //             j--;
-        //             numBlocksInChunk[i] ++;
-        //         }
-        //         //else {
-        //          //   cnt2++;
-        //         //}
-        //     }
-        // }

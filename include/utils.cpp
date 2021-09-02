@@ -102,29 +102,32 @@ namespace util
         }
     }
 
-    void initCsr(csr &M, int n, int nnz)
+    void initCsr(csr &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
-        M.rowPtr = new int[n + 1]();
+        M.rowPtr = new int[m + 1]();
         M.colInd = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
 
-    void initCsc(csc &M, int n, int nnz)
+    void initCsc(csc &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
         M.colPtr = new int[n + 1]();
         M.rowInd = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
 
-    void initCoo(coo &M, int n, int nnz)
+    void initCoo(coo &M, int m, int n, int nnz)
     // initialize COO matrix
     {
         M.row = new int[nnz]();
         M.col = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
@@ -182,7 +185,7 @@ namespace util
 
         readMtxValues(checkFile, checkN, checkNnz);
         coo checkM;
-        util::initCoo(checkM, checkN, checkNnz);
+        util::initCoo(checkM, checkN, checkN, checkNnz);
 
         openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
 
