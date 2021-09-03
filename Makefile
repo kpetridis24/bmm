@@ -28,5 +28,9 @@ mpi:
 	$(OPENMPI) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) 
 	mpirun -np 2 ./build/main 
 
+final:
+	$(OPENMPI) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) -lcilkrts -ldl -std=c++11 -fcilkplus
+	mpirun -np 2 ./build/main
+
 clean:
 	rm test

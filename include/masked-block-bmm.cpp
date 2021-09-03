@@ -4,6 +4,8 @@
 
 #include <headers.hpp>
 #include <bits/stdc++.h>
+#include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
