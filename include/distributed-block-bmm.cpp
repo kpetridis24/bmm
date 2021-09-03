@@ -141,9 +141,6 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     t = util::toc(timer);
     // std::cout << "\nVector processing time = " << t << " seconds" << std::endl;
 
-    std::cout << "Process " << rank << " result: \n";
-    prt::vec(_vecCooC);
-
     /* ------------------ fix indices of matrix C - add offsets ----------------- */
 
     int *_rowsC = new int[_vecCooC.size()];
@@ -154,7 +151,15 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
 
     util::addCooRowOffsets(_vecCooC, _rowsC, _colsC, chunkStartingRow);
     std::vector <std::pair <int, int>> bmmResultVec;
-    bmmResultGather(numProcesses, rank, selfSize, totalSize, _rowsC, _colsC, bmmResultRows, bmmResultCols, bmmResultVec);
+    
+    // if (rank == 0) {
+    //     std::cout << "Process " << rank << " result: \n";
+    //     prt::arr(_rowsC, selfSize);
+    //     prt::arr(_colsC, selfSize);
+    // }
+
+    bmmResultGather(numProcesses, rank, selfSize, totalSize, _rowsC, _colsC, bmmResultRows,
+                    bmmResultCols, bmmResultVec);
 
     /* ------------------------------ MPI finalize ------------------------------ */
 
@@ -172,15 +177,15 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
 
     // /* ------------------------------ check result ------------------------------ */
     
-    std::cout << "Distributed lock-BMM result:\n";
-    prt::vec(bmmResultVec);
+    std::cout << "Distributed block-BMM result:\n";
+    // prt::vec(bmmResultVec);
 
-    if (util::checkRes(matIndA, bmmResultVec)) {
-      std::cout << "\nTest passed\n";
-    }
-    else {
-      std::cout << "\nTest failed\n";
-    }
+    // if (util::checkRes(matIndA, bmmResultVec)) {
+    //   std::cout << "\nTest passed\n";
+    // }
+    // else {
+    //   std::cout << "\nTest failed\n";
+    // }
 }
 
 void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b)
@@ -363,7 +368,7 @@ void bmmResultGather( int numProcesses,
             MPI_Recv(&receivedSize, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
             tag = stat.MPI_TAG;
             resultSizes[tag] = receivedSize;
-            resultOffsets[tag] = resultOffsets[tag - 1] + resultSizes[tag];
+            resultOffsets[tag + 1] = resultOffsets[tag] + resultSizes[tag];
             totalSize += receivedSize;
         }
 
