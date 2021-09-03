@@ -7,6 +7,63 @@
 #include <headers.hpp>
 #include <mpi.h>
 
+void bmmResultGather( int numProcesses,
+                      int rank, 
+                      int selfSize,
+                      int &totalSize, 
+                      int *rowsC, 
+                      int *colsC, 
+                      int *bmmResultRows, 
+                      int *bmmResultCols ) {
+    
+    MPI_Status stat;
+    int *resultSizes = new int[numProcesses];
+    int *resultOffsets = new int[numProcesses];
+    int receivedSize, tag;
+
+    if (rank != 0) {
+
+        MPI_Send(&selfSize, 1, MPI_INT, 0, rank, MPI_COMM_WORLD);
+    }
+    else {
+
+        int cnt = 0;
+        totalSize = selfSize;
+        resultSizes[0] = selfSize;
+        resultOffsets[0] = 0;
+        
+        for (int p = 1; p < numProcesses; p++) {
+
+            MPI_Recv(&receivedSize, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+            tag = stat.MPI_TAG;
+            resultSizes[tag] = receivedSize;
+            resultOffsets[tag] = resultOffsets[tag - 1] + resultSizes[tag];
+            totalSize += receivedSize;
+        }
+
+        bmmResultRows = new int[totalSize];
+        bmmResultCols = new int[totalSize];
+        // prt::arr(resultSizes, numProcesses);
+        // prt::arr(resultOffsets, numProcesses);
+    }   
+
+    MPI_Gatherv(rowsC, selfSize, MPI_INT, bmmResultRows, resultSizes, resultOffsets,
+                MPI_INT, 0, MPI_COMM_WORLD);
+
+    MPI_Gatherv(colsC, selfSize, MPI_INT, bmmResultCols, resultSizes, resultOffsets,
+                MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Transfer to vector in order to use tester
+    if (rank == 0) {
+
+        std::vector <std::pair <int, int>> bmmResultVec;
+        for (int i = 0; i < totalSize; i++) 
+            bmmResultVec.push_back(std::pair <int, int> (bmmResultRows[i], bmmResultCols[i]));
+
+        //TODO: here use tester
+    } 
+}
+
 void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
 {
     struct timeval timer;
@@ -122,19 +179,19 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
 
     timer = util::tic();
 
-    std::multimap<int, int> _cooC;
+    std::multimap <int, int> _cooC;
     // blockBmm(bcsrA, bcscB, _cooC);
     maskedBlockBmm(bcsrA, bcsrA, bcscB, _cooC);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
 
-    std::vector<std::pair<int, int>> _vecCooC;
+    std::vector <std::pair <int, int>> _vecCooC;
 
     timer = util::tic();
 
     for (auto &x : _cooC) {
-      _vecCooC.push_back(std::pair<int, int> (x.first, x.second));
+      _vecCooC.push_back(std::pair <int, int> (x.first, x.second));
     }
     std::sort(_vecCooC.begin(), _vecCooC.end());
 
@@ -148,29 +205,12 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
 
     int *_rowsC = new int[_vecCooC.size()];
     int *_colsC = new int[_vecCooC.size()];
+    int *bmmResultRows;
+    int *bmmResultCols;
+    int selfSize = _vecCooC.size(), totalSize = 0;
 
     util::addCooRowOffsets(_vecCooC, _rowsC, _colsC, chunkStartingRow);
-
-    // std::cout << "Process " << rank << " result: \n";
-    // for (int i = 0; i < _vecCooC.size(); i++) {
-    //   std::cout << _rowsC[i] << " " << _colsC[i] << std::endl;
-    // }
-
-    /* ----------------------------- gather results ----------------------------- */
-
-    /* -------------------------------------------------------------------------- */
-    /*                                    TODO                                    */
-    /* -------------------------------------------------------------------------- */
-
-    // gather _rowsC and _colsC from each process to process 0
-
-    /* ------------------------------- construct C ------------------------------ */
-
-    /* -------------------------------------------------------------------------- */
-    /*                                    TODO                                    */
-    /* -------------------------------------------------------------------------- */
-
-    // construct C as pair vector in order to use tester
+    bmmResultGather(numProcesses, rank, selfSize, totalSize, _rowsC, _colsC, bmmResultRows, bmmResultCols);
 
     /* ------------------------------ MPI finalize ------------------------------ */
 

@@ -192,6 +192,14 @@ ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
 void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv);
 void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b);
 void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b);
+void bmmResultGather( int numProcesses,
+                      int rank, 
+                      int selfSize,
+                      int &totalSize, 
+                      int *rowsC, 
+                      int *colsC, 
+                      int *bmmResultRows, 
+                      int *bmmResultCols );
 
 /* -------------------------------------------------------------------------- */
 

@@ -26,8 +26,8 @@ int main(int argc, char **argv)
 {
     struct timeval timer;
     double t = -1;
-    int matIndA = 2;
-    int matIndB = 2;
+    int matIndA = 1;
+    int matIndB = 1;
 
   /* ----------------------- distributed block-BMM test ----------------------- */
 

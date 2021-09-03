@@ -7,7 +7,7 @@
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
-void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &C)
+void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
 // masked boolean matrix multiplication F.*(A*B) using blocks
 {
     if (A.n != B.m || A.m != F.m || B.n != F.n) {
@@ -74,7 +74,8 @@ void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc 
             util::blockOffsets(bIndA, A.nzBlockIndex, A.blockNnzCounter, A.b, LL_rowPtrOffsetA, LL_colIndOffsetA);
             util::blockOffsets(bIndB, B.nzBlockIndex, B.blockNnzCounter, B.b, LL_colPtrOffsetB, LL_rowIndOffsetB);
 
-            maskedBbm(F, A, B, LL_rowPtrOffsetF, LL_colIndOffsetF, LL_rowPtrOffsetA, LL_colIndOffsetA, LL_colPtrOffsetB, LL_rowIndOffsetB, _C);
+            maskedBbm(F, A, B, LL_rowPtrOffsetF, LL_colIndOffsetF, LL_rowPtrOffsetA, LL_colIndOffsetA,
+                      LL_colPtrOffsetB, LL_rowIndOffsetB, _C);
             
             ptr1++;
             ptr2++;
@@ -102,6 +103,7 @@ void maskedBbm( bcsr &F,
             
             int _colF = F.LL_bColInd[_indF + LL_colIndOffsetF];
 
+            // External masking
             // check if index is already true
             // auto it = _C.find(_rowF);
             // if (it != _C.end()) {
