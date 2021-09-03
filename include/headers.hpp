@@ -117,6 +117,7 @@ namespace prt
 {
     void arr(int *arr, int len);
     void mat(int **mat, int rows, int cols);
+    void vec(std::vector<std::pair<int, int>> vec);
     void csrMat(csr &M);
     void cscMat(csc &M);
     void cooMat(coo &M);
@@ -133,7 +134,7 @@ namespace util
   void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM);
   void removeCooRowOffsets(coo &M, int offset);
   void addCooRowOffsets(std::vector<std::pair<int, int>> &vecCooM, int *rowsM, int *colsM, int offset);
-  bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC);
+  bool checkRes(int graphInd, std::vector<std::pair<int, int>> &vecC);
   void initCsr(csr &M, int m, int n, int nnz);
   void initCsc(csc &M, int m, int n, int nnz);
   void initCoo(coo &M, int m, int n, int nnz);
@@ -199,7 +200,8 @@ void bmmResultGather( int numProcesses,
                       int *rowsC, 
                       int *colsC, 
                       int *bmmResultRows, 
-                      int *bmmResultCols );
+                      int *bmmResultCols,
+                      std::vector <std::pair <int, int>> &bmmResultVec );
 
 /* -------------------------------------------------------------------------- */
 

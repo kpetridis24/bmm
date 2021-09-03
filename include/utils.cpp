@@ -190,8 +190,34 @@ namespace util
         delete[] M.blockNnzCounter;
     }
 
-    bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC)
+    bool checkRes(int graphInd, std::vector<std::pair<int, int>> &vecC)
     {
+        std::string checkGraph;
+
+        switch(graphInd) {
+            case 0:
+                checkGraph = "s6.mtx";
+                break;
+            case 1:
+                checkGraph = "s12.mtx";
+                break;
+            case 2:
+                checkGraph = "com-Youtube.mtx";
+                break;
+            case 3:
+                checkGraph = "belgium_osm.mtx";
+                break;
+            case 4:
+                checkGraph = "dblp-2010.mtx";
+
+                break;
+            case 5:
+                checkGraph = "as-Skitter.mtx";
+                break;
+            default:
+                exit(1);
+        }
+
         // read correct result
         int checkN;
         int checkNnz;
