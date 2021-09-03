@@ -59,7 +59,7 @@ void bmmResultGather( int numProcesses,
         std::vector <std::pair <int, int>> bmmResultVec;
         for (int i = 0; i < totalSize; i++) 
             bmmResultVec.push_back(std::pair <int, int> (bmmResultRows[i], bmmResultCols[i]));
-
+        std::sort(bmmResultVec.begin(), bmmResultVec.end());
         //TODO: here use tester
     } 
 }
