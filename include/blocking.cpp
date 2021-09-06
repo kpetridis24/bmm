@@ -9,12 +9,16 @@ ret csr2bcsr(csr &M, bcsr &blM)
 {
     int numBlocks = (M.n / blM.b) * (M.n / blM.b), emptyBlocks = 0;
     int *blockNnzCounter = new int[numBlocks + 1]();
-    
+
+    // #pragma omp parallel for 
     for(int i = 0; i < M.n; i++) 
         for(int j = M.rowPtr[i]; j < M.rowPtr[i + 1]; j++) 
             blockNnzCounter[(i / blM.b) * (M.n / blM.b) + (M.colInd[j] / blM.b) + 1]++;
-    
-    for(int i = 0; i < numBlocks; i++) if (blockNnzCounter[i] == 0) emptyBlocks++;
+
+    // #pragma omp parallel for schedule(dynamic)
+    for(int i = 0; i < numBlocks; i++) 
+        if (blockNnzCounter[i] == 0) 
+            emptyBlocks++;
 
     int t = 0, t2 = 0, blkPtrSize = numBlocks - emptyBlocks + 1;
     int *nzBlockIndex = new int[numBlocks]; 
@@ -31,7 +35,7 @@ ret csr2bcsr(csr &M, bcsr &blM)
     int cnt = 0;
     int *elementCounter = new int[numBlocks]();
     int blockIdx, colIndOffset;
-
+    
     for (int i = 0; i < M.n; i++) {
         
         if (cnt == blM.b) cnt = 0;
@@ -91,6 +95,7 @@ ret csr2bcsr(csr &M, bcsr &blM)
     int *b_rows = new int[nnzb];
     int *b_cols = new int[nnzb];
 
+    // #pragma omp parallel for 
     for (int i = 0; i < nnzb; i++) {
         b_rows[i] = nzBlockIndex2[i] / blocks_per_row;
         b_cols[i] = nzBlockIndex2[i] % blocks_per_row;
@@ -131,11 +136,15 @@ ret csr2bcsc(csc &M, bcsc &blM)
     int numBlocks = (M.n / blM.b) * (M.n / blM.b), emptyBlocks = 0;
     int *blockNnzCounter = new int[numBlocks + 1]();
     
+    // #pragma omp parallel for 
     for(int i = 0; i < M.n; i++) 
         for(int j = M.colPtr[i]; j < M.colPtr[i + 1]; j++) 
             blockNnzCounter[(i / blM.b) * (M.n / blM.b) + (M.rowInd[j] / blM.b) + 1]++;
-    
-    for(int i = 0; i < numBlocks; i++) if (blockNnzCounter[i] == 0) emptyBlocks++;
+
+    // #pragma omp parallel for 
+    for(int i = 0; i < numBlocks; i++) 
+        if (blockNnzCounter[i] == 0) 
+        emptyBlocks++;
 
     int t = 0, t2 = 0, blkPtrSize = numBlocks - emptyBlocks + 1;
     int *nzBlockIndex = new int[numBlocks]; 
@@ -212,6 +221,7 @@ ret csr2bcsc(csc &M, bcsc &blM)
     int *b_rows = new int[nnzb];
     int *b_cols = new int[nnzb];
 
+    // #pragma omp parallel for 
     for (int i = 0; i < nnzb; i++) {
         b_cols[i] = nzBlockIndex2[i] / blocks_per_row;  // TODO check
         b_rows[i] = nzBlockIndex2[i] % blocks_per_row;

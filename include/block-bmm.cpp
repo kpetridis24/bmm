@@ -4,6 +4,7 @@
 
 #include <headers.hpp>
 #include <bits/stdc++.h>
+#include <omp.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
@@ -27,7 +28,9 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
     int sizeC = 0;
 
     // high level matrix multiplication
+    // #pragma omp parallel for 
     for (int blockRowF = 0; blockRowF < blocksPerRow; blockRowF++) {
+    // #pragma omp parallel for 
         for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];
@@ -37,6 +40,8 @@ ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
             util::addCooBlockToMatrix(C, _C.M, blockRowF, blockColF, A.b, sizeC, _C.sizeM);
         }
     }
+    
+
 
     ret2 ret;
     ret.M = C;

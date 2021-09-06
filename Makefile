@@ -11,5 +11,11 @@ default:
 	$(CC) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS)
 	./build/main
 	@printf "\n"
+
+omp:
+	$(CC) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) -fopenmp
+	./build/main
+	@printf "\n"
+
 clean:
 	rm test
