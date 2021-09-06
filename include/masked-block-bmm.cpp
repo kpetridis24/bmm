@@ -4,8 +4,7 @@
 
 #include <headers.hpp>
 #include <bits/stdc++.h>
-#include <cilk/cilk.h>
-#include <cilk/cilk_api.h>
+#include <omp.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
@@ -31,6 +30,7 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
 
     // high level matrix multiplication
     for (int blockRowF = 0; blockRowF < numBlockRowsF; blockRowF++) {
+        // #pragma omp parallel for schedule(dynamic)
         for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];

@@ -162,7 +162,7 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
                     bmmResultCols, bmmResultVec);
 
     /* ------------------------------ MPI finalize ------------------------------ */
-
+    
     MPI_Finalize();
 
     if (rank != 0)
@@ -180,12 +180,13 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     std::cout << "Distributed block-BMM result:\n";
     // prt::vec(bmmResultVec);
 
-    // if (util::checkRes(matIndA, bmmResultVec)) {
-    //   std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //   std::cout << "\nTest failed\n";
-    // }
+    if (util::checkRes(matIndA, bmmResultVec)) {
+        std::cout << "\nTest passed\n";
+    }
+    else {
+        std::cout << "\nTest failed\n";
+    }
+    
 }
 
 void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b)
@@ -368,7 +369,7 @@ void bmmResultGather( int numProcesses,
             MPI_Recv(&receivedSize, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
             tag = stat.MPI_TAG;
             resultSizes[tag] = receivedSize;
-            resultOffsets[tag + 1] = resultOffsets[tag] + resultSizes[tag];
+            resultOffsets[tag] = resultOffsets[tag - 1] + resultSizes[tag - 1];
             totalSize += receivedSize;
         }
 

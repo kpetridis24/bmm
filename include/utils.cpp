@@ -190,7 +190,7 @@ namespace util
         delete[] M.blockNnzCounter;
     }
 
-    bool checkRes(int graphInd, std::vector<std::pair<int, int>> &vecC)
+    bool checkRes(int graphInd, std::vector <std::pair <int, int>> &vecC)
     {
         std::string checkGraph;
 
