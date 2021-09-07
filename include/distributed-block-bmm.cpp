@@ -170,10 +170,13 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
 
     // /* ------------------------------- free memory ------------------------------ */
 
-    // util::delCsr(A);
-    // util::delCsc(B);
-    // util::delBcsr(blA); 
-    // util::delBcsc(blB);
+    // util::delCsr(csrA);
+    // util::delCsc(cscB);
+    // util::delBcsr(bcsrA); 
+    // util::delBcsc(bcscB);
+    // util::delCoo(cooA);
+    // util::delCoo(cooB);
+    // util::delCoo(_cooA);
 
     // /* ------------------------------ check result ------------------------------ */
     

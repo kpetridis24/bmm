@@ -29,8 +29,11 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
     int blocksPerRowB = B.n / A.b;
 
     // high level matrix multiplication
+    // #pragma omp parallel
+    // {
     for (int blockRowF = 0; blockRowF < numBlockRowsF; blockRowF++) {
-        // #pragma omp parallel for schedule(dynamic)
+
+        #pragma omp parallel for   // nowait schedule(dynamic)
         for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];
@@ -40,9 +43,11 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
             util::addCooBlockToMatrix(C, blockRowF, blockColF, A.b, _C);
         }
     }
+    // }
+    
 }
 
-void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &_C)
+void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &_C)
 {   
     int ptr1 = 0;
     int ptr2 = 0;

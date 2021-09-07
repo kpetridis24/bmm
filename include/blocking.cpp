@@ -163,7 +163,7 @@ ret csc2bcsc(csc &M, bcsc &blM)
     int cnt = 0;
     int *elementCounter = new int[numBlocks]();
     int blockIdx, rowIndOffset;
-
+    
     for (int i = 0; i < M.n; i++) {
         
         if (cnt == blM.b) cnt = 0;
