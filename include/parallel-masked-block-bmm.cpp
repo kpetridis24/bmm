@@ -3,8 +3,9 @@
 /* -------------------------------------------------------------------------- */
 
 #include <headers.hpp>
-#include <cilk/cilk.h>
+// #include <cilk/cilk.h>
 // #include <cilk/cilk_api.h>
+#include <omp.h>
 
 void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
 {
@@ -24,9 +25,15 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
     csr A;
     csc B;
 
+    timer = util::tic();
+
     read2csr(matIndF, nF, nnzF, b, F);
     read2csr(matIndA, nA, nnzA, b, A);
     read2csc(matIndB, nB, nnzB, b, B);
+
+    t = util::toc(timer);
+    std::cout << "\nReading of F, A and B completed\n" << "Reading time = " << t << " seconds" << std::endl;
+
 
     /* -------------------------------- blocking -------------------------------- */
 
@@ -43,6 +50,10 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
     t = util::toc(timer);
     std::cout << "\nBlocking of F, A and B completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
+    util::delCsr(F);
+    util::delCsr(A);
+    util::delCsc(B);
+
     /* ----------------------------- block bmm test ----------------------------- */
 
     timer = util::tic();
@@ -51,7 +62,11 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
     parallelMaskedBlockBmm(bcsrA, bcsrA, bcscB, C);
 
     t = util::toc(timer);
-    std::cout << "\nParallel block-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+    std::cout << "\nParallel block-BMM completed\n" << "Parallel block-BMM time = " << t << " seconds" << std::endl;
+
+    util::delBcsr(bcsrF);
+    util::delBcsr(bcsrA);
+    util::delBcsc(bcscB);
 
     std::vector<std::pair<int, int>> vecC;
 
@@ -93,7 +108,8 @@ void parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> 
         std::vector<std::multimap <int, int>> bRowC(_numOfNzBlocks);
         int startInd = F.HL_bRowPtr[blockRowF];
 
-        cilk_for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
+        #pragma omp parallel for schedule(dynamic)
+        for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];
             maskedBlockRowColMult(blockRowF, blockColF, F, A, B, bRowC[indF - startInd]); // add block to the block-row vector

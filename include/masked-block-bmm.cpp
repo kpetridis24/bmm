@@ -4,7 +4,6 @@
 
 #include <headers.hpp>
 #include <bits/stdc++.h>
-// #include <omp.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
@@ -26,9 +25,14 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
     csr A;
     csc B;
 
+    timer = util::tic();
+
     read2csr(matIndF, nF, nnzF, b, F);
     read2csr(matIndA, nA, nnzA, b, A);
     read2csc(matIndB, nB, nnzB, b, B);
+
+    t = util::toc(timer);
+    std::cout << "\nReading of F, A and B completed\n" << "Reading time = " << t << " seconds" << std::endl;
 
     /* -------------------------------- blocking -------------------------------- */
 
@@ -45,6 +49,10 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
     t = util::toc(timer);
     std::cout << "\nBlocking of F, A and B completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
+    util::delCsr(F);
+    util::delCsr(A);
+    util::delCsc(B);
+
     /* ----------------------------- block bmm test ----------------------------- */
 
     timer = util::tic();
@@ -54,6 +62,10 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+
+    util::delBcsr(bcsrF);
+    util::delBcsr(bcsrA);
+    util::delBcsc(bcscB);
 
     std::vector<std::pair<int, int>> vecC;
 
@@ -89,18 +101,10 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
     }
 
     int numBlockRowsF = F.m / F.b;
-    // int blocksPerRowF = F.n / F.b;
-    // int numBlockRowsA = A.m / A.b;
-    // int blocksPerRowA = A.n / A.b;
-    // int numBlockRowsB = B.m / A.b;
-    // int blocksPerRowB = B.n / A.b;
 
     // high level matrix multiplication
-    // #pragma omp parallel
-    // {
     for (int blockRowF = 0; blockRowF < numBlockRowsF; blockRowF++) {
 
-        #pragma omp parallel for   // nowait schedule(dynamic)
         for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
 
             int blockColF = F.HL_bColInd[indF];
@@ -109,9 +113,7 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
             maskedBlockRowColMult(blockRowF, blockColF, F, A, B, _C);
             util::addCooBlockToMatrix(C, blockRowF, blockColF, A.b, _C);
         }
-    }
-    // }
-    
+    }    
 }
 
 void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &_C)

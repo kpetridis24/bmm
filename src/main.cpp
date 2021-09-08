@@ -24,15 +24,24 @@
 
 int main(int argc, char **argv)
 {
-  int matIndF = 2;
-  int matIndA = 2;
-  int matIndB = 2;
-
-  // maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
-  parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+  int matIndF = 3;
+  int matIndA = 3;
+  int matIndB = 3;
 
 /* -------------------------------------------------------------------------- */
-/*                         distributed block-BMM test                         */
+/*                                 sequential                                 */
+/* -------------------------------------------------------------------------- */
+
+  maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+
+/* -------------------------------------------------------------------------- */
+/*                                  parallel                                  */
+/* -------------------------------------------------------------------------- */
+
+  // parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+
+/* -------------------------------------------------------------------------- */
+/*                                 distributed                                */
 /* -------------------------------------------------------------------------- */
 
 // timer = util::tic();

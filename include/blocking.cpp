@@ -35,6 +35,8 @@ ret csr2bcsr(csr &M, bcsr &blM)
             nnzb++;
     }
 
+    delete[] isNotEmpty;
+
     int t = 0, t2 = 0, blkPtrSize = numBlocks - emptyBlocks + 1;
     int *nzBlockIndex = new int[numBlocks]; 
     int *nzBlockIndex2 = new int[blkPtrSize];
@@ -89,7 +91,7 @@ ret csr2bcsr(csr &M, bcsr &blM)
         b_cols[i] = nzBlockIndex2[i] % blocksPerRow;
     }
 
-    // delete[] nzBlockIndex2;
+    delete[] nzBlockIndex2;
     // prt::arr(b_rows, nnzb);
     // prt::arr(b_cols, nnzb);
 
@@ -110,8 +112,8 @@ ret csr2bcsr(csr &M, bcsr &blM)
 
 // /* -------------------------------------------------------------------------- */
 
-//     delete[] b_rows;
-//     delete[] b_cols;
+    delete[] b_rows;
+    delete[] b_cols;
 
     ret _ret = {HL_bRowPtr, HL_bColInd, nzBlockIndex, blockNnzCounter, numBlockRows+1,
                 nnzb, numBlocks, numBlocks+1};
@@ -146,6 +148,8 @@ ret csc2bcsc(csc &M, bcsc &blM)
         if (isNotEmpty[i])
             nnzb++;
     }
+
+    delete[] isNotEmpty;
 
     int t = 0, t2 = 0, blkPtrSize = numBlocks - emptyBlocks + 1;
     int *nzBlockIndex = new int[numBlocks]; 
@@ -193,13 +197,6 @@ ret csc2bcsc(csc &M, bcsc &blM)
     // prt::arr(blockNnzCounter, numBlocks+1);     //Non zeros of each block, thus externalBlockRowPtr
     // std::cout << "nzBlockIndex:";
     // prt::arr(nzBlockIndex, numBlocks);       //Non zero block indices, can be transformed to BCSR with the offsets
-    
-/* -------------------------------------------------------------------------- */
-/*                                    TODO                                    */
-/* -------------------------------------------------------------------------- */
-/* -------------------------------------------------------------------------- */
-/*                      pop nz blocks of blockNnzCounter                      */
-/* -------------------------------------------------------------------------- */
 
 /* -------------------------------------------------------------------------- */
 /*                                Low-Level CSC                               */
