@@ -10,33 +10,37 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <bits/stdc++.h>
-#include <mpi.h>
+// #include <mpi.h>
 
 #include <headers.hpp>
 #include <bmm.cpp>
 #include <blocking.cpp>
 #include <block-bmm.cpp>
 #include <masked-block-bmm.cpp>
-// #include <parallel-masked-block-bmm.cpp>
-#include <distributed-block-bmm.cpp>
+#include <parallel-masked-block-bmm.cpp>
+// #include <distributed-block-bmm.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
 int main(int argc, char **argv)
 {
-    struct timeval timer;
-    double t = -1;
-    int matIndA = 2;
-    int matIndB = 2;
+  int matIndF = 2;
+  int matIndA = 2;
+  int matIndB = 2;
 
-  /* ----------------------- distributed block-BMM test ----------------------- */
+  // maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+  parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
 
-    timer = util::tic();
+/* -------------------------------------------------------------------------- */
+/*                         distributed block-BMM test                         */
+/* -------------------------------------------------------------------------- */
 
-    distributedBlockBmm(matIndA, matIndB, argc, argv);
+// timer = util::tic();
 
-    t = util::toc(timer);
-    std::cout << "\nDistributed block-BMM completed\n" << "Total time = " << t << " seconds (pre-processing included)\n\n";
+// distributedBlockBmm(matIndA, matIndB, argc, argv);
+
+// t = util::toc(timer);
+// std::cout << "\nDistributed block-BMM completed\n" << "Total time = " << t << " seconds (pre-processing included)\n\n";
 
   return 0;
 }

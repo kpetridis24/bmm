@@ -4,9 +4,76 @@
 
 #include <headers.hpp>
 #include <bits/stdc++.h>
-#include <omp.h>
+// #include <omp.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
+
+void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
+{
+    struct timeval timer;
+    double t = -1;
+
+    /* ------------------------------ read matrices ----------------------------- */
+
+    int nF;
+    int nA;
+    int nB;
+    int nnzF;
+    int nnzA;
+    int nnzB;
+    int b;
+    csr F;
+    csr A;
+    csc B;
+
+    read2csr(matIndF, nF, nnzF, b, F);
+    read2csr(matIndA, nA, nnzA, b, A);
+    read2csc(matIndB, nB, nnzB, b, B);
+
+    /* -------------------------------- blocking -------------------------------- */
+
+    timer = util::tic();
+
+    bcsr bcsrF;
+    bcsr bcsrA; 
+    bcsc bcscB;
+
+    csr2bcsr(F, bcsrF, b);
+    csr2bcsr(A, bcsrA, b);
+    csc2bcsc(B, bcscB, b);
+
+    t = util::toc(timer);
+    std::cout << "\nBlocking of F, A and B completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
+    /* ----------------------------- block bmm test ----------------------------- */
+
+    timer = util::tic();
+
+    std::multimap<int, int> C;
+    maskedBlockBmm(bcsrA, bcsrA, bcscB, C);
+
+    t = util::toc(timer);
+    std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+
+    std::vector<std::pair<int, int>> vecC;
+
+    for (const auto& x : C) {
+        vecC.push_back(std::pair<int, int> (x.first, x.second));
+    }
+    std::sort(vecC.begin(), vecC.end());
+
+    // prt::vec(vecC);
+
+    /* ------------------------------ check result ------------------------------ */
+
+    if (util::checkRes(matIndA, vecC)) {
+        std::cout << "\nTest passed\n";
+    }
+    else {
+        std::cout << "\nTest failed\n";
+    }
+}
+
 
 void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
 // masked boolean matrix multiplication F.*(A*B) using blocks
@@ -22,11 +89,11 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
     }
 
     int numBlockRowsF = F.m / F.b;
-    int blocksPerRowF = F.n / F.b;
-    int numBlockRowsA = A.m / A.b;
-    int blocksPerRowA = A.n / A.b;
-    int numBlockRowsB = B.m / A.b;
-    int blocksPerRowB = B.n / A.b;
+    // int blocksPerRowF = F.n / F.b;
+    // int numBlockRowsA = A.m / A.b;
+    // int blocksPerRowA = A.n / A.b;
+    // int numBlockRowsB = B.m / A.b;
+    // int blocksPerRowB = B.n / A.b;
 
     // high level matrix multiplication
     // #pragma omp parallel

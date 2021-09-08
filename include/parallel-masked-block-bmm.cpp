@@ -4,14 +4,78 @@
 
 #include <headers.hpp>
 #include <cilk/cilk.h>
-#include <cilk/cilk_api.h>
+// #include <cilk/cilk_api.h>
 
-/* ---------------------------- masked block-bmm ---------------------------- */
+void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
+{
+    struct timeval timer;
+    double t = -1;
 
-ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
+    /* ------------------------------ read matrices ----------------------------- */
+
+    int nF;
+    int nA;
+    int nB;
+    int nnzF;
+    int nnzA;
+    int nnzB;
+    int b;
+    csr F;
+    csr A;
+    csc B;
+
+    read2csr(matIndF, nF, nnzF, b, F);
+    read2csr(matIndA, nA, nnzA, b, A);
+    read2csc(matIndB, nB, nnzB, b, B);
+
+    /* -------------------------------- blocking -------------------------------- */
+
+    timer = util::tic();
+
+    bcsr bcsrF;
+    bcsr bcsrA; 
+    bcsc bcscB;
+
+    csr2bcsr(F, bcsrF, b);
+    csr2bcsr(A, bcsrA, b);
+    csc2bcsc(B, bcscB, b);
+
+    t = util::toc(timer);
+    std::cout << "\nBlocking of F, A and B completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
+    /* ----------------------------- block bmm test ----------------------------- */
+
+    timer = util::tic();
+
+    std::multimap<int, int> C;
+    parallelMaskedBlockBmm(bcsrA, bcsrA, bcscB, C);
+
+    t = util::toc(timer);
+    std::cout << "\nParallel block-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+
+    std::vector<std::pair<int, int>> vecC;
+
+    for (const auto& x : C) {
+        vecC.push_back(std::pair<int, int> (x.first, x.second));
+    }
+    std::sort(vecC.begin(), vecC.end());
+
+    // prt::vec(vecC);
+
+    /* ------------------------------ check result ------------------------------ */
+
+    if (util::checkRes(matIndA, vecC)) {
+        std::cout << "\nTest passed\n";
+    }
+    else {
+        std::cout << "\nTest failed\n";
+    }
+}
+
+void parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
 // masked boolean matrix multiplication F.*(A*B) using blocks
 {
-    if (A.n != B.n || A.n != F.n) {
+    if (A.n != B.m || A.m != F.m || B.n != F.n) {
         std::cout << "Dimensions error\n";
         exit(1);
     }
@@ -21,41 +85,24 @@ ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B)
         exit(1);
     }
 
-    int nnzF = F.blockNnzCounter[(F.n / F.b) * (F.n / F.b)];
-    int blocksPerRow = A.n / A.b;
+    int numBlockRowsF = F.m / F.b;
 
-    int *C = new int[nnzF](); 
-    int sizeC = 0;
+    for (int blockRowF = 0; blockRowF < numBlockRowsF; blockRowF++) {
 
-    // high level matrix multiplication
-    for (int blockRowF = 0; blockRowF < blocksPerRow; blockRowF++) {    // each iteration computes a block-row of C matrix
-    
-        int numOfNzBlocks = F.HL_bRowPtr[blockRowF + 1] - F.HL_bRowPtr[blockRowF];
-
-        ret2 **bRowC = new ret2*[numOfNzBlocks];
+        int _numOfNzBlocks = F.HL_bRowPtr[blockRowF + 1] - F.HL_bRowPtr[blockRowF];
+        std::vector<std::multimap <int, int>> bRowC(_numOfNzBlocks);
         int startInd = F.HL_bRowPtr[blockRowF];
 
-        cilk_for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {     // each iteration computes a specific block of the current block-row, will be parallelized
-            // if we find how many iterations are executed (numOfNzrBlocks) we can make an array to store the product blocks _C and when all threads finish use addCooBlockToMatrix to add them to C
+        cilk_for (int indF = F.HL_bRowPtr[blockRowF]; indF < F.HL_bRowPtr[blockRowF + 1]; indF++) {
+
             int blockColF = F.HL_bColInd[indF];
-            std::multimap <int, int> map;
-
-            bRowC[indF - startInd] = maskedBlockRowColMult(blockRowF, blockColF, F, A, B, map);
+            maskedBlockRowColMult(blockRowF, blockColF, F, A, B, bRowC[indF - startInd]); // add block to the block-row vector
         }
 
-        for (int i = 0; i < numOfNzBlocks; i++) {
+        for (int i = 0; i < _numOfNzBlocks; i++) {
+            // the result block-rows of C have to be added in C sequentially to avoid data races
             int blockColF = F.HL_bColInd[F.HL_bRowPtr[blockRowF] + i];
-            util::addCooBlockToMatrix(C, bRowC[i]->M, blockRowF, blockColF, A.b, sizeC, bRowC[i]->sizeM);
-            delete[] bRowC[i]->M;
-            delete bRowC[i];
+            util::addCooBlockToMatrix(C, blockRowF, blockColF, A.b, bRowC[i]);
         }
-
-        delete[] bRowC;
     }
-
-    ret2 ret;
-    ret.M = C;
-    ret.sizeM = sizeC;
-
-    return ret;
 }

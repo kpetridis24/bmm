@@ -98,7 +98,8 @@ typedef struct
 /* ----------------------------- read functions ----------------------------- */
 
 void read2coo(int graphId, int &n, int &nnz, int &b, coo &M);
-std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A, csc &B);
+std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A);
+std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B);
 void readMtxValues(std::string f, int &n, int &nnz);
 void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz);
 int coo2csr(
@@ -149,6 +150,8 @@ namespace util
 
 ret csr2bcsr(csr &M, bcsr &blM);
 ret csc2bcsc(csc &M, bcsc &blM);
+void csr2bcsr(csr &M, bcsr &bcsrM, int b);
+void csc2bcsc(csc &M, bcsc &bcscM, int b);
 
 /* -------------------------------- block-bmm ------------------------------- */
 
@@ -186,7 +189,10 @@ void maskedBbm( bcsr &F,
                 int LL_rowIndOffsetB,
                 std::multimap <int, int> &_mapC );
 
-ret2 parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
+void parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C);
+
+void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
+void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
 
 /* ------------------------------ mpi functions ----------------------------- */
 

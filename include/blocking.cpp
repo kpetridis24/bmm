@@ -7,7 +7,6 @@
 
 ret csr2bcsr(csr &M, bcsr &blM) 
 {
-
     int numBlockRows = M.m / blM.b;
     int blocksPerRow = M.n / blM.b;
 
@@ -253,4 +252,48 @@ ret csc2bcsc(csc &M, bcsc &blM)
                 nnzb, numBlocks, numBlocks + 1};
 
     return _ret;
+}
+
+void csr2bcsr(csr &M, bcsr &bcsrM, int b)
+{
+    bcsrM.m = M.m;
+    bcsrM.n = M.n;
+    bcsrM.b = b;
+
+    int numBlocksM = (bcsrM.m / bcsrM.b) * (bcsrM.n / bcsrM.b);
+    int LL_bRowPtrSizeM = numBlocksM * (bcsrM.b + 1);
+
+    // init Low-Level CSR
+    bcsrM.LL_bRowPtr = new int[LL_bRowPtrSizeM]();
+    bcsrM.LL_bColInd = new int[M.nnz]();
+
+    // blocking
+    ret _ret = csr2bcsr(M, bcsrM);
+
+    bcsrM.HL_bRowPtr = _ret.ret1;
+    bcsrM.HL_bColInd = _ret.ret2;
+    bcsrM.nzBlockIndex = _ret.ret3;
+    bcsrM.blockNnzCounter = _ret.ret4;
+}
+
+void csc2bcsc(csc &M, bcsc &bcscM, int b)
+{
+    bcscM.m = M.m;
+    bcscM.n = M.n;
+    bcscM.b = b;
+
+    int numBlocksM = (bcscM.m / bcscM.b) * (bcscM.n / bcscM.b);
+    int LL_bColPtrSizeM = numBlocksM * (bcscM.b + 1);
+
+    // init Low-Level CSC
+    bcscM.LL_bColPtr = new int[LL_bColPtrSizeM]();
+    bcscM.LL_bRowInd = new int[M.nnz]();
+
+    // blocking
+    ret _ret = csc2bcsc(M, bcscM);
+
+    bcscM.HL_bColPtr = _ret.ret1;
+    bcscM.HL_bRowInd = _ret.ret2;
+    bcscM.nzBlockIndex = _ret.ret3;
+    bcscM.blockNnzCounter = _ret.ret4;
 }
