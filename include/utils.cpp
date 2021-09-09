@@ -245,4 +245,34 @@ namespace util
         util::delCoo(checkM);
         return true;
     }
+
+    bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC)
+    {
+        // read correct result
+        int checkN;
+        int checkNnz;
+
+        std::string checkFile = "graphs/bmm-res/" + checkGraph;
+
+        readMtxValues(checkFile, checkN, checkNnz);
+        coo checkM;
+        util::initCoo(checkM, checkN, checkN, checkNnz);
+
+        openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
+
+        // compare results
+        bool pass = true;
+        if (checkM.nnz != vecC.size()) {
+            return false;
+        }
+        else {
+            for (int i = 0; i < vecC.size(); i++) {
+                if (checkM.row[i] != vecC[i].first || checkM.col[i] != vecC[i].second) {
+                    return false;
+                }
+            }
+        }
+        util::delCoo(checkM);
+        return true;
+    }
 }

@@ -136,6 +136,7 @@ namespace util
   void removeCooRowOffsets(coo &M, int offset);
   void addCooRowOffsets(std::vector<std::pair<int, int>> &vecCooM, int *rowsM, int *colsM, int offset);
   bool checkRes(int graphInd, std::vector<std::pair<int, int>> &vecC);
+  bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC);
   void initCsr(csr &M, int m, int n, int nnz);
   void initCsc(csc &M, int m, int n, int nnz);
   void initCoo(coo &M, int m, int n, int nnz);

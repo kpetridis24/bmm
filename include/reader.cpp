@@ -43,6 +43,30 @@ void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
             b = 48469;
             // b = 17857;
             break;
+        case 6:
+            graph = "F1.mtx";
+            b = 2;
+            break;
+        case 7:
+            graph = "A1.mtx";
+            b = 2;
+            break;
+        case 8:
+            graph = "B1.mtx";
+            b = 2;
+            break;
+        case 9:
+            graph = "F2.mtx";
+            b = 250000;
+            break;
+        case 10:
+            graph = "A2.mtx";
+            b = 250000;
+            break;
+        case 11:
+            graph = "B2.mtx";
+            b = 250000;
+            break;
         default:
             exit(1);
     }
@@ -90,6 +114,30 @@ std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A)
             graph = "as-Skitter.mtx";
             b = 48469;
             // b = 17857;
+            break;
+        case 6:
+            graph = "F1.mtx";
+            b = 2;
+            break;
+        case 7:
+            graph = "A1.mtx";
+            b = 2;
+            break;
+        case 8:
+            graph = "B1.mtx";
+            b = 2;
+            break;
+        case 9:
+            graph = "F2.mtx";
+            b = 250000;
+            break;
+        case 10:
+            graph = "A2.mtx";
+            b = 250000;
+            break;
+        case 11:
+            graph = "B2.mtx";
+            b = 250000;
             break;
         default:
             exit(1);
@@ -151,6 +199,30 @@ std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B)
             graph = "as-Skitter.mtx";
             b = 48469;
             // b = 17857;
+            break;
+        case 6:
+            graph = "F1.mtx";
+            b = 2;
+            break;
+        case 7:
+            graph = "A1.mtx";
+            b = 2;
+            break;
+        case 8:
+            graph = "B1.mtx";
+            b = 2;
+            break;
+        case 9:
+            graph = "F2.mtx";
+            b = 250000;
+            break;
+        case 10:
+            graph = "A2.mtx";
+            b = 250000;
+            break;
+        case 11:
+            graph = "B2.mtx";
+            b = 250000;
             break;
         default:
             exit(1);

@@ -17,16 +17,16 @@
 #include <blocking.cpp>
 #include <block-bmm.cpp>
 #include <masked-block-bmm.cpp>
-#include <parallel-masked-block-bmm.cpp>
+// #include <parallel-masked-block-bmm.cpp>
 // #include <distributed-block-bmm.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
 int main(int argc, char **argv)
 {
-  int matIndF = 3;
-  int matIndA = 3;
-  int matIndB = 3;
+  int matIndF = 4;
+  int matIndA = 4;
+  int matIndB = 4;
 
 /* -------------------------------------------------------------------------- */
 /*                                 sequential                                 */

@@ -58,7 +58,7 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
     timer = util::tic();
 
     std::multimap<int, int> C;
-    maskedBlockBmm(bcsrA, bcsrA, bcscB, C);
+    maskedBlockBmm(bcsrF, bcsrA, bcscB, C);
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
@@ -78,12 +78,12 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
 
     /* ------------------------------ check result ------------------------------ */
 
-    if (util::checkRes(matIndA, vecC)) {
-        std::cout << "\nTest passed\n";
-    }
-    else {
-        std::cout << "\nTest failed\n";
-    }
+    // if (util::checkRes("C2.mtx", vecC)) {
+    //     std::cout << "\nTest passed\n";
+    // }
+    // else {
+    //     std::cout << "\nTest failed\n";
+    // }
 }
 
 
@@ -117,7 +117,7 @@ void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
 }
 
 void maskedBlockRowColMult(int blockRowF, int blockColF, bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &_C)
-{   
+{
     int ptr1 = 0;
     int ptr2 = 0;
     int bIndA;
