@@ -1,35 +1,38 @@
 clear;
 format long g;
 
-%% com-Youtube
-fid = fopen('com-Youtube.mtx');
-e = textscan(fid,'%f %f', 2987624);
+%% select matrix
+% fid = fopen('com-Youtube.mtx');
+% n = 1134890;
+% nnz = 2987624;
+
+% fid = fopen('belgium_osm.mtx');
+% n = 1441295;
+% nnz = 1549970;
+
+% fid = fopen('s6.mtx');
+% nnz = 12;
+% n = 6;
+
+fid = fopen('s12.mtx');
+nnz = 19;
+n = 12;
+
+%% read
+e = textscan(fid,'%f %f', nnz);
 data = cell2mat(e);
 fclose(fid);
 
-S = sparse(data(:, 2), data(:, 1), 1, 1134890, 1134890, 2987624);
+S = sparse(data(:, 2), data(:, 1), 1, n, n, nnz);
 
-%% s6
-% fid = fopen('s6.mtx');
-% e = textscan(fid,'%f %f', 12);
-% data = cell2mat(e);
-% fclose(fid);
-% 
-% S = sparse(data(:, 2), data(:, 1), 1, 6, 6, 12);
 
-%% s12
-% fid = fopen('s12.mtx');
-% e = textscan(fid,'%f %f', 19);
-% data = cell2mat(e);
-% fclose(fid);
-% 
-% S = sparse(data(:, 2), data(:, 1), 1, 12, 12, 19);
-
-%% COO
-C = S.*(S*S) > 0;
+%% masked bmm
+tic;
+C = (S.*(S*S)) > 0;
+toc
 [row, col] = find(C);
 cooC = [col, row];
 cooC = sortrows(cooC,[2 1]);
-dlmwrite('bmm_res_com-Youtube.mtx', cooC , 'delimiter', ' ', 'precision',  10);
+% dlmwrite('bmm_res_belgium_osm.mtx', cooC , 'delimiter', ' ', 'precision',  10);
 
 

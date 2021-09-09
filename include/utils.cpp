@@ -11,7 +11,7 @@ namespace prt
     void arr(int *arr, int len)
     {
         std::cout << std::endl;
-        for(int i = 0; i < len; i++)
+        for (int i = 0; i < len; i++)
             std::cout << arr[i] << " ";
         std::cout << std::endl;
     }
@@ -19,18 +19,24 @@ namespace prt
 
     void mat(int **mat, int rows, int cols)
     {
-        for(int i = 0; i < rows; i++){
-            for(int j = 0; j < cols; j++){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 std::cout << mat[i][j] << " ";
             }
             std::cout << std::endl;
         }
     }
 
+    void vec(std::vector<std::pair<int, int>> vec)
+    {
+        for (auto x : vec)
+        std::cout << x.first << " " << x.second << std::endl;
+    }
+
     void csrMat(csr &M)
     {
         std::cout << "\nrowPtr:";
-        prt::arr(M.rowPtr, M.n + 1);
+        prt::arr(M.rowPtr, M.m + 1);
         std::cout << "colInd:";
         prt::arr(M.colInd, M.nnz);
     }
@@ -86,42 +92,57 @@ namespace util
         LL_colIndOffset = blockNnzCounter[blockInd];
     }
 
-    void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM)
+    void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM)
     {
         int rowOffset = blockRow * b;
         int colOffset = blockCol * b;
 
-        for (int i = 0; i < _sizeM; i += 2) {
-            M[sizeM + i] = _M[i] + rowOffset;
-            M[sizeM + i + 1] = _M[i + 1] + colOffset;
+        for (const auto& x : _mapM) {
+            mapM.insert(std::pair <int, int> (x.first + rowOffset, x.second + colOffset));
         }
-
-        sizeM += _sizeM;
     }
 
-    void initCsr(csr &M, int n, int nnz)
+    void removeCooRowOffsets(coo &M, int offset)
+    {
+        for (int i = 0; i < M.nnz; i++) {
+            M.row[i] -= offset;
+        }
+    }
+
+    void addCooRowOffsets(std::vector<std::pair <int, int>> &vecCooM, int *rowsM, int *colsM, int offset)
+    {
+        for (int i = 0; i < vecCooM.size(); i++) {
+            rowsM[i] = vecCooM[i].first + offset;
+            colsM[i] = vecCooM[i].second;
+        }
+    }
+
+    void initCsr(csr &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
-        M.rowPtr = new int[n + 1]();
+        M.rowPtr = new int[m + 1]();
         M.colInd = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
 
-    void initCsc(csc &M, int n, int nnz)
+    void initCsc(csc &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
         M.colPtr = new int[n + 1]();
         M.rowInd = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
 
-    void initCoo(coo &M, int n, int nnz)
+    void initCoo(coo &M, int m, int n, int nnz)
     // initialize COO matrix
     {
         M.row = new int[nnz]();
         M.col = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
@@ -169,16 +190,33 @@ namespace util
         delete[] M.blockNnzCounter;
     }
 
-    bool checkRes(std::string checkGraph, coo &C)
+    bool checkRes(int graphInd, std::vector <std::pair <int, int>> &vecC)
     {
-        std::vector<std::pair <int, int> > vectC (C.nnz);
+        std::string checkGraph;
 
-        for (int i = 0; i < C.nnz; i++) {
-            vectC[i].first = C.row[i];
-            vectC[i].second = C.col[i];
+        switch(graphInd) {
+            case 0:
+                checkGraph = "s6.mtx";
+                break;
+            case 1:
+                checkGraph = "s12.mtx";
+                break;
+            case 2:
+                checkGraph = "com-Youtube.mtx";
+                break;
+            case 3:
+                checkGraph = "belgium_osm.mtx";
+                break;
+            case 4:
+                checkGraph = "dblp-2010.mtx";
+
+                break;
+            case 5:
+                checkGraph = "as-Skitter.mtx";
+                break;
+            default:
+                exit(1);
         }
-
-        std::sort(vectC.begin(), vectC.end());
 
         // read correct result
         int checkN;
@@ -188,18 +226,50 @@ namespace util
 
         readMtxValues(checkFile, checkN, checkNnz);
         coo checkM;
-        util::initCoo(checkM, checkN, checkNnz);
+        util::initCoo(checkM, checkN, checkN, checkNnz);
 
         openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
 
         // compare results
         bool pass = true;
-        if (checkM.nnz != vectC.size()) {
+        if (checkM.nnz != vecC.size()) {
             return false;
         }
         else {
-            for (int i = 0; i < vectC.size(); i++) {
-                if (checkM.row[i] != vectC[i].first || checkM.col[i] != vectC[i].second) {
+            for (int i = 0; i < vecC.size(); i++) {
+                if (checkM.row[i] != vecC[i].first || checkM.col[i] != vecC[i].second) {
+                    return false;
+                }
+            }
+        }
+        util::delCoo(checkM);
+        return true;
+    }
+
+    bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC)
+    {
+        // read correct result
+        int checkN;
+        int checkNnz;
+
+        // prt::vec(vecC);
+
+        std::string checkFile = "graphs/bmm-res/" + checkGraph;
+
+        readMtxValues(checkFile, checkN, checkNnz);
+        coo checkM;
+        util::initCoo(checkM, checkN, checkN, checkNnz);
+
+        openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
+
+        // compare results
+        bool pass = true;
+        if (checkM.nnz != vecC.size()) {
+            return false;
+        }
+        else {
+            for (int i = 0; i < vecC.size(); i++) {
+                if (checkM.row[i] != vecC[i].first || checkM.col[i] != vecC[i].second) {
                     return false;
                 }
             }

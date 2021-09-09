@@ -15,6 +15,7 @@ typedef struct
 {
   int *row;
   int *col;
+  int m;
   int n;
   int nnz;
 } coo;
@@ -25,6 +26,7 @@ typedef struct
 {
   int *rowPtr;
   int *colInd;
+  int m;
   int n;
   int nnz;
 } csr;
@@ -35,6 +37,7 @@ typedef struct
 {
   int *colPtr;
   int *rowInd;
+  int m;
   int n;
   int nnz;
 } csc;
@@ -49,6 +52,7 @@ typedef struct
   int *HL_bColInd;
   int *nzBlockIndex;
   int *blockNnzCounter;
+  int m;
   int n;
   int b;
   int nnz;
@@ -64,6 +68,7 @@ typedef struct
   int *HL_bRowInd;
   int *nzBlockIndex;
   int *blockNnzCounter;
+  int m;
   int n;
   int b;
 } bcsc;
@@ -76,6 +81,10 @@ typedef struct
   int *ret2;
   int *ret3; 
   int *ret4;
+  int size1;
+  int size2;
+  int size3;
+  int size4;
 } ret;
 
 /* ------------------ masked block row-col mult return type ----------------- */
@@ -88,6 +97,9 @@ typedef struct
 
 /* ----------------------------- read functions ----------------------------- */
 
+void read2coo(int graphId, int &n, int &nnz, int &b, coo &M);
+std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A);
+std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B);
 void readMtxValues(std::string f, int &n, int &nnz);
 void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz);
 int coo2csr(
@@ -96,7 +108,7 @@ int coo2csr(
   int const * const cooRow,
   int const * const cooCol,  
   int const         nnz,      
-  int const         n,         
+  int const         m,         
   int const         isOneBased 
 );
 
@@ -106,6 +118,7 @@ namespace prt
 {
     void arr(int *arr, int len);
     void mat(int **mat, int rows, int cols);
+    void vec(std::vector<std::pair<int, int>> vec);
     void csrMat(csr &M);
     void cscMat(csc &M);
     void cooMat(coo &M);
@@ -119,11 +132,14 @@ namespace util
   struct timeval tic();
   static double toc(struct timeval begin);
   void blockOffsets(int blockInd, int *nzBlockIndex, int *blockNnzCounter, int b, int &LL_row_ptr_offset, int &LL_col_ind_offset);
-  void addCooBlockToMatrix(int *M, int *_M, int blockRow, int blockCol, int b, int &sizeM, int _sizeM);
-  bool checkRes(std::string checkGraph, coo &C);
-  void initCsr(csr &M, int n, int nnz);
-  void initCsc(csc &M, int n, int nnz);
-  void initCoo(coo &M, int n, int nnz);
+  void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM);
+  void removeCooRowOffsets(coo &M, int offset);
+  void addCooRowOffsets(std::vector<std::pair<int, int>> &vecCooM, int *rowsM, int *colsM, int offset);
+  bool checkRes(int graphInd, std::vector<std::pair<int, int>> &vecC);
+  bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC);
+  void initCsr(csr &M, int m, int n, int nnz);
+  void initCsc(csc &M, int m, int n, int nnz);
+  void initCoo(coo &M, int m, int n, int nnz);
   void delCsr(csr &M);
   void delCsc(csc &M);
   void delCoo(coo &M);
@@ -134,7 +150,9 @@ namespace util
 /* --------------------------- blocking functions --------------------------- */
 
 ret csr2bcsr(csr &M, bcsr &blM);
-ret csr2bcsc(csr &M, bcsc &blM);
+ret csc2bcsc(csc &M, bcsc &blM);
+void csr2bcsr(csr &M, bcsr &bcsrM, int b);
+void csc2bcsc(csc &M, bcsc &bcscM, int b);
 
 /* -------------------------------- block-bmm ------------------------------- */
 
@@ -144,31 +162,53 @@ bool rowColMult( int rowA, int colB,
                  int LL_colIndOffsetA,
                  int LL_colPtrOffsetB,
                  int LL_rowIndOffsetB );
-bool *blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B);
+
+void blockBmm(bcsr &A, bcsc &B, std::multimap<int, int> &C);
+void blockRowColMult( int blockRowA, int blockColB, 
+                      bcsr &A, bcsc &B, 
+                      std::multimap<int, int> &_mapC );
 void bbm( bcsr &A,
           bcsc &B,
-          bool *_C,
           int LL_rowPtrOffsetA,
           int LL_colIndOffsetA,
           int LL_colPtrOffsetB,
-          int LL_rowIndOffsetB );
-void blockBmm(bcsr &A, bcsc &B);
-ret2 maskedBlockRowColMult( int blockRowA, int blockColB, 
+          int LL_rowIndOffsetB,
+          std::multimap <int, int> &_C );
+
+void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap<int, int> &mapC);
+void maskedBlockRowColMult( int blockRowA, int blockColB, 
                             bcsr &F, bcsr &A, bcsc &B, 
-                            std::multimap<int, int> &map );
+                            std::multimap<int, int> &_mapC );
 void maskedBbm( bcsr &F,
                 bcsr &A,
                 bcsc &B,
-                int *_C,
-                int &_sizeC,
                 int LL_rowPtrOffsetF,
                 int LL_colIndOffsetF,
                 int LL_rowPtrOffsetA,
                 int LL_colIndOffsetA,
                 int LL_colPtrOffsetB,
                 int LL_rowIndOffsetB,
-                std::multimap <int, int> &map );
-ret2 maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B);
+                std::multimap <int, int> &_mapC );
+
+void parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C);
+
+void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
+void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
+
+/* ------------------------------ mpi functions ----------------------------- */
+
+void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool parallel, int argc, char **argv);
+void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b);
+void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b);
+void bmmResultGather( int numProcesses,
+                      int rank, 
+                      int selfSize,
+                      int &totalSize, 
+                      int *rowsC, 
+                      int *colsC, 
+                      int *bmmResultRows, 
+                      int *bmmResultCols,
+                      std::vector <std::pair <int, int>> &bmmResultVec );
 
 /* -------------------------------------------------------------------------- */
 
