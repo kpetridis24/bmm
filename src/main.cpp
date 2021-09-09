@@ -24,9 +24,9 @@
 
 int main(int argc, char **argv)
 {
-  int matIndF = 4;
-  int matIndA = 4;
-  int matIndB = 4;
+  int matIndF = 2;
+  int matIndA = 2;
+  int matIndB = 2;
 
 /* -------------------------------------------------------------------------- */
 /*                                 sequential                                 */

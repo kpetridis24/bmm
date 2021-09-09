@@ -78,14 +78,13 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
 
     /* ------------------------------ check result ------------------------------ */
 
-    // if (util::checkRes("C2.mtx", vecC)) {
-    //     std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //     std::cout << "\nTest failed\n";
-    // }
+    if (util::checkRes(matIndF, vecC)) {
+        std::cout << "\nTest passed\n";
+    }
+    else {
+        std::cout << "\nTest failed\n";
+    }
 }
-
 
 void maskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)
 // masked boolean matrix multiplication F.*(A*B) using blocks

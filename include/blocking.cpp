@@ -7,10 +7,22 @@
 
 ret csr2bcsr(csr &M, bcsr &blM) 
 {
+    blM.m = M.m;
+    blM.n = M.n;
+
+    int numBlocksM = (blM.m / blM.b) * (blM.n / blM.b);
+    int LL_bRowPtrSizeM = numBlocksM * (blM.b + 1);
+
+    // init Low-Level CSR
+    blM.LL_bRowPtr = new int[LL_bRowPtrSizeM]();
+    blM.LL_bColInd = new int[M.nnz]();
+
+
     int numBlockRows = M.m / blM.b;
     int blocksPerRow = M.n / blM.b;
 
     int numBlocks = (M.m / blM.b) * (M.n / blM.b);
+
     int emptyBlocks = 0;
     int nnzb = 0;
     int *blockNnzCounter = new int[numBlocks + 1]();
@@ -92,8 +104,6 @@ ret csr2bcsr(csr &M, bcsr &blM)
     }
 
     delete[] nzBlockIndex2;
-    // prt::arr(b_rows, nnzb);
-    // prt::arr(b_cols, nnzb);
 
 /* -------------------------------------------------------------------------- */
 /*                                    B-CSR                                   */
@@ -104,16 +114,13 @@ ret csr2bcsr(csr &M, bcsr &blM)
 
     coo2csr(HL_bRowPtr, HL_bColInd, b_rows, b_cols, nnzb, numBlockRows, 0);
 
-//     // std::cout << "\nHigh-Level B-CSR\n";
-//     // std::cout << "HL-b_rowPtr:\t";
-//     // prt::arr(HL_bRowPtr, numBlockRows + 1);
-//     // std::cout << "HL-b_colInd:\t";
-//     // prt::arr(HL_bColInd, nnzb);
-
-// /* -------------------------------------------------------------------------- */
-
     delete[] b_rows;
     delete[] b_cols;
+
+    blM.HL_bRowPtr = HL_bRowPtr;
+    blM.HL_bColInd = HL_bColInd;
+    blM.nzBlockIndex = nzBlockIndex;
+    blM.blockNnzCounter = blockNnzCounter;
 
     ret _ret = {HL_bRowPtr, HL_bColInd, nzBlockIndex, blockNnzCounter, numBlockRows+1,
                 nnzb, numBlocks, numBlocks+1};
@@ -122,6 +129,17 @@ ret csr2bcsr(csr &M, bcsr &blM)
 
 ret csc2bcsc(csc &M, bcsc &blM) 
 {
+
+    blM.m = M.m;
+    blM.n = M.n;
+
+    int numBlocksM = (blM.m / blM.b) * (blM.n / blM.b);
+    int LL_bColPtrSizeM = numBlocksM * (blM.b + 1);
+
+    // init Low-Level CSC
+    blM.LL_bColPtr = new int[LL_bColPtrSizeM]();
+    blM.LL_bRowInd = new int[M.nnz]();
+
     int numBlockRows = M.m / blM.b;
     int blocksPerRow = M.n / blM.b;
 
@@ -131,8 +149,9 @@ ret csc2bcsc(csc &M, bcsc &blM)
     bool *isNotEmpty = new bool[numBlocks]();
 
     for(int i = 0; i < M.n; i++) 
-        for(int j = M.colPtr[i]; j < M.colPtr[i + 1]; j++) 
+        for(int j = M.colPtr[i]; j < M.colPtr[i + 1]; j++) {
             blockNnzCounter[(i / blM.b) * numBlockRows + (M.rowInd[j] / blM.b) + 1]++;
+        }
     
     for(int i = 0; i < numBlocks; i++) {
         if (blockNnzCounter[i] == 0) {
@@ -193,21 +212,6 @@ ret csc2bcsc(csc &M, bcsc &blM)
         cumsum = 0;
     }  
 
-    // std::cout << "\nblockNnzCounter:";
-    // prt::arr(blockNnzCounter, numBlocks+1);     //Non zeros of each block, thus externalBlockRowPtr
-    // std::cout << "nzBlockIndex:";
-    // prt::arr(nzBlockIndex, numBlocks);       //Non zero block indices, can be transformed to BCSR with the offsets
-
-/* -------------------------------------------------------------------------- */
-/*                                Low-Level CSC                               */
-/* -------------------------------------------------------------------------- */
-    
-    // std::cout << "\nLow-Level CSC\n";
-    // std::cout << "LL-bColPtr:\t";
-    // prt::arr(blM.LL_bColPtr, blkPtrSize * (blM.b + 1));   //Inside blkRowPtr
-    // std::cout << "LL-bRowInd:\t";
-    // prt::arr(blM.LL_bRowInd, M.nnz);
-
 /* -------------------------------------------------------------------------- */
 /*                                    B-COO                                   */
 /* -------------------------------------------------------------------------- */
@@ -222,9 +226,6 @@ ret csc2bcsc(csc &M, bcsc &blM)
 
     delete[] nzBlockIndex2;
 
-    // prt::arr(b_rows, nnzb);
-    // prt::arr(b_cols, nnzb);
-
 /* -------------------------------------------------------------------------- */
 /*                                    B-CSC                                   */
 /* -------------------------------------------------------------------------- */
@@ -234,16 +235,15 @@ ret csc2bcsc(csc &M, bcsc &blM)
 
     coo2csr(HL_bColPtr, HL_bRowInd, b_cols, b_rows, nnzb, numBlockRows, 0);
 
-    // std::cout << "\nHigh-Level B-CSC\n";
-    // std::cout << "HL-bColPtr:\t";
-    // prt::arr(HL_bColPtr, numBlockRows + 1);
-    // std::cout << "HL-bRowInd:\t";
-    // prt::arr(HL_bRowInd, nnzb);
-
 /* -------------------------------------------------------------------------- */
 
     delete[] b_rows;
     delete[] b_cols;
+
+    blM.HL_bColPtr = HL_bColPtr;
+    blM.HL_bRowInd = HL_bRowInd;
+    blM.nzBlockIndex = nzBlockIndex;
+    blM.blockNnzCounter = blockNnzCounter;
 
     ret _ret = {HL_bColPtr, HL_bRowInd, nzBlockIndex, blockNnzCounter, numBlockRows+1,
                 nnzb, numBlocks, numBlocks + 1};
@@ -253,44 +253,16 @@ ret csc2bcsc(csc &M, bcsc &blM)
 
 void csr2bcsr(csr &M, bcsr &bcsrM, int b)
 {
-    bcsrM.m = M.m;
-    bcsrM.n = M.n;
     bcsrM.b = b;
 
-    int numBlocksM = (bcsrM.m / bcsrM.b) * (bcsrM.n / bcsrM.b);
-    int LL_bRowPtrSizeM = numBlocksM * (bcsrM.b + 1);
-
-    // init Low-Level CSR
-    bcsrM.LL_bRowPtr = new int[LL_bRowPtrSizeM]();
-    bcsrM.LL_bColInd = new int[M.nnz]();
-
     // blocking
-    ret _ret = csr2bcsr(M, bcsrM);
-
-    bcsrM.HL_bRowPtr = _ret.ret1;
-    bcsrM.HL_bColInd = _ret.ret2;
-    bcsrM.nzBlockIndex = _ret.ret3;
-    bcsrM.blockNnzCounter = _ret.ret4;
+    csr2bcsr(M, bcsrM);
 }
 
 void csc2bcsc(csc &M, bcsc &bcscM, int b)
 {
-    bcscM.m = M.m;
-    bcscM.n = M.n;
     bcscM.b = b;
 
-    int numBlocksM = (bcscM.m / bcscM.b) * (bcscM.n / bcscM.b);
-    int LL_bColPtrSizeM = numBlocksM * (bcscM.b + 1);
-
-    // init Low-Level CSC
-    bcscM.LL_bColPtr = new int[LL_bColPtrSizeM]();
-    bcscM.LL_bRowInd = new int[M.nnz]();
-
     // blocking
-    ret _ret = csc2bcsc(M, bcscM);
-
-    bcscM.HL_bColPtr = _ret.ret1;
-    bcscM.HL_bRowInd = _ret.ret2;
-    bcscM.nzBlockIndex = _ret.ret3;
-    bcscM.blockNnzCounter = _ret.ret4;
+    csc2bcsc(M, bcscM);
 }
