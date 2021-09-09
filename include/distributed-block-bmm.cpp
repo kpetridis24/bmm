@@ -10,7 +10,13 @@
 void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel, int argc, char **argv)
 {
     struct timeval timer;
-    double t = -1;
+    double tTotal = -1;
+    double t1 = -1;
+    double t2 = -1;
+    double t3 = -1;
+    double t4 = -1;
+    double t5 = -1;
+    double t6 = -1;
 
     int numProcesses, rank;
     int blockSizeF;
@@ -31,9 +37,14 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
 
     /* ---------------------- distribute A and broadcast B ---------------------- */
 
-    distributeCooMatrix(numProcesses, rank, cooF, _cooF, matIndF, blockSizeF);
-    distributeCooMatrix(numProcesses, rank, cooA, _cooA, matIndA, blockSizeA);
-    broadcastCooMatrix(numProcesses, rank, cooB, matIndB, blockSizeB);
+    t1 = distributeCooMatrix(numProcesses, rank, cooF, _cooF, matIndF, blockSizeF);
+    t2 = distributeCooMatrix(numProcesses, rank, cooA, _cooA, matIndA, blockSizeA);
+    t3 = broadcastCooMatrix(numProcesses, rank, cooB, matIndB, blockSizeB);
+
+    /* ------------------------ start timer in process 0 ------------------------ */
+
+    if (rank == 0)
+        timer = util::tic();
 
     /* ---------------- fix indices of matrix A - remove offsets ---------------- */
 
@@ -42,6 +53,11 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
 
     util::removeCooRowOffsets(_cooF, chunkStartingRow);
     util::removeCooRowOffsets(_cooA, chunkStartingRow);
+
+    /* ------------------------ stop timer in process 0 ------------------------- */
+
+    if (rank == 0)
+        t4 = util::toc(timer);
 
     /* ------------------- convert F and A to CSR and B to CSC ------------------ */
 
@@ -66,44 +82,47 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
 
     /* -------------------------- blocking of F Matrix -------------------------- */
 
-    timer = util::tic();
+    // timer = util::tic();
 
     bcsr bcsrF;
 
     // blocking
     csr2bcsr(csrF, bcsrF, blockSizeF);
 
-    t = util::toc(timer);
+    // t = util::toc(timer);
     // std::cout << "\nBlocking F in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
 
     /* -------------------------- blocking of A Matrix -------------------------- */
 
-    timer = util::tic();
+    // timer = util::tic();
 
     bcsr bcsrA;
 
     // blocking
     csr2bcsr(csrA, bcsrA, blockSizeA);
 
-    t = util::toc(timer);
+    // t = util::toc(timer);
     // std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
     /* -------------------------- blocking of B Matrix -------------------------- */
 
-    timer = util::tic();
+    // timer = util::tic();
 
     bcsc bcscB;
 
     // blocking
     csc2bcsc(cscB, bcscB, blockSizeB);
 
-    t = util::toc(timer);
+    // t = util::toc(timer);
     // std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
 
-    /* -------------------------------- block BMM ------------------------------- */
+    /* ------------------------ start timer in process 0 ------------------------ */
 
-    timer = util::tic();
+    if (rank == 0)
+        timer = util::tic();
+
+    /* -------------------------------- block BMM ------------------------------- */
 
     std::multimap <int, int> _cooC;
 
@@ -114,20 +133,28 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
         parallelMaskedBlockBmm(bcsrF, bcsrA, bcscB, _cooC);
     }
 
-    t = util::toc(timer);
-    std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
+    /* ------------------------ stop timer in process 0 ------------------------- */
+
+    if (rank == 0)
+        t5 = util::toc(timer);
+
+    /* --------------------------- sort result matrix --------------------------- */
+
+    // std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
 
     std::vector <std::pair <int, int>> _vecCooC;
-
-    timer = util::tic();
 
     for (auto &x : _cooC) {
       _vecCooC.push_back(std::pair <int, int> (x.first, x.second));
     }
     std::sort(_vecCooC.begin(), _vecCooC.end());
 
-    t = util::toc(timer);
     // std::cout << "\nVector processing time = " << t << " seconds" << std::endl;
+
+    /* ------------------------ start timer in process 0 ------------------------ */
+
+    if (rank == 0)
+        timer = util::tic();
 
     /* ------------------ fix indices of matrix C - add offsets ----------------- */
 
@@ -149,6 +176,11 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
     bmmResultGather(numProcesses, rank, selfSize, totalSize, _rowsC, _colsC, bmmResultRows,
                     bmmResultCols, bmmResultVec);
 
+    /* ------------------------ stop timer in process 0 ------------------------- */
+
+    if (rank == 0)
+        t6 = util::toc(timer);
+
     // /* ------------------------------- free memory ------------------------------ */
 
     // util::delCsr(csrF);
@@ -158,8 +190,15 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
     // util::delCoo(_cooF);
     // util::delCoo(_cooA);
 
-    /* ------------------------------ MPI finalize ------------------------------ */
+    /* ---------------------- compute total execution time ---------------------- */
     
+    if (rank == 0) {
+        tTotal = t1 + t2 + t3 + t4 + t5 + t6;
+        std::cout << "\nDistributed block-BMM completed\n" << "Total time = " << tTotal << " seconds\n\n";
+    }
+
+    /* ------------------------------ MPI finalize ------------------------------ */
+
     MPI_Finalize();
 
     if (rank != 0)
@@ -185,7 +224,7 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
     }
 }
 
-void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b)
+double distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b)
 {
     MPI_Request req;
     MPI_Status stat;
@@ -210,12 +249,12 @@ void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd
 
         /* ------------------------------- read matrix ------------------------------ */
         
-        timer = util::tic();
+        // timer = util::tic();
 
         read2coo(matInd, n, nnz, b, M);
         
         // std::cout << "\nMatrix read successfully\nn = " << M.n << ", nnz = " << M.nnz << std::endl;
-        t = util::toc(timer);
+        // t = util::toc(timer);
         // std::cout << "\nReading time = " << t << std::endl;
         // prt::cooMat(M);
 
@@ -290,12 +329,14 @@ void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd
         t = util::toc(timer);
         // std::cout << "Distribution of matrix time = " << t << std::endl;
         util::delCoo(M);
+        return t;
     }
 
     // prt::cooMat(_M);
+    return 1;
 }
 
-void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b)
+double broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b)
 {
     int n;
     int nnz;
@@ -306,17 +347,17 @@ void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b)
 
         /* ------------------------------- read matrix ------------------------------ */
 
-        timer = util::tic();
+        // timer = util::tic();
 
         read2coo(matInd, n, nnz, b, M);
         
         // std::cout << "\nMatrix read successfully\nn = " << M.n << ", nnz = " << M.nnz << std::endl;
-        t = util::toc(timer);
+        // t = util::toc(timer);
         // std::cout << "\nReading time = " << t << std::endl;
         // prt::cooMat(M);
-    }
 
-    timer = util::tic();
+        timer = util::tic();
+    }
 
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nnz, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -332,6 +373,13 @@ void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b)
     // std::cout << "Broadcast of matrix time = " << t << std::endl;
 
     // prt::cooMat(M);
+
+    if (rank == 0) {
+        t = util::toc(timer);
+        return t;
+    }
+
+    return 1;
 }
 
 void bmmResultGather( int numProcesses,

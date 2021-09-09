@@ -43,13 +43,8 @@ int main(int argc, char **argv)
 /*                                 distributed                                */
 /* -------------------------------------------------------------------------- */
 
-  // timer = util::tic();
-
-  bool isParallel = false;
+  bool isParallel = true;
   distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, argc, argv);
-
-  //  t = util::toc(timer);
-  // std::cout << "\nDistributed block-BMM completed\n" << "Total time = " << t << " seconds (pre-processing included)\n\n";
 
   return 0;
 }
