@@ -252,6 +252,8 @@ namespace util
         int checkN;
         int checkNnz;
 
+        // prt::vec(vecC);
+
         std::string checkFile = "graphs/bmm-res/" + checkGraph;
 
         readMtxValues(checkFile, checkN, checkNnz);

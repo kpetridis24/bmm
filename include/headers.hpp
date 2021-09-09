@@ -197,7 +197,7 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
 
 /* ------------------------------ mpi functions ----------------------------- */
 
-void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv);
+void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool parallel, int argc, char **argv);
 void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b);
 void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b);
 void bmmResultGather( int numProcesses,

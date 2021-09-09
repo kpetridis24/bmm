@@ -7,12 +7,13 @@
 #include <headers.hpp>
 #include <mpi.h>
 
-void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
+void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel, int argc, char **argv)
 {
     struct timeval timer;
     double t = -1;
 
     int numProcesses, rank;
+    int blockSizeF;
     int blockSizeA;
     int blockSizeB;
 
@@ -22,12 +23,15 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    coo cooF;
     coo cooA;
     coo cooB;
+    coo _cooF;
     coo _cooA;
 
     /* ---------------------- distribute A and broadcast B ---------------------- */
 
+    distributeCooMatrix(numProcesses, rank, cooF, _cooF, matIndF, blockSizeF);
     distributeCooMatrix(numProcesses, rank, cooA, _cooA, matIndA, blockSizeA);
     broadcastCooMatrix(numProcesses, rank, cooB, matIndB, blockSizeB);
 
@@ -36,9 +40,15 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     int rowsPerChunk = _cooA.n / numProcesses;
     int chunkStartingRow = rowsPerChunk * rank;
 
+    util::removeCooRowOffsets(_cooF, chunkStartingRow);
     util::removeCooRowOffsets(_cooA, chunkStartingRow);
 
-    /* ---------------------- convert A to CSR and B to CSC --------------------- */
+    /* ------------------- convert F and A to CSR and B to CSC ------------------ */
+
+    csr csrF;
+    util::initCsr(csrF, _cooF.m, _cooF.n, _cooF.nnz);
+
+    coo2csr(csrF.rowPtr, csrF.colInd, _cooF.row, _cooF.col, _cooF.nnz, _cooF.m, 0);
 
     csr csrA;
     util::initCsr(csrA, _cooA.m, _cooA.n, _cooA.nnz);
@@ -54,34 +64,27 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
 
     // prt::cscMat(cscB);
 
+    /* -------------------------- blocking of F Matrix -------------------------- */
+
+    timer = util::tic();
+
+    bcsr bcsrF;
+
+    // blocking
+    csr2bcsr(csrF, bcsrF, blockSizeF);
+
+    t = util::toc(timer);
+    // std::cout << "\nBlocking F in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
+
+
     /* -------------------------- blocking of A Matrix -------------------------- */
 
     timer = util::tic();
 
     bcsr bcsrA;
-    bcsrA.m = _cooA.m;
-    bcsrA.n = _cooA.n;
-    bcsrA.b = blockSizeA;
-
-    int numBlocksA = (bcsrA.m / bcsrA.b) * (bcsrA.n / bcsrA.b);
-    int LL_bRowPtrSize = numBlocksA * (bcsrA.b + 1);
-
-    // init Low-Level CSR
-    bcsrA.LL_bRowPtr = new int[LL_bRowPtrSize]();
-    bcsrA.LL_bColInd = new int[_cooA.nnz]();
 
     // blocking
-    ret _ret1 = csr2bcsr(csrA, bcsrA);
-
-    bcsrA.HL_bRowPtr = _ret1.ret1;
-    bcsrA.HL_bColInd = _ret1.ret2;
-    bcsrA.nzBlockIndex = _ret1.ret3;
-    bcsrA.blockNnzCounter = _ret1.ret4;
-    int HL_bRowPtrSize = _ret1.size1;
-    int HL_bColIndSize = _ret1.size2;
-    int nzBlockIndexSizeA = _ret1.size3;
-    int blockNnzCounterSizeA = _ret1.size4;
-
+    csr2bcsr(csrA, bcsrA, blockSizeA);
 
     t = util::toc(timer);
     // std::cout << "\nBlocking A in B-CSR completed\n" << "Blocking time = " << t << " seconds" << std::endl;
@@ -91,29 +94,9 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     timer = util::tic();
 
     bcsc bcscB;
-    bcscB.m = cooB.m;
-    bcscB.n = cooB.n;
-    bcscB.b = blockSizeB;
-
-    int numBlocks = (bcscB.m / bcscB.b) * (bcscB.n / bcscB.b);
-    int LL_bColPtrSize = numBlocks * (bcscB.b + 1);
-
-    // init Low-Level CSC
-    bcscB.LL_bColPtr = new int[LL_bColPtrSize]();
-    bcscB.LL_bRowInd = new int[cooB.nnz]();
 
     // blocking
-    ret _ret2 = csc2bcsc(cscB, bcscB);
-    
-    bcscB.HL_bColPtr = _ret2.ret1;
-    bcscB.HL_bRowInd = _ret2.ret2;
-    bcscB.nzBlockIndex = _ret2.ret3;
-    bcscB.blockNnzCounter = _ret2.ret4;
-    int HL_bColPtrSize = _ret2.size1;
-    int HL_bRowIndSize = _ret2.size2;
-    int nzBlockIndexSizeB = _ret2.size3;
-    int blockNnzCounterSizeB = _ret2.size4;
-
+    csc2bcsc(cscB, bcscB, blockSizeB);
 
     t = util::toc(timer);
     // std::cout << "\nBlocking B in B-CSC completed\n" << "Blocking time = " << t << " seconds" << std::endl;
@@ -123,8 +106,13 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     timer = util::tic();
 
     std::multimap <int, int> _cooC;
-    // blockBmm(bcsrA, bcscB, _cooC);
-    maskedBlockBmm(bcsrA, bcsrA, bcscB, _cooC);
+
+    if (!isParallel) {
+        maskedBlockBmm(bcsrF, bcsrA, bcscB, _cooC);
+    }
+    else {
+        parallelMaskedBlockBmm(bcsrF, bcsrA, bcscB, _cooC);
+    }
 
     t = util::toc(timer);
     std::cout << "\nBlock-BMM completed\n" << "Block-BMM time = " << t << " seconds" << std::endl;
@@ -153,13 +141,22 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     std::vector <std::pair <int, int>> bmmResultVec;
     
     // if (rank == 0) {
-    //     std::cout << "Process " << rank << " result: \n";
-    //     prt::arr(_rowsC, selfSize);
-    //     prt::arr(_colsC, selfSize);
+        // std::cout << "Process " << rank << " result: \n";
+        // prt::arr(_rowsC, selfSize);
+        // prt::arr(_colsC, selfSize);
     // }
 
     bmmResultGather(numProcesses, rank, selfSize, totalSize, _rowsC, _colsC, bmmResultRows,
                     bmmResultCols, bmmResultVec);
+
+    // /* ------------------------------- free memory ------------------------------ */
+
+    // util::delCsr(csrF);
+    // util::delCsr(csrA);
+    // util::delCsc(cscB);
+    // util::delCoo(cooB);
+    // util::delCoo(_cooF);
+    // util::delCoo(_cooA);
 
     /* ------------------------------ MPI finalize ------------------------------ */
     
@@ -168,28 +165,24 @@ void distributedBlockBmm(int matIndA, int matIndB, int argc, char **argv)
     if (rank != 0)
         exit(0);
 
-    // /* ------------------------------- free memory ------------------------------ */
-
-    // util::delCsr(csrA);
-    // util::delCsc(cscB);
-    // util::delBcsr(bcsrA); 
-    // util::delBcsc(bcscB);
-    // util::delCoo(cooA);
-    // util::delCoo(cooB);
-    // util::delCoo(_cooA);
-
     // /* ------------------------------ check result ------------------------------ */
     
-    std::cout << "Distributed block-BMM result:\n";
+    // std::cout << "Distributed block-BMM result:\n";
     // prt::vec(bmmResultVec);
 
-    if (util::checkRes(matIndA, bmmResultVec)) {
+    // if (util::checkRes(matIndA, bmmResultVec)) {
+    //     std::cout << "\nTest passed\n";
+    // }
+    // else {
+    //     std::cout << "\nTest failed\n";
+    // }
+
+    if (util::checkRes("C1.mtx", bmmResultVec)) {
         std::cout << "\nTest passed\n";
     }
     else {
         std::cout << "\nTest failed\n";
     }
-    
 }
 
 void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b)
@@ -382,6 +375,8 @@ void bmmResultGather( int numProcesses,
         // prt::arr(resultOffsets, numProcesses);
     }
 
+    MPI_Barrier(MPI_COMM_WORLD);
+
     MPI_Gatherv(rowsC, selfSize, MPI_INT, bmmResultRows, resultSizes, resultOffsets,
                 MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -394,5 +389,10 @@ void bmmResultGather( int numProcesses,
         for (int i = 0; i < totalSize; i++) 
             bmmResultVec.push_back(std::pair <int, int> (bmmResultRows[i], bmmResultCols[i]));
         std::sort(bmmResultVec.begin(), bmmResultVec.end());
-    } 
+    }
+
+    // delete[] resultSizes;
+    // delete[] resultOffsets;
+    // delete[] bmmResultRows;
+    // delete[] bmmResultCols;
 }

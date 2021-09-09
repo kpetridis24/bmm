@@ -85,7 +85,7 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
     //     std::cout << "\nTest failed\n";
     // }
 
-    if (util::checkRes("C1.mtx", vecC)) {
+    if (util::checkRes("C3.mtx", vecC)) {
         std::cout << "\nTest passed\n";
     }
     else {

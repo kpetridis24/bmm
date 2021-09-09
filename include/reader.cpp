@@ -45,15 +45,15 @@ void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
             break;
         case 6:
             graph = "F1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 7:
             graph = "A1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 8:
             graph = "B1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 9:
             graph = "F2.mtx";
@@ -66,6 +66,18 @@ void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
         case 11:
             graph = "B2.mtx";
             b = 250000;
+            break;
+        case 12:
+            graph = "F3.mtx";
+            b = 200000;
+            break;
+        case 13:
+            graph = "A3.mtx";
+            b = 200000;
+            break;
+        case 14:
+            graph = "B3.mtx";
+            b = 200000;
             break;
         default:
             exit(1);
@@ -117,15 +129,15 @@ std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A)
             break;
         case 6:
             graph = "F1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 7:
             graph = "A1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 8:
             graph = "B1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 9:
             graph = "F2.mtx";
@@ -138,6 +150,18 @@ std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A)
         case 11:
             graph = "B2.mtx";
             b = 250000;
+            break;
+        case 12:
+            graph = "F3.mtx";
+            b = 200000;
+            break;
+        case 13:
+            graph = "A3.mtx";
+            b = 200000;
+            break;
+        case 14:
+            graph = "B3.mtx";
+            b = 200000;
             break;
         default:
             exit(1);
@@ -202,15 +226,15 @@ std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B)
             break;
         case 6:
             graph = "F1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 7:
             graph = "A1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 8:
             graph = "B1.mtx";
-            b = 250000;
+            b = 200000;
             break;
         case 9:
             graph = "F2.mtx";
@@ -223,6 +247,18 @@ std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B)
         case 11:
             graph = "B2.mtx";
             b = 250000;
+            break;
+        case 12:
+            graph = "F3.mtx";
+            b = 200000;
+            break;
+        case 13:
+            graph = "A3.mtx";
+            b = 200000;
+            break;
+        case 14:
+            graph = "B3.mtx";
+            b = 200000;
             break;
         default:
             exit(1);
