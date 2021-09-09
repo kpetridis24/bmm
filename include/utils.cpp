@@ -36,7 +36,7 @@ namespace prt
     void csrMat(csr &M)
     {
         std::cout << "\nrowPtr:";
-        prt::arr(M.rowPtr, M.n + 1);
+        prt::arr(M.rowPtr, M.m + 1);
         std::cout << "colInd:";
         prt::arr(M.colInd, M.nnz);
     }
@@ -102,29 +102,47 @@ namespace util
         }
     }
 
-    void initCsr(csr &M, int n, int nnz)
+    void removeCooRowOffsets(coo &M, int offset)
+    {
+        for (int i = 0; i < M.nnz; i++) {
+            M.row[i] -= offset;
+        }
+    }
+
+    void addCooRowOffsets(std::vector<std::pair <int, int>> &vecCooM, int *rowsM, int *colsM, int offset)
+    {
+        for (int i = 0; i < vecCooM.size(); i++) {
+            rowsM[i] = vecCooM[i].first + offset;
+            colsM[i] = vecCooM[i].second;
+        }
+    }
+
+    void initCsr(csr &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
-        M.rowPtr = new int[n + 1]();
+        M.rowPtr = new int[m + 1]();
         M.colInd = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
 
-    void initCsc(csc &M, int n, int nnz)
+    void initCsc(csc &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
         M.colPtr = new int[n + 1]();
         M.rowInd = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
 
-    void initCoo(coo &M, int n, int nnz)
+    void initCoo(coo &M, int m, int n, int nnz)
     // initialize COO matrix
     {
         M.row = new int[nnz]();
         M.col = new int[nnz]();
+        M.m = m;
         M.n = n;
         M.nnz = nnz;
     }
@@ -172,8 +190,34 @@ namespace util
         delete[] M.blockNnzCounter;
     }
 
-    bool checkRes(std::string checkGraph, std::vector<std::pair<int, int>> &vecC)
+    bool checkRes(int graphInd, std::vector <std::pair <int, int>> &vecC)
     {
+        std::string checkGraph;
+
+        switch(graphInd) {
+            case 0:
+                checkGraph = "s6.mtx";
+                break;
+            case 1:
+                checkGraph = "s12.mtx";
+                break;
+            case 2:
+                checkGraph = "com-Youtube.mtx";
+                break;
+            case 3:
+                checkGraph = "belgium_osm.mtx";
+                break;
+            case 4:
+                checkGraph = "dblp-2010.mtx";
+
+                break;
+            case 5:
+                checkGraph = "as-Skitter.mtx";
+                break;
+            default:
+                exit(1);
+        }
+
         // read correct result
         int checkN;
         int checkNnz;
@@ -182,7 +226,39 @@ namespace util
 
         readMtxValues(checkFile, checkN, checkNnz);
         coo checkM;
-        util::initCoo(checkM, checkN, checkNnz);
+        util::initCoo(checkM, checkN, checkN, checkNnz);
+
+        openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
+
+        // compare results
+        bool pass = true;
+        if (checkM.nnz != vecC.size()) {
+            return false;
+        }
+        else {
+            for (int i = 0; i < vecC.size(); i++) {
+                if (checkM.row[i] != vecC[i].first || checkM.col[i] != vecC[i].second) {
+                    return false;
+                }
+            }
+        }
+        util::delCoo(checkM);
+        return true;
+    }
+
+    bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC)
+    {
+        // read correct result
+        int checkN;
+        int checkNnz;
+
+        // prt::vec(vecC);
+
+        std::string checkFile = "graphs/bmm-res/" + checkGraph;
+
+        readMtxValues(checkFile, checkN, checkNnz);
+        coo checkM;
+        util::initCoo(checkM, checkN, checkN, checkNnz);
 
         openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
 

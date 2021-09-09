@@ -5,6 +5,286 @@
 #include <iostream>
 #include <fstream>
 
+#include <headers.hpp>
+
+void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
+{
+    std::string graph;
+
+    switch(graphId) {
+        case 0:
+            graph = "s6.mtx";
+            // b = 2;
+            b = 3;
+            break;
+        case 1:
+            graph = "s12.mtx";
+            b = 2;
+            // b = 3;
+            // b = 4;
+            // b = 6;
+            break;
+        case 2:
+            graph = "com-Youtube.mtx";
+            // b = 226978;
+            b = 113489;
+            break;
+        case 3:
+            graph = "belgium_osm.mtx";
+            b = 62665;
+            break;
+        case 4:
+            graph = "dblp-2010.mtx";
+            b = 23299;
+            // b = 14182;
+            break;
+        case 5:
+            graph = "as-Skitter.mtx";
+            b = 48469;
+            // b = 17857;
+            break;
+        case 6:
+            graph = "F1.mtx";
+            b = 200000;
+            break;
+        case 7:
+            graph = "A1.mtx";
+            b = 200000;
+            break;
+        case 8:
+            graph = "B1.mtx";
+            b = 200000;
+            break;
+        case 9:
+            graph = "F2.mtx";
+            b = 250000;
+            break;
+        case 10:
+            graph = "A2.mtx";
+            b = 250000;
+            break;
+        case 11:
+            graph = "B2.mtx";
+            b = 250000;
+            break;
+        case 12:
+            graph = "F3.mtx";
+            b = 200000;
+            break;
+        case 13:
+            graph = "A3.mtx";
+            b = 200000;
+            break;
+        case 14:
+            graph = "B3.mtx";
+            b = 200000;
+            break;
+        default:
+            exit(1);
+    }
+
+    std::string file = "graphs/" + graph;
+
+    readMtxValues(file, n, nnz);
+    util::initCoo(M, n, n, nnz);
+    openMtxFile(file, M.col, M.row, M.n, M.nnz);
+    M.m = M.n;
+}
+
+std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A)
+{
+    std::string graph;
+
+    switch(graphId) {
+        case 0:
+            graph = "s6.mtx";
+            // b = 2;
+            b = 3;
+            break;
+        case 1:
+            graph = "s12.mtx";
+            b = 2;
+            // b = 3;
+            // b = 4;
+            // b = 6;
+            break;
+        case 2:
+            graph = "com-Youtube.mtx";
+            b = 226978;
+            // b = 113489;
+            break;
+        case 3:
+            graph = "belgium_osm.mtx";
+            b = 62665;
+            break;
+        case 4:
+            graph = "dblp-2010.mtx";
+            b = 23299;
+            // b = 14182;
+            break;
+        case 5:
+            graph = "as-Skitter.mtx";
+            b = 48469;
+            // b = 17857;
+            break;
+        case 6:
+            graph = "F1.mtx";
+            b = 200000;
+            break;
+        case 7:
+            graph = "A1.mtx";
+            b = 200000;
+            break;
+        case 8:
+            graph = "B1.mtx";
+            b = 200000;
+            break;
+        case 9:
+            graph = "F2.mtx";
+            b = 250000;
+            break;
+        case 10:
+            graph = "A2.mtx";
+            b = 250000;
+            break;
+        case 11:
+            graph = "B2.mtx";
+            b = 250000;
+            break;
+        case 12:
+            graph = "F3.mtx";
+            b = 200000;
+            break;
+        case 13:
+            graph = "A3.mtx";
+            b = 200000;
+            break;
+        case 14:
+            graph = "B3.mtx";
+            b = 200000;
+            break;
+        default:
+            exit(1);
+    }
+
+    std::string file = "graphs/" + graph;
+
+    readMtxValues(file, n, nnz);
+
+    coo M;
+    util::initCoo(M, n, n, nnz);
+
+    openMtxFile(file, M.col, M.row, M.n, M.nnz);
+
+    util::initCsr(A, n, n, nnz);
+
+    coo2csr(A.rowPtr, A.colInd, M.row, M.col, A.nnz, A.n, 0);
+    A.m = A.n;
+
+    util::delCoo(M);
+
+    // prt::csrMat(A);
+    
+    return graph;
+}
+
+std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B)
+{
+    std::string graph;
+
+    switch(graphId) {
+        case 0:
+            graph = "s6.mtx";
+            // b = 2;
+            b = 3;
+            break;
+        case 1:
+            graph = "s12.mtx";
+            b = 2;
+            // b = 3;
+            // b = 4;
+            // b = 6;
+            break;
+        case 2:
+            graph = "com-Youtube.mtx";
+            b = 226978;
+            // b = 113489;
+            break;
+        case 3:
+            graph = "belgium_osm.mtx";
+            b = 62665;
+            break;
+        case 4:
+            graph = "dblp-2010.mtx";
+            b = 23299;
+            // b = 14182;
+            break;
+        case 5:
+            graph = "as-Skitter.mtx";
+            b = 48469;
+            // b = 17857;
+            break;
+        case 6:
+            graph = "F1.mtx";
+            b = 200000;
+            break;
+        case 7:
+            graph = "A1.mtx";
+            b = 200000;
+            break;
+        case 8:
+            graph = "B1.mtx";
+            b = 200000;
+            break;
+        case 9:
+            graph = "F2.mtx";
+            b = 250000;
+            break;
+        case 10:
+            graph = "A2.mtx";
+            b = 250000;
+            break;
+        case 11:
+            graph = "B2.mtx";
+            b = 250000;
+            break;
+        case 12:
+            graph = "F3.mtx";
+            b = 200000;
+            break;
+        case 13:
+            graph = "A3.mtx";
+            b = 200000;
+            break;
+        case 14:
+            graph = "B3.mtx";
+            b = 200000;
+            break;
+        default:
+            exit(1);
+    }
+
+    std::string file = "graphs/" + graph;
+
+    readMtxValues(file, n, nnz);
+
+    coo M;
+    util::initCoo(M, n, n, nnz);
+
+    openMtxFile(file, M.col, M.row, M.n, M.nnz);
+
+    util::initCsc(B, n, n, nnz);
+
+    coo2csr(B.colPtr, B.rowInd, M.col, M.row, B.nnz, B.n, 0);
+    B.m = B.n;
+
+    util::delCoo(M);
+
+    // prt::cscMat(B);
+    
+    return graph;
+}
+
 void readMtxValues(std::string f, int &n, int &nnz)
 {
     // Open the file:
@@ -57,24 +337,24 @@ int coo2csr(
   int const * const cooRow,
   int const * const cooCol,  
   int const         nnz,      
-  int const         n,         
+  int const         m,         
   int const         isOneBased 
 )
 {
   // ----- cannot assume that input is already 0!
-    for(int l = 0; l < n + 1; l++) row[l] = 0;
+    for(int l = 0; l < m + 1; l++) row[l] = 0;
 
   // ----- find the correct column sizes
     for(int l = 0; l < nnz; l++)
         row[cooRow[l] - isOneBased]++;
 
   // ----- cumulative sum
-    for(int i = 0, cumsum = 0; i < n; i++) {
+    for(int i = 0, cumsum = 0; i < m; i++) {
         int temp = row[i];
         row[i] = cumsum;
         cumsum += temp;
     }
-    row[n] = nnz;
+    row[m] = nnz;
 
   // ----- copy the row indices to the correct place
     for(int l = 0; l < nnz; l++) {
@@ -87,13 +367,13 @@ int coo2csr(
     }
 
   // ----- revert the column pointers
-    for(int i = 0, last = 0; i < n; i++) {
+    for(int i = 0, last = 0; i < m; i++) {
         int temp = row[i];
         row[i] = last;
         last = temp;
     }
 
-    return n;
+    return m;
 }
 
 /* -------------------------------------------------------------------------- */

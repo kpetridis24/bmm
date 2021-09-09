@@ -10,7 +10,7 @@
 void blockBmm(bcsr &A, bcsc &B, std::multimap<int, int> &C)
 // boolean matrix multiplication (A*B) using blocks
 {
-    if (A.n != B.n) {
+    if (A.n != B.m) {
         std::cout << "Dimensions error\n";
         exit(1);
     }
@@ -20,11 +20,14 @@ void blockBmm(bcsr &A, bcsc &B, std::multimap<int, int> &C)
         exit(1);
     }
 
-    int blocksPerRow = A.n / A.b;
+    int numBlockRowsA = A.m / A.b;
+    int blocksPerRowA = A.n / A.b;
+    int numBlockRowsB = B.m / A.b;
+    int blocksPerRowB = B.n / A.b;
 
     // high level matrix multiplication
-    for (int blockRowA = 0; blockRowA < blocksPerRow; blockRowA++) {
-        for (int blockColB = 0; blockColB < blocksPerRow; blockColB++) {
+    for (int blockRowA = 0; blockRowA < numBlockRowsA; blockRowA++) {
+        for (int blockColB = 0; blockColB < blocksPerRowB; blockColB++) {
 
             std::multimap <int, int> _C; // block of matrix C
 
@@ -41,7 +44,7 @@ void blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B, std::multim
     int bIndA;
     int bIndB;
     int cN;
-    int blocksPerRow = A.n / A.b;
+    int blocksPerRowA = A.n / A.b;
 
     int LL_rowPtrOffsetA, LL_colIndOffsetA;
     int LL_colPtrOffsetB, LL_rowIndOffsetB;
@@ -56,8 +59,8 @@ void blockRowColMult(int blockRowA, int blockColB, bcsr &A, bcsc &B, std::multim
         else {
             cN = A.HL_bColInd[A.HL_bRowPtr[blockRowA] + ptr1]; // common neighbor index
 
-            bIndA = blockRowA * blocksPerRow + cN;
-            bIndB = blockColB * blocksPerRow + cN;
+            bIndA = blockRowA * blocksPerRowA + cN;
+            bIndB = blockColB * blocksPerRowA + cN;
 
             util::blockOffsets(bIndA, A.nzBlockIndex, A.blockNnzCounter, A.b, LL_rowPtrOffsetA, LL_colIndOffsetA);
             util::blockOffsets(bIndB, B.nzBlockIndex, B.blockNnzCounter, B.b, LL_colPtrOffsetB, LL_rowIndOffsetB);
