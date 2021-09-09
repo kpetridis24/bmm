@@ -11,10 +11,10 @@ ret csr2bcsr(csr &M, bcsr &blM)
     blM.n = M.n;
 
     int numBlocksM = (blM.m / blM.b) * (blM.n / blM.b);
-    int LL_bRowPtrSizeM = numBlocksM * (blM.b + 1);
+    // int LL_bRowPtrSizeM = numBlocksM * (blM.b + 1);
 
     // init Low-Level CSR
-    blM.LL_bRowPtr = new int[LL_bRowPtrSizeM]();
+    // blM.LL_bRowPtr = new int[LL_bRowPtrSizeM]();
     blM.LL_bColInd = new int[M.nnz]();
 
 
@@ -48,6 +48,8 @@ ret csr2bcsr(csr &M, bcsr &blM)
     }
 
     delete[] isNotEmpty;
+
+    blM.LL_bRowPtr = new int[(nnzb + 1) * (blM.b + 1)]();
 
     int t = 0, t2 = 0, blkPtrSize = numBlocks - emptyBlocks + 1;
     int *nzBlockIndex = new int[numBlocks]; 
@@ -129,15 +131,14 @@ ret csr2bcsr(csr &M, bcsr &blM)
 
 ret csc2bcsc(csc &M, bcsc &blM) 
 {
-
     blM.m = M.m;
     blM.n = M.n;
 
     int numBlocksM = (blM.m / blM.b) * (blM.n / blM.b);
-    int LL_bColPtrSizeM = numBlocksM * (blM.b + 1);
+    // int LL_bColPtrSizeM = numBlocksM * (blM.b + 1);
 
     // init Low-Level CSC
-    blM.LL_bColPtr = new int[LL_bColPtrSizeM]();
+    // blM.LL_bColPtr = new int[LL_bColPtrSizeM]();
     blM.LL_bRowInd = new int[M.nnz]();
 
     int numBlockRows = M.m / blM.b;
@@ -169,6 +170,8 @@ ret csc2bcsc(csc &M, bcsc &blM)
     }
 
     delete[] isNotEmpty;
+
+    blM.LL_bColPtr = new int[(nnzb + 1) * (blM.b + 1)]();
 
     int t = 0, t2 = 0, blkPtrSize = numBlocks - emptyBlocks + 1;
     int *nzBlockIndex = new int[numBlocks]; 

@@ -1,5 +1,5 @@
-n = 1.5e6;
-d = 0.4; % approximate number of true elements per row
+n = 2e6;
+d = 1; % approximate number of true elements per row
 
 % generate random sparse matrices
 F = sprand( n, n, d/n ) > 0;

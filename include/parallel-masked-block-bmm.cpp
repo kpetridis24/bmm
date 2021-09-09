@@ -85,6 +85,13 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
     // else {
     //     std::cout << "\nTest failed\n";
     // }
+
+    if (util::checkRes("C1.mtx", vecC)) {
+        std::cout << "\nTest passed\n";
+    }
+    else {
+        std::cout << "\nTest failed\n";
+    }
 }
 
 void parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C)

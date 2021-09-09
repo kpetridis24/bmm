@@ -17,28 +17,28 @@
 #include <blocking.cpp>
 #include <block-bmm.cpp>
 #include <masked-block-bmm.cpp>
-// #include <parallel-masked-block-bmm.cpp>
+#include <parallel-masked-block-bmm.cpp>
 // #include <distributed-block-bmm.cpp>
 #include <utils.cpp>
 #include <reader.cpp>
 
 int main(int argc, char **argv)
 {
-  int matIndF = 2;
-  int matIndA = 2;
-  int matIndB = 2;
+  int matIndF = 6;
+  int matIndA = 7;
+  int matIndB = 8;
 
 /* -------------------------------------------------------------------------- */
 /*                                 sequential                                 */
 /* -------------------------------------------------------------------------- */
 
-  maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+  // maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
 
 /* -------------------------------------------------------------------------- */
 /*                                  parallel                                  */
 /* -------------------------------------------------------------------------- */
 
-  // parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+  parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
 
 /* -------------------------------------------------------------------------- */
 /*                                 distributed                                */
