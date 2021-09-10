@@ -2,8 +2,6 @@
 /*                          distributed-block-bmm.cpp                         */
 /* -------------------------------------------------------------------------- */
 
-#include <iostream>
-#include <cstdlib>
 #include <headers.hpp>
 #include <mpi.h>
 
@@ -205,18 +203,8 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
         exit(0);
 
     // /* ------------------------------ check result ------------------------------ */
-    
-    // std::cout << "Distributed block-BMM result:\n";
-    // prt::vec(bmmResultVec);
 
-    // if (util::checkRes(matIndA, bmmResultVec)) {
-    //     std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //     std::cout << "\nTest failed\n";
-    // }
-
-    if (util::checkRes("C1.mtx", bmmResultVec)) {
+    if (util::checkRes("C_s12.mtx", bmmResultVec)) {
         std::cout << "\nTest passed\n";
     }
     else {

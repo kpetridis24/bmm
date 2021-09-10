@@ -2,17 +2,7 @@
 /*                                  main.cpp                                  */
 /* -------------------------------------------------------------------------- */
 
-#include <iostream>
-#include <cstdlib>
-#include <cstdbool>
-#include <iostream>
-#include <fstream>
-#include <sys/time.h>
-#include <unistd.h>
-#include <bits/stdc++.h>
-
 #include <headers.hpp>
-#include <bmm.cpp>
 #include <blocking.cpp>
 #include <block-bmm.cpp>
 #include <masked-block-bmm.cpp>
@@ -23,28 +13,31 @@
 
 int main(int argc, char **argv)
 {
-  int matIndF = 6;
-  int matIndA = 7;
-  int matIndB = 8;
+/* -------------------------------------------------------------------------- */
+/*                                s12.mtx -> 0                                */
+/*                                 F.mtx -> 1                                 */
+/*                                 Α.mtx -> 2                                 */
+/*                                 B.mtx -> 3                                 */
+/* -------------------------------------------------------------------------- */
 
-/* -------------------------------------------------------------------------- */
-/*                                 sequential                                 */
-/* -------------------------------------------------------------------------- */
+  int matIndF = 0;
+  int matIndA = 0;
+  int matIndB = 0;
+
+/* ------------------------------- sequential ------------------------------- */
 
   // maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
 
-/* -------------------------------------------------------------------------- */
-/*                                  parallel                                  */
-/* -------------------------------------------------------------------------- */
+/* -------------------------------- parallel -------------------------------- */
 
   // parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
 
-/* -------------------------------------------------------------------------- */
-/*                                 distributed                                */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------- distributed ------------------------------ */
 
-  bool isParallel = true;
+  bool isParallel = false;
   distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, argc, argv);
+
+/* -------------------------------------------------------------------------- */
 
   return 0;
 }

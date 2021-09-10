@@ -2,9 +2,6 @@
 /*                                 reader.cpp                                 */
 /* -------------------------------------------------------------------------- */
 
-#include <iostream>
-#include <fstream>
-
 #include <headers.hpp>
 
 void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
@@ -13,70 +10,22 @@ void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
 
     switch(graphId) {
         case 0:
-            graph = "s6.mtx";
-            // b = 2;
-            b = 3;
-            break;
-        case 1:
             graph = "s12.mtx";
             b = 2;
             // b = 3;
             // b = 4;
             // b = 6;
             break;
+        case 1:
+            graph = "F.mtx";
+            b = 200000;
+            break;
         case 2:
-            graph = "com-Youtube.mtx";
-            // b = 226978;
-            b = 113489;
+            graph = "A.mtx";
+            b = 200000;
             break;
         case 3:
-            graph = "belgium_osm.mtx";
-            b = 62665;
-            break;
-        case 4:
-            graph = "dblp-2010.mtx";
-            b = 23299;
-            // b = 14182;
-            break;
-        case 5:
-            graph = "as-Skitter.mtx";
-            b = 48469;
-            // b = 17857;
-            break;
-        case 6:
-            graph = "F1.mtx";
-            b = 200000;
-            break;
-        case 7:
-            graph = "A1.mtx";
-            b = 200000;
-            break;
-        case 8:
-            graph = "B1.mtx";
-            b = 200000;
-            break;
-        case 9:
-            graph = "F2.mtx";
-            b = 250000;
-            break;
-        case 10:
-            graph = "A2.mtx";
-            b = 250000;
-            break;
-        case 11:
-            graph = "B2.mtx";
-            b = 250000;
-            break;
-        case 12:
-            graph = "F3.mtx";
-            b = 200000;
-            break;
-        case 13:
-            graph = "A3.mtx";
-            b = 200000;
-            break;
-        case 14:
-            graph = "B3.mtx";
+            graph = "B.mtx";
             b = 200000;
             break;
         default:
@@ -97,70 +46,22 @@ std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A)
 
     switch(graphId) {
         case 0:
-            graph = "s6.mtx";
-            // b = 2;
-            b = 3;
-            break;
-        case 1:
             graph = "s12.mtx";
             b = 2;
             // b = 3;
             // b = 4;
             // b = 6;
             break;
+        case 1:
+            graph = "F.mtx";
+            b = 200000;
+            break;
         case 2:
-            graph = "com-Youtube.mtx";
-            b = 226978;
-            // b = 113489;
+            graph = "A.mtx";
+            b = 200000;
             break;
         case 3:
-            graph = "belgium_osm.mtx";
-            b = 62665;
-            break;
-        case 4:
-            graph = "dblp-2010.mtx";
-            b = 23299;
-            // b = 14182;
-            break;
-        case 5:
-            graph = "as-Skitter.mtx";
-            b = 48469;
-            // b = 17857;
-            break;
-        case 6:
-            graph = "F1.mtx";
-            b = 200000;
-            break;
-        case 7:
-            graph = "A1.mtx";
-            b = 200000;
-            break;
-        case 8:
-            graph = "B1.mtx";
-            b = 200000;
-            break;
-        case 9:
-            graph = "F2.mtx";
-            b = 250000;
-            break;
-        case 10:
-            graph = "A2.mtx";
-            b = 250000;
-            break;
-        case 11:
-            graph = "B2.mtx";
-            b = 250000;
-            break;
-        case 12:
-            graph = "F3.mtx";
-            b = 200000;
-            break;
-        case 13:
-            graph = "A3.mtx";
-            b = 200000;
-            break;
-        case 14:
-            graph = "B3.mtx";
+            graph = "B.mtx";
             b = 200000;
             break;
         default:
@@ -194,70 +95,22 @@ std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B)
 
     switch(graphId) {
         case 0:
-            graph = "s6.mtx";
-            // b = 2;
-            b = 3;
-            break;
-        case 1:
             graph = "s12.mtx";
             b = 2;
             // b = 3;
             // b = 4;
             // b = 6;
             break;
+        case 1:
+            graph = "F.mtx";
+            b = 200000;
+            break;
         case 2:
-            graph = "com-Youtube.mtx";
-            b = 226978;
-            // b = 113489;
+            graph = "A.mtx";
+            b = 200000;
             break;
         case 3:
-            graph = "belgium_osm.mtx";
-            b = 62665;
-            break;
-        case 4:
-            graph = "dblp-2010.mtx";
-            b = 23299;
-            // b = 14182;
-            break;
-        case 5:
-            graph = "as-Skitter.mtx";
-            b = 48469;
-            // b = 17857;
-            break;
-        case 6:
-            graph = "F1.mtx";
-            b = 200000;
-            break;
-        case 7:
-            graph = "A1.mtx";
-            b = 200000;
-            break;
-        case 8:
-            graph = "B1.mtx";
-            b = 200000;
-            break;
-        case 9:
-            graph = "F2.mtx";
-            b = 250000;
-            break;
-        case 10:
-            graph = "A2.mtx";
-            b = 250000;
-            break;
-        case 11:
-            graph = "B2.mtx";
-            b = 250000;
-            break;
-        case 12:
-            graph = "F3.mtx";
-            b = 200000;
-            break;
-        case 13:
-            graph = "A3.mtx";
-            b = 200000;
-            break;
-        case 14:
-            graph = "B3.mtx";
+            graph = "B.mtx";
             b = 200000;
             break;
         default:
@@ -327,10 +180,6 @@ void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz)
     fin.close();
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                 COO to CSR                                 */
-/* -------------------------------------------------------------------------- */
-
 int coo2csr(
   int       * const row,       
   int       * const col,     
@@ -375,5 +224,3 @@ int coo2csr(
 
     return m;
 }
-
-/* -------------------------------------------------------------------------- */

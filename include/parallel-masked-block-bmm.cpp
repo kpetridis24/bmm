@@ -3,8 +3,6 @@
 /* -------------------------------------------------------------------------- */
 
 #include <headers.hpp>
-// #include <cilk/cilk.h>
-// #include <cilk/cilk_api.h>
 #include <omp.h>
 
 void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
@@ -79,14 +77,7 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
 
     /* ------------------------------ check result ------------------------------ */
 
-    // if (util::checkRes(matIndA, vecC)) {
-    //     std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //     std::cout << "\nTest failed\n";
-    // }
-
-    if (util::checkRes("C3.mtx", vecC)) {
+    if (util::checkRes("C_s12.mtx", vecC)) {
         std::cout << "\nTest passed\n";
     }
     else {

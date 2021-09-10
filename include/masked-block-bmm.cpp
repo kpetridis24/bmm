@@ -3,7 +3,6 @@
 /* -------------------------------------------------------------------------- */
 
 #include <headers.hpp>
-#include <bits/stdc++.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
@@ -78,14 +77,7 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
 
     /* ------------------------------ check result ------------------------------ */
 
-    // if (util::checkRes(matIndF, vecC)) {
-    //     std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //     std::cout << "\nTest failed\n";
-    // }
-
-    if (util::checkRes("C3.mtx", vecC)) {
+    if (util::checkRes("C_s12.mtx", vecC)) {
         std::cout << "\nTest passed\n";
     }
     else {
