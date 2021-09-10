@@ -135,7 +135,7 @@ namespace util
   void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM);
   void removeCooRowOffsets(coo &M, int offset);
   void addCooRowOffsets(std::vector<std::pair<int, int>> &vecCooM, int *rowsM, int *colsM, int offset);
-  bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC);
+  void computeChunks(int* chunkSizes, int* chunkOffsets, int numProcesses, int numBlockRows);
   void initCsr(csr &M, int m, int n, int nnz);
   void initCsc(csc &M, int m, int n, int nnz);
   void initCoo(coo &M, int m, int n, int nnz);
@@ -144,6 +144,7 @@ namespace util
   void delCoo(coo &M);
   void delBcsr(bcsr &M);
   void delBcsc(bcsc &M);
+  bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC);
 };
 
 /* --------------------------- blocking functions --------------------------- */

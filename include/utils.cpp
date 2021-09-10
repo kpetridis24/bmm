@@ -115,6 +115,22 @@ namespace util
         }
     }
 
+    void computeChunks(int* chunkSizes, int* chunkOffsets, int numProcesses, int numBlockRows)
+    {
+        int rem = numBlockRows % numProcesses; // blockRows remaining after division among processes
+        int sum = 0;                 // Sum of chunkSizes. Used to calculate displacements
+
+        for (int i = 0; i < numProcesses; i++) {
+            chunkSizes[i] = numBlockRows / numProcesses;
+            if (rem > 0) {
+                chunkSizes[i] += 1;
+                rem--;
+            }
+            chunkOffsets[i] = sum;
+            sum += chunkSizes[i];
+        }
+    }
+
     void initCsr(csr &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
