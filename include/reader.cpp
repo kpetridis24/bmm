@@ -4,29 +4,22 @@
 
 #include <headers.hpp>
 
-void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
+void read2coo(int graphId, int &n, int &nnz, coo &M)
 {
     std::string graph;
 
     switch(graphId) {
         case 0:
             graph = "s12.mtx";
-            b = 2;
-            // b = 3;
-            // b = 4;
-            // b = 6;
             break;
         case 1:
             graph = "F.mtx";
-            b = 250000;
             break;
         case 2:
             graph = "A.mtx";
-            b = 250000;
             break;
         case 3:
             graph = "B.mtx";
-            b = 250000;
             break;
         default:
             exit(1);
@@ -40,29 +33,22 @@ void read2coo(int graphId, int &n, int &nnz, int &b, coo &M)
     M.m = M.n;
 }
 
-std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A)
+std::string read2csr(int graphId, int &n, int &nnz, csr &A)
 {
     std::string graph;
 
     switch(graphId) {
         case 0:
             graph = "s12.mtx";
-            b = 2;
-            // b = 3;
-            // b = 4;
-            // b = 6;
             break;
         case 1:
             graph = "F.mtx";
-            b = 250000;
             break;
         case 2:
             graph = "A.mtx";
-            b = 250000;
             break;
         case 3:
             graph = "B.mtx";
-            b = 250000;
             break;
         default:
             exit(1);
@@ -84,34 +70,25 @@ std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A)
 
     util::delCoo(M);
 
-    // prt::csrMat(A);
-    
     return graph;
 }
 
-std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B)
+std::string read2csc(int graphId, int &n, int &nnz, csc &B)
 {
     std::string graph;
 
     switch(graphId) {
         case 0:
             graph = "s12.mtx";
-            b = 2;
-            // b = 3;
-            // b = 4;
-            // b = 6;
             break;
         case 1:
             graph = "F.mtx";
-            b = 250000;
             break;
         case 2:
             graph = "A.mtx";
-            b = 250000;
             break;
         case 3:
             graph = "B.mtx";
-            b = 250000;
             break;
         default:
             exit(1);
@@ -133,8 +110,6 @@ std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B)
 
     util::delCoo(M);
 
-    // prt::cscMat(B);
-    
     return graph;
 }
 
@@ -173,9 +148,6 @@ void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz)
         fin >> row[i] >> col[i];
         row[i]--;
         col[i]--;
-        // i++;
-        // row[i]=col[i-1];
-        // col[i]=row[i-1];
     }
     fin.close();
 }

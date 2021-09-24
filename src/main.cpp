@@ -23,19 +23,20 @@ int main(int argc, char **argv)
   int matIndF = 1;
   int matIndA = 2;
   int matIndB = 3;
+  int b = 250000;
 
 /* ------------------------------- sequential ------------------------------- */
 
-  // maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+  // maskedBlockBmm(matIndF, matIndA, matIndB, b);
 
 /* -------------------------------- parallel -------------------------------- */
 
-  // parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+  // parallelMaskedBlockBmm(matIndF, matIndA, matIndB, b);
 
 /* ------------------------------- distributed ------------------------------ */
 
   bool isParallel = false;
-  distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, argc, argv);
+  distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, b, argc, argv);
 
 /* -------------------------------------------------------------------------- */
 

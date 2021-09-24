@@ -97,9 +97,9 @@ typedef struct
 
 /* ----------------------------- read functions ----------------------------- */
 
-void read2coo(int graphId, int &n, int &nnz, int &b, coo &M);
-std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A);
-std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B);
+void read2coo(int graphId, int &n, int &nnz, coo &M);
+std::string read2csr(int graphId, int &n, int &nnz, csr &A);
+std::string read2csc(int graphId, int &n, int &nnz, csc &B);
 void readMtxValues(std::string f, int &n, int &nnz);
 void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz);
 int coo2csr(
@@ -192,12 +192,12 @@ void maskedBbm( bcsr &F,
 
 void parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C);
 
-void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
-void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
+void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int b);
+void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int b);
 
 /* ------------------------------ mpi functions ----------------------------- */
 
-void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool parallel, int argc, char **argv);
+void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool parallel, int b, int argc, char **argv);
 double distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b);
 double broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b);
 void bmmResultGather( int numProcesses,

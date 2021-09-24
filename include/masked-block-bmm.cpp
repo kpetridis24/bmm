@@ -6,7 +6,7 @@
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
-void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
+void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int b)
 {
     struct timeval timer;
     double t = -1;
@@ -19,16 +19,15 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
     int nnzF;
     int nnzA;
     int nnzB;
-    int b;
     csr F;
     csr A;
     csc B;
 
     timer = util::tic();
 
-    read2csr(matIndF, nF, nnzF, b, F);
-    read2csr(matIndA, nA, nnzA, b, A);
-    read2csc(matIndB, nB, nnzB, b, B);
+    read2csr(matIndF, nF, nnzF, F);
+    read2csr(matIndA, nA, nnzA, A);
+    read2csc(matIndB, nB, nnzB, B);
 
     t = util::toc(timer);
     std::cout << "\nReading of F, A and B completed\n" << "Reading time = " << t << " seconds" << std::endl;

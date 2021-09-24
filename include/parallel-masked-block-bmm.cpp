@@ -5,7 +5,7 @@
 #include <headers.hpp>
 #include <omp.h>
 
-void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
+void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int b)
 {
     struct timeval timer;
     double t = -1;
@@ -18,16 +18,15 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
     int nnzF;
     int nnzA;
     int nnzB;
-    int b;
     csr F;
     csr A;
     csc B;
 
     timer = util::tic();
 
-    read2csr(matIndF, nF, nnzF, b, F);
-    read2csr(matIndA, nA, nnzA, b, A);
-    read2csc(matIndB, nB, nnzB, b, B);
+    read2csr(matIndF, nF, nnzF, F);
+    read2csr(matIndA, nA, nnzA, A);
+    read2csc(matIndB, nB, nnzB, B);
 
     t = util::toc(timer);
     std::cout << "\nReading of F, A and B completed\n" << "Reading time = " << t << " seconds" << std::endl;
@@ -72,8 +71,6 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
         vecC.push_back(std::pair<int, int> (x.first, x.second));
     }
     std::sort(vecC.begin(), vecC.end());
-
-    // prt::vec(vecC);
 
     /* ------------------------------ check result ------------------------------ */
 
