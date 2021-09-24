@@ -26,7 +26,7 @@ openmp:
 
 mpi:
 	$(OPENMPI) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) 
-	mpirun -np 5 ./build/main 
+	mpirun -np 4 ./build/main 
 
 final:
 	$(OPENMPI) -o $(BUILD_DIR)/main -I$(INCLUDE_DIR) $(SOURCES) $(CFLAGS) -fopenmp
