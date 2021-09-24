@@ -39,6 +39,10 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
     t2 = distributeCooMatrix(numProcesses, rank, cooA, _cooA, matIndA, blockSizeA);
     t3 = broadcastCooMatrix(numProcesses, rank, cooB, matIndB, blockSizeB);
 
+    if (rank == 1) {
+        std::cout << _cooF.row[0] << "\t" << _cooF.col[0] << std::endl;
+    }
+
     /* ------------------------ start timer in process 0 ------------------------ */
 
     if (rank == 0)
@@ -181,12 +185,16 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
 
     // /* ------------------------------- free memory ------------------------------ */
 
-    // util::delCsr(csrF);
-    // util::delCsr(csrA);
-    // util::delCsc(cscB);
-    // util::delCoo(cooB);
-    // util::delCoo(_cooF);
-    // util::delCoo(_cooA);
+    util::delCsr(csrF);
+    util::delCsr(csrA);
+    util::delCsc(cscB);
+    util::delCoo(cooB);
+    util::delCoo(_cooF);
+    util::delCoo(_cooA);
+    delete[] _rowsC;
+    delete[] _colsC;
+    delete[] bmmResultRows;
+    delete[] bmmResultCols;
 
     /* ---------------------- compute total execution time ---------------------- */
     
@@ -199,17 +207,19 @@ void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool isParallel,
 
     MPI_Finalize();
 
-    if (rank != 0)
-        exit(0);
+    // if (rank != 0)
+    //     exit(0);
 
     // /* ------------------------------ check result ------------------------------ */
 
-    if (util::checkRes("C_s12.mtx", bmmResultVec)) {
-        std::cout << "\nTest passed\n";
-    }
-    else {
-        std::cout << "\nTest failed\n";
-    }
+    // if (rank == 0) {
+    //     if (util::checkRes("C.mtx", bmmResultVec)) {
+    //         std::cout << "\nTest passed\n";
+    //     }
+    //     else {
+    //         std::cout << "\nTest failed\n";
+    //     }
+    // }
 }
 
 double distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b)
@@ -233,7 +243,7 @@ double distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matI
 
     /* -------------------------------- process 0 ------------------------------- */
 
-    if(rank == 0) {
+    if (rank == 0) {
 
         /* ------------------------------- read matrix ------------------------------ */
         
@@ -286,7 +296,6 @@ double distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matI
         
         for (int p = 1; p < numProcesses; p++) 
             MPI_Send(&chunkSizes[p], 1, MPI_INT, p, 0, MPI_COMM_WORLD);
-        
     }
     else {
         /* --------------------------- receive array sizes -------------------------- */
@@ -320,7 +329,9 @@ double distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matI
         return t;
     }
 
-    // prt::cooMat(_M);
+    delete[] chunkSizes;
+    delete[] chunkOffsets;
+
     return 1;
 }
 
@@ -427,8 +438,8 @@ void bmmResultGather( int numProcesses,
         std::sort(bmmResultVec.begin(), bmmResultVec.end());
     }
 
-    // delete[] resultSizes;
-    // delete[] resultOffsets;
+    delete[] resultSizes;
+    delete[] resultOffsets;
     // delete[] bmmResultRows;
     // delete[] bmmResultCols;
 }

@@ -77,7 +77,7 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
 
     /* ------------------------------ check result ------------------------------ */
 
-    if (util::checkRes("C_s12.mtx", vecC)) {
+    if (util::checkRes("C.mtx", vecC)) {
         std::cout << "\nTest passed\n";
     }
     else {
