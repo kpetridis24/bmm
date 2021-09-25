@@ -1,0 +1,9 @@
+
+mpic++ -o build/main -I./include src/main.cpp -O3 -fopenmp
+srun ./build/main
+
+Distributed block-BMM completed
+Total time = 2.10181 seconds
+
+
+Test passed

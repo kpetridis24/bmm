@@ -1,0 +1,25 @@
+
+mpic++ -o build/main -I./include src/main.cpp -O3 
+srun ./build/main 
+
+Reading of F, A and B completed
+Reading time = 6.27115 seconds
+
+Blocking of F, A and B completed
+Blocking time = 0.709571 seconds
+
+Parallel block-BMM completed
+Parallel block-BMM time = 2.53331 seconds
+
+Test passed
+
+Reading of F, A and B completed
+Reading time = 22.6441 seconds
+
+Blocking of F, A and B completed
+Blocking time = 0.904734 seconds
+
+Parallel block-BMM completed
+Parallel block-BMM time = 3.13639 seconds
+
+Test passed
