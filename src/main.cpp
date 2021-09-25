@@ -2,17 +2,7 @@
 /*                                  main.cpp                                  */
 /* -------------------------------------------------------------------------- */
 
-#include <iostream>
-#include <cstdlib>
-#include <cstdbool>
-#include <iostream>
-#include <fstream>
-#include <sys/time.h>
-#include <unistd.h>
-#include <bits/stdc++.h>
-
 #include <headers.hpp>
-#include <bmm.cpp>
 #include <blocking.cpp>
 #include <block-bmm.cpp>
 #include <masked-block-bmm.cpp>
@@ -23,33 +13,32 @@
 
 int main(int argc, char **argv)
 {
-  int matIndF = 6;
-  int matIndA = 7;
-  int matIndB = 8;
-
 /* -------------------------------------------------------------------------- */
-/*                                 sequential                                 */
-/* -------------------------------------------------------------------------- */
-
-  // maskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
-
-/* -------------------------------------------------------------------------- */
-/*                                  parallel                                  */
+/*                                s12.mtx -> 0                                */
+/*                                 F.mtx -> 1                                 */
+/*                                 Α.mtx -> 2                                 */
+/*                                 B.mtx -> 3                                 */
 /* -------------------------------------------------------------------------- */
 
-  // parallelMaskedBlockBmm(matIndF, matIndA, matIndB, argc, argv);
+  int matIndF = 1;
+  int matIndA = 2;
+  int matIndB = 3;
+  int b = 250000;
 
-/* -------------------------------------------------------------------------- */
-/*                                 distributed                                */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------- sequential ------------------------------- */
 
-  // timer = util::tic();
+  // maskedBlockBmm(matIndF, matIndA, matIndB, b);
+
+/* -------------------------------- parallel -------------------------------- */
+
+  // parallelMaskedBlockBmm(matIndF, matIndA, matIndB, b);
+
+/* ------------------------------- distributed ------------------------------ */
 
   bool isParallel = false;
-  distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, argc, argv);
+  distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, b, argc, argv);
 
-  //  t = util::toc(timer);
-  // std::cout << "\nDistributed block-BMM completed\n" << "Total time = " << t << " seconds (pre-processing included)\n\n";
+/* -------------------------------------------------------------------------- */
 
   return 0;
 }

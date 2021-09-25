@@ -1,0 +1,15 @@
+
+g++ -o build/main -I./include src/main.cpp -O3 -fopenmp
+./build/main
+
+Reading of F, A and B completed
+Reading time = 23.139 seconds
+
+Blocking of F, A and B completed
+Blocking time = 0.722465 seconds
+
+Parallel block-BMM completed
+Parallel block-BMM time = 0.939296 seconds
+
+Test passed
+

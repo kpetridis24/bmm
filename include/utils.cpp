@@ -2,9 +2,7 @@
 /*                                  utils.cpp                                 */
 /* -------------------------------------------------------------------------- */
 
-#include <iostream>
 #include <headers.hpp>
-#include <bits/stdc++.h>
 
 namespace prt
 {   
@@ -117,6 +115,22 @@ namespace util
         }
     }
 
+    void computeChunks(int* chunkSizes, int* chunkOffsets, int numProcesses, int numBlockRows)
+    {
+        int rem = numBlockRows % numProcesses; // blockRows remaining after division among processes
+        int sum = 0;                 // Sum of chunkSizes. Used to calculate displacements
+
+        for (int i = 0; i < numProcesses; i++) {
+            chunkSizes[i] = numBlockRows / numProcesses;
+            if (rem > 0) {
+                chunkSizes[i] += 1;
+                rem--;
+            }
+            chunkOffsets[i] = sum;
+            sum += chunkSizes[i];
+        }
+    }
+
     void initCsr(csr &M, int m, int n, int nnz)
     // initialize CSR matrix
     {
@@ -188,62 +202,6 @@ namespace util
         delete[] M.HL_bRowInd;
         delete[] M.nzBlockIndex;
         delete[] M.blockNnzCounter;
-    }
-
-    bool checkRes(int graphInd, std::vector <std::pair <int, int>> &vecC)
-    {
-        std::string checkGraph;
-
-        switch(graphInd) {
-            case 0:
-                checkGraph = "s6.mtx";
-                break;
-            case 1:
-                checkGraph = "s12.mtx";
-                break;
-            case 2:
-                checkGraph = "com-Youtube.mtx";
-                break;
-            case 3:
-                checkGraph = "belgium_osm.mtx";
-                break;
-            case 4:
-                checkGraph = "dblp-2010.mtx";
-
-                break;
-            case 5:
-                checkGraph = "as-Skitter.mtx";
-                break;
-            default:
-                exit(1);
-        }
-
-        // read correct result
-        int checkN;
-        int checkNnz;
-
-        std::string checkFile = "graphs/bmm-res/bmm_res_" + checkGraph;
-
-        readMtxValues(checkFile, checkN, checkNnz);
-        coo checkM;
-        util::initCoo(checkM, checkN, checkN, checkNnz);
-
-        openMtxFile(checkFile, checkM.col, checkM.row, checkM.n, checkM.nnz);
-
-        // compare results
-        bool pass = true;
-        if (checkM.nnz != vecC.size()) {
-            return false;
-        }
-        else {
-            for (int i = 0; i < vecC.size(); i++) {
-                if (checkM.row[i] != vecC[i].first || checkM.col[i] != vecC[i].second) {
-                    return false;
-                }
-            }
-        }
-        util::delCoo(checkM);
-        return true;
     }
 
     bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC)

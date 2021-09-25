@@ -97,9 +97,9 @@ typedef struct
 
 /* ----------------------------- read functions ----------------------------- */
 
-void read2coo(int graphId, int &n, int &nnz, int &b, coo &M);
-std::string read2csr(int graphId, int &n, int &nnz, int &b, csr &A);
-std::string read2csc(int graphId, int &n, int &nnz, int &b, csc &B);
+void read2coo(int graphId, int &n, int &nnz, coo &M);
+std::string read2csr(int graphId, int &n, int &nnz, csr &A);
+std::string read2csc(int graphId, int &n, int &nnz, csc &B);
 void readMtxValues(std::string f, int &n, int &nnz);
 void openMtxFile(std::string f, int *row, int *col, int &n, int &nnz);
 int coo2csr(
@@ -135,8 +135,7 @@ namespace util
   void addCooBlockToMatrix(std::multimap<int, int> &mapM, int blockRow, int blockCol, int b, std::multimap<int, int> &_mapM);
   void removeCooRowOffsets(coo &M, int offset);
   void addCooRowOffsets(std::vector<std::pair<int, int>> &vecCooM, int *rowsM, int *colsM, int offset);
-  bool checkRes(int graphInd, std::vector<std::pair<int, int>> &vecC);
-  bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC);
+  void computeChunks(int* chunkSizes, int* chunkOffsets, int numProcesses, int numBlockRows);
   void initCsr(csr &M, int m, int n, int nnz);
   void initCsc(csc &M, int m, int n, int nnz);
   void initCoo(coo &M, int m, int n, int nnz);
@@ -145,6 +144,7 @@ namespace util
   void delCoo(coo &M);
   void delBcsr(bcsr &M);
   void delBcsc(bcsc &M);
+  bool checkRes(std::string checkGraph, std::vector <std::pair <int, int>> &vecC);
 };
 
 /* --------------------------- blocking functions --------------------------- */
@@ -192,14 +192,14 @@ void maskedBbm( bcsr &F,
 
 void parallelMaskedBlockBmm(bcsr &F, bcsr &A, bcsc &B, std::multimap <int, int> &C);
 
-void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
-void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv);
+void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int b);
+void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int b);
 
 /* ------------------------------ mpi functions ----------------------------- */
 
-void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool parallel, int argc, char **argv);
-void distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b);
-void broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b);
+void distributedBlockBmm(int matIndF, int matIndA, int matIndB, bool parallel, int b, int argc, char **argv);
+double distributeCooMatrix(int numProcesses, int rank, coo &M, coo &_M, int matInd, int &b);
+double broadcastCooMatrix(int numProcesses, int rank, coo &M, int matInd, int &b);
 void bmmResultGather( int numProcesses,
                       int rank, 
                       int selfSize,

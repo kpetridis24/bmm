@@ -11,10 +11,8 @@ ret csr2bcsr(csr &M, bcsr &blM)
     blM.n = M.n;
 
     int numBlocksM = (blM.m / blM.b) * (blM.n / blM.b);
-    // int LL_bRowPtrSizeM = numBlocksM * (blM.b + 1);
 
     // init Low-Level CSR
-    // blM.LL_bRowPtr = new int[LL_bRowPtrSizeM]();
     blM.LL_bColInd = new int[M.nnz]();
 
 
@@ -135,10 +133,8 @@ ret csc2bcsc(csc &M, bcsc &blM)
     blM.n = M.n;
 
     int numBlocksM = (blM.m / blM.b) * (blM.n / blM.b);
-    // int LL_bColPtrSizeM = numBlocksM * (blM.b + 1);
 
     // init Low-Level CSC
-    // blM.LL_bColPtr = new int[LL_bColPtrSizeM]();
     blM.LL_bRowInd = new int[M.nnz]();
 
     int numBlockRows = M.m / blM.b;

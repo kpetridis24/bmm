@@ -3,11 +3,10 @@
 /* -------------------------------------------------------------------------- */
 
 #include <headers.hpp>
-#include <bits/stdc++.h>
 
 /* ---------------------------- masked block-bmm ---------------------------- */
 
-void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
+void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int b)
 {
     struct timeval timer;
     double t = -1;
@@ -20,16 +19,15 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
     int nnzF;
     int nnzA;
     int nnzB;
-    int b;
     csr F;
     csr A;
     csc B;
 
     timer = util::tic();
 
-    read2csr(matIndF, nF, nnzF, b, F);
-    read2csr(matIndA, nA, nnzA, b, A);
-    read2csc(matIndB, nB, nnzB, b, B);
+    read2csr(matIndF, nF, nnzF, F);
+    read2csr(matIndA, nA, nnzA, A);
+    read2csc(matIndB, nB, nnzB, B);
 
     t = util::toc(timer);
     std::cout << "\nReading of F, A and B completed\n" << "Reading time = " << t << " seconds" << std::endl;
@@ -78,14 +76,7 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv
 
     /* ------------------------------ check result ------------------------------ */
 
-    // if (util::checkRes(matIndF, vecC)) {
-    //     std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //     std::cout << "\nTest failed\n";
-    // }
-
-    if (util::checkRes("C3.mtx", vecC)) {
+    if (util::checkRes("C.mtx", vecC)) {
         std::cout << "\nTest passed\n";
     }
     else {

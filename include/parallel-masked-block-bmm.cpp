@@ -3,11 +3,9 @@
 /* -------------------------------------------------------------------------- */
 
 #include <headers.hpp>
-// #include <cilk/cilk.h>
-// #include <cilk/cilk_api.h>
 #include <omp.h>
 
-void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, char **argv)
+void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int b)
 {
     struct timeval timer;
     double t = -1;
@@ -20,16 +18,15 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
     int nnzF;
     int nnzA;
     int nnzB;
-    int b;
     csr F;
     csr A;
     csc B;
 
     timer = util::tic();
 
-    read2csr(matIndF, nF, nnzF, b, F);
-    read2csr(matIndA, nA, nnzA, b, A);
-    read2csc(matIndB, nB, nnzB, b, B);
+    read2csr(matIndF, nF, nnzF, F);
+    read2csr(matIndA, nA, nnzA, A);
+    read2csc(matIndB, nB, nnzB, B);
 
     t = util::toc(timer);
     std::cout << "\nReading of F, A and B completed\n" << "Reading time = " << t << " seconds" << std::endl;
@@ -75,18 +72,9 @@ void parallelMaskedBlockBmm(int matIndF, int matIndA, int matIndB, int argc, cha
     }
     std::sort(vecC.begin(), vecC.end());
 
-    // prt::vec(vecC);
-
     /* ------------------------------ check result ------------------------------ */
 
-    // if (util::checkRes(matIndA, vecC)) {
-    //     std::cout << "\nTest passed\n";
-    // }
-    // else {
-    //     std::cout << "\nTest failed\n";
-    // }
-
-    if (util::checkRes("C3.mtx", vecC)) {
+    if (util::checkRes("C.mtx", vecC)) {
         std::cout << "\nTest passed\n";
     }
     else {
