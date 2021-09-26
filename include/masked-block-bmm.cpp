@@ -72,8 +72,6 @@ void maskedBlockBmm(int matIndF, int matIndA, int matIndB, int b)
     }
     std::sort(vecC.begin(), vecC.end());
 
-    // prt::vec(vecC);
-
     /* ------------------------------ check result ------------------------------ */
 
     if (util::checkRes("C.mtx", vecC)) {

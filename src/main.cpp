@@ -14,7 +14,6 @@
 int main(int argc, char **argv)
 {
 /* -------------------------------------------------------------------------- */
-/*                                s12.mtx -> 0                                */
 /*                                 F.mtx -> 1                                 */
 /*                                 Α.mtx -> 2                                 */
 /*                                 B.mtx -> 3                                 */
@@ -27,7 +26,7 @@ int main(int argc, char **argv)
 
 /* ------------------------------- sequential ------------------------------- */
 
-  // maskedBlockBmm(matIndF, matIndA, matIndB, b);
+  maskedBlockBmm(matIndF, matIndA, matIndB, b);
 
 /* -------------------------------- parallel -------------------------------- */
 
@@ -35,8 +34,8 @@ int main(int argc, char **argv)
 
 /* ------------------------------- distributed ------------------------------ */
 
-  bool isParallel = false;
-  distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, b, argc, argv);
+  // bool isParallel = false;
+  // distributedBlockBmm(matIndF, matIndA, matIndB, isParallel, b, argc, argv);
 
 /* -------------------------------------------------------------------------- */
 
