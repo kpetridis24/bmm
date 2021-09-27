@@ -29,6 +29,6 @@ make hybrid
 
 \* An *OpenMP* and *MPI* compatible compiler is required. 
 
-\*\* Input datasets can be generated with `generator.m` and have to be placed in `graphs` folder.
+\*\* Input datasets can be generated with `generator.m` and have to be placed in `mtx/in` folder.
 
-\*\*\* In order for the tester to work, the result matrix `C.mtx` from `generator.m` have to be placed in a `graphs/bmm-res` folder.
+\*\*\* In order for the tester to work, the result matrix `C.mtx` from `generator.m` have to be placed in  `mtx/out` folder.
