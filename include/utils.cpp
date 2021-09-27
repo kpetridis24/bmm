@@ -212,7 +212,7 @@ namespace util
 
         // prt::vec(vecC);
 
-        std::string checkFile = "graphs/bmm-res/" + checkGraph;
+        std::string checkFile = "mtx/out/" + checkGraph;
 
         readMtxValues(checkFile, checkN, checkNnz);
         coo checkM;

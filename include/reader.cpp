@@ -25,7 +25,7 @@ void read2coo(int graphId, int &n, int &nnz, coo &M)
             exit(1);
     }
 
-    std::string file = "graphs/" + graph;
+    std::string file = "mtx/in/" + graph;
 
     readMtxValues(file, n, nnz);
     util::initCoo(M, n, n, nnz);
@@ -54,7 +54,7 @@ std::string read2csr(int graphId, int &n, int &nnz, csr &A)
             exit(1);
     }
 
-    std::string file = "graphs/" + graph;
+    std::string file = "mtx/in/" + graph;
 
     readMtxValues(file, n, nnz);
 
@@ -94,7 +94,7 @@ std::string read2csc(int graphId, int &n, int &nnz, csc &B)
             exit(1);
     }
 
-    std::string file = "graphs/" + graph;
+    std::string file = "mtx/in/" + graph;
 
     readMtxValues(file, n, nnz);
 
