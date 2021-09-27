@@ -22,7 +22,7 @@ int main(int argc, char **argv)
   int matIndF = 1;
   int matIndA = 2;
   int matIndB = 3;
-  int b = 250000;
+  int b = 25000;
 
 /* ------------------------------- sequential ------------------------------- */
 
